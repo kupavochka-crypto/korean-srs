@@ -101,14 +101,17 @@ export default function App() {
         {TAB_DEFS.map((def) => (
           <button
             key={def.id}
+            type="button"
             className={`tab-item ${tab === def.id ? 'active' : ''}`}
+            aria-label={t('tab.' + def.id)}
+            title={t('tab.' + def.id)}
             onClick={() => store.selectTab(def.id)}
           >
             <span className="tab-icon">
               <WIcon name={def.icon} />
             </span>
-            <span>{t('tab.' + def.id)}</span>
-            <span style={{ fontSize: 9, opacity: 0.7 }}>{def.korean}</span>
+            <span className="tab-label">{t('tab.' + def.id)}</span>
+            <span className="tab-kor">{def.korean}</span>
             {def.id === 'cards' && dueCount > 0 && (
               <span className="tab-badge">{dueCount}</span>
             )}
