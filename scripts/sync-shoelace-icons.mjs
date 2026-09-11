@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const source = join(root, 'node_modules/@shoelace-style/shoelace/dist/assets/icons');
-const target = join(root, 'public/shoelace/icons');
+const target = join(root, 'public/shoelace/assets/icons');
 
 const ICONS = [
   'house',
@@ -78,4 +78,4 @@ for (const name of ICONS) {
 if (missing.length) {
   console.warn('[shoelace] missing icons:', missing.join(', '));
 }
-console.log(`[shoelace] synced ${ICONS.length - missing.length} icons to public/shoelace/icons`);
+console.log(`[shoelace] synced ${ICONS.length - missing.length} icons to public/shoelace/assets/icons`);

@@ -206,24 +206,24 @@ textarea {
   transition: transform var(--t-base) var(--spring), opacity var(--t-base) ease;
 }
 
+.tab-item .tab-icon sl-icon {
+  font-size: 1em;
+}
+
 .tab-item.active .tab-icon {
   transform: translateY(-2px) scale(1.12);
 }
 
 .tab-label {
   max-width: 100%;
+  padding: 0 2px;
+  font-size: 9px;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.tab-kor {
-  font-size: 9px;
-  opacity: 0.7;
-}
-
-/* App shell is max 520px — 8 labeled tabs never fit; icons only */
-.tab-label,
 .tab-kor {
   display: none;
 }
