@@ -1,5 +1,6 @@
 import { store, useStore } from '../store/AppStore';
 import SrsRatingBar from '../components/SrsRatingBar';
+import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import type { Word } from '../types';
 import WIcon from '../ui/WIcon';
@@ -7,6 +8,43 @@ import WIcon from '../ui/WIcon';
 function formatNextReview(word: Word): string {
   const days = Math.max(1, Math.round((word.nextReviewAt - Date.now()) / (24 * 60 * 60 * 1000)));
   return t('cards.nextReview', { count: days });
+}
+
+function CardsEmptyState({
+  title,
+  desc,
+  difficultCount,
+}: {
+  title: string;
+  desc: string;
+  difficultCount: number;
+}) {
+  return (
+    <div>
+      <ScreenHeader title={t('tab.cards')} subtitle="복습" />
+      <div className="cards-done center">
+        <div className="empty-state-icon">
+          <WIcon name="stars" size={48} style={{ color: 'var(--warning)' }} />
+        </div>
+        <h2>{title}</h2>
+        <p className="muted">{desc}</p>
+        <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
+          <span>
+            {t('cards.reviewAll')}
+            <span className="btn-kor">모든 단어 복습</span>
+          </span>
+        </button>
+        {difficultCount > 0 && (
+          <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
+            <span>
+              {t('cards.difficult', { count: difficultCount })}
+              <span className="btn-kor">어려운 단어</span>
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function CardsScreen() {
@@ -18,49 +56,21 @@ export default function CardsScreen() {
 
   if (queue.length === 0) {
     return (
-      <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}><WIcon name="stars" size={48} style={{ color: 'var(--warning)' }} /></div>
-        <h2>{t('cards.nothing')}</h2>
-        <p className="muted">{t('cards.nothingDesc')}</p>
-        <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
-          <span>
-            {t('cards.reviewAll')}
-            <span className="btn-kor">모든 단어 복습</span>
-          </span>
-        </button>
-        {difficultCount > 0 && (
-          <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
-            <span>
-              {t('cards.difficult', { count: difficultCount })}
-              <span className="btn-kor">어려운 단어</span>
-            </span>
-          </button>
-        )}
-      </div>
+      <CardsEmptyState
+        title={t('cards.nothing')}
+        desc={t('cards.nothingDesc')}
+        difficultCount={difficultCount}
+      />
     );
   }
 
   if (index >= queue.length) {
     return (
-      <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}><WIcon name="stars" size={48} style={{ color: 'var(--warning)' }} /></div>
-        <h2>{t('cards.doneTitle')}</h2>
-        <p className="muted">{t('cards.doneDesc')}</p>
-        <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
-          <span>
-            {t('cards.reviewAll')}
-            <span className="btn-kor">모든 단어 복습</span>
-          </span>
-        </button>
-        {difficultCount > 0 && (
-          <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
-            <span>
-              {t('cards.difficult', { count: difficultCount })}
-              <span className="btn-kor">어려운 단어</span>
-            </span>
-          </button>
-        )}
-      </div>
+      <CardsEmptyState
+        title={t('cards.doneTitle')}
+        desc={t('cards.doneDesc')}
+        difficultCount={difficultCount}
+      />
     );
   }
 
@@ -68,11 +78,12 @@ export default function CardsScreen() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <ScreenHeader title={t('tab.cards')} subtitle="복습" />
+      <div className="cards-toolbar-row">
         <span className="muted" style={{ fontSize: 13 }}>
           {t('cards.progress', { i: index + 1, total: queue.length })}
         </span>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="cards-toolbar-actions">
           <button
             className="icon-btn"
             onClick={() => store.openEditWord(word)}
@@ -109,17 +120,13 @@ export default function CardsScreen() {
               >
                 <WIcon name="volume-up" />
               </button>
-              <span className="muted mt16" style={{ fontSize: 12 }}>
-                {t('cards.tapToFlip')}
-              </span>
+              <span className="muted mt16 cards-tap-hint">{t('cards.tapToFlip')}</span>
             </div>
           </div>
           <div className="flip-face flip-back">
             <div className="flashcard">
               <span className="fc-translation">{word.translation}</span>
-              <span className="fc-korean mt12" style={{ fontSize: 26 }}>
-                {word.korean}
-              </span>
+              <span className="fc-korean fc-korean-sm">{word.korean}</span>
               {word.exampleSentence && (
                 <div className="fc-example">
                   <div>{word.exampleSentence}</div>
@@ -140,9 +147,7 @@ export default function CardsScreen() {
 
       {flipped && (
         <div>
-          <p className="muted center" style={{ fontSize: 13, marginTop: 16 }}>
-            {t('cards.evaluate')}
-          </p>
+          <p className="muted center cards-evaluate-hint">{t('cards.evaluate')}</p>
           <SrsRatingBar onRate={(rating) => store.rateCard(rating)} />
         </div>
       )}

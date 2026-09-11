@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import WordCard from '../components/WordCard';
 import TagInput from '../components/TagInput';
+import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
@@ -18,6 +19,7 @@ export default function DictionaryScreen() {
 
   return (
     <div>
+      <ScreenHeader title={t('tab.dictionary')} subtitle="단어장" />
       <div className="search-row">
         <input
           className="search-input"
@@ -64,7 +66,7 @@ export default function DictionaryScreen() {
 
       {words.length === 0 ? (
         <div className="empty-hint">
-          <span style={{ fontSize: 24 }}><WIcon name="inbox" size={24} style={{ color: 'var(--text-tertiary)' }} /></span>
+          <span className="empty-state-icon"><WIcon name="inbox" size={24} style={{ color: 'var(--text-tertiary)' }} /></span>
           <span>
             {search || selectedCategoryId ? t('dict.emptyFound') : t('dict.emptyEmpty')}
           </span>
@@ -83,7 +85,7 @@ export default function DictionaryScreen() {
       )}
 
       <button className="fab" onClick={() => store.openAddWord()} aria-label={t('dict.addWordAria')}>
-        +
+        <WIcon name="plus" size={24} />
       </button>
 
       {selectionActive && (
@@ -117,9 +119,7 @@ export default function DictionaryScreen() {
               </button>
             </div>
             <TagInput tags={pendingTags} onChange={setPendingTags} />
-            <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '8px 0 16px' }}>
-              {t('dict.tagsHint')}
-            </p>
+            <p className="field-hint">{t('dict.tagsHint')}</p>
             <button
               className="primary-btn"
               onClick={() => {

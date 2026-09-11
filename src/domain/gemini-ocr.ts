@@ -10,6 +10,30 @@ const MODEL_CANDIDATES = [
   'gemini-flash-latest',
 ];
 
+const AUDIO_MODEL_CANDIDATES = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-3.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
+  'gemini-flash-latest',
+];
+
+interface GenerateOptions {
+  audioFirst?: boolean;
+  thinking?: boolean;
+  fileRef?: { uri: string; mimeType: string };
+}
+
+type ContentPart =
+  | { text: string }
+  | { inline_data: { mime_type: string; data: string } }
+  | { file_data: { mime_type: string; file_uri: string } };
+
+const AUDIO_REQUEST_TIMEOUT_MS = 120_000;
+const DEFAULT_REQUEST_TIMEOUT_MS = 45_000;
+
 export class GeminiOcrError extends Error {
   constructor(message: string) {
     super(message);
@@ -22,6 +46,12 @@ export const missingApiKeyError = () =>
 
 const invalidResponseError = () =>
   new GeminiOcrError('Gemini вернул неожиданный ответ.');
+
+const networkResponseError = (cause?: string) =>
+  new GeminiOcrError(
+    cause ??
+      'Не удалось связаться с Gemini. Проверьте интернет или вставьте текст песни вручную.'
+  );
 
 const invalidImageError = () =>
   new GeminiOcrError('Не удалось подготовить изображение для распознавания.');
@@ -108,7 +138,7 @@ If a word has several meanings, pick the most common everyday one.
 Words:
 ${list}`;
 
-  const raw = await generateWithFallback(trimmedKey, prompt, null);
+  const raw = await generateWithFallback(trimmedKey, prompt, null, null);
   const parsed = parseScannedVocabulary(raw);
   const map: Record<string, string> = {};
   for (const item of parsed) {
@@ -212,18 +242,59 @@ If a Russian or English translation is written next to that word on the image, c
 If no translation is visible for a word, leave translation as an empty string. Do not invent it.
 Return ONLY a JSON array, no markdown, no commentary:
 [{"korean":"커피","translation":"кофе"}]`;
-  return generateWithFallback(apiKey, prompt, jpegBase64);
+  return generateWithFallback(apiKey, prompt, jpegBase64, null);
+}
+
+export async function generateGeminiText(
+  apiKey: string,
+  prompt: string,
+  inlineData?: { mimeType: string; data: string } | null
+): Promise<string> {
+  const jpegBase64 =
+    inlineData?.mimeType.startsWith('image/') ? inlineData.data : null;
+  const audioBase64 =
+    inlineData && !inlineData.mimeType.startsWith('image/') ? inlineData : null;
+  return generateWithFallback(apiKey, prompt, jpegBase64, audioBase64);
+}
+
+export async function generateGeminiAudio(
+  apiKey: string,
+  prompt: string,
+  audioInline: { mimeType: string; data: string }
+): Promise<string> {
+  return generateWithFallback(apiKey, prompt, null, audioInline, {
+    audioFirst: true,
+    thinking: false,
+    models: AUDIO_MODEL_CANDIDATES,
+  });
+}
+
+export async function generateGeminiAudioFromFile(
+  apiKey: string,
+  prompt: string,
+  fileUri: string,
+  mimeType: string
+): Promise<string> {
+  return generateWithFallback(apiKey, prompt, null, null, {
+    audioFirst: true,
+    thinking: false,
+    models: AUDIO_MODEL_CANDIDATES,
+    fileRef: { uri: fileUri, mimeType },
+  });
 }
 
 async function generateWithFallback(
   apiKey: string,
   prompt: string,
-  jpegBase64: string | null
+  jpegBase64: string | null,
+  audioInline?: { mimeType: string; data: string } | null,
+  options: GenerateOptions & { models?: string[] } = {}
 ): Promise<string> {
+  const models = options.models ?? (audioInline ? AUDIO_MODEL_CANDIDATES : MODEL_CANDIDATES);
   let lastError: Error = invalidResponseError();
-  for (const model of MODEL_CANDIDATES) {
+  for (const model of models) {
     try {
-      return await generateContent(model, apiKey, prompt, jpegBase64);
+      return await generateContent(model, apiKey, prompt, jpegBase64, audioInline, options);
     } catch (error) {
       lastError = error instanceof Error ? error : invalidResponseError();
     }
@@ -235,26 +306,51 @@ async function generateContent(
   model: string,
   apiKey: string,
   prompt: string,
-  jpegBase64: string | null
+  jpegBase64: string | null,
+  audioInline?: { mimeType: string; data: string } | null,
+  options: GenerateOptions = {}
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const parts: Array<{ text?: string; inline_data?: { mime_type: string; data: string } }> = [
-    { text: prompt },
-  ];
+  const isAudioRequest = !!audioInline || !!options.fileRef;
+  let mediaPart: ContentPart | null = null;
+
   if (jpegBase64) {
-    parts.push({ inline_data: { mime_type: 'image/jpeg', data: jpegBase64 } });
+    mediaPart = { inline_data: { mime_type: 'image/jpeg', data: jpegBase64 } };
+  } else if (options.fileRef) {
+    mediaPart = {
+      file_data: {
+        mime_type: options.fileRef.mimeType,
+        file_uri: options.fileRef.uri,
+      },
+    };
+  } else if (audioInline) {
+    mediaPart = { inline_data: { mime_type: audioInline.mimeType, data: audioInline.data } };
   }
-  const body = {
+
+  const parts: ContentPart[] = [];
+  if (mediaPart && options.audioFirst) {
+    parts.push(mediaPart, { text: prompt });
+  } else {
+    parts.push({ text: prompt });
+    if (mediaPart) parts.push(mediaPart);
+  }
+
+  const useThinking = options.thinking ?? !isAudioRequest;
+  const body: Record<string, unknown> = {
     contents: [{ parts }],
-    generationConfig: {
-      thinkingConfig: { thinkingLevel: 'low' },
-    },
   };
+  if (useThinking) {
+    body.generationConfig = {
+      thinkingConfig: { thinkingLevel: 'low' },
+    };
+  }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 45000);
+  const timeoutMs = isAudioRequest ? AUDIO_REQUEST_TIMEOUT_MS : DEFAULT_REQUEST_TIMEOUT_MS;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  const proxyUrl = storedGeminiProxy();
+  // Audio/file requests bypass proxy: Vercel proxy limits body to ~4.5 MB and times out at 30s.
+  const proxyUrl = isAudioRequest ? '' : storedGeminiProxy();
   let response: Response;
   try {
     if (proxyUrl) {
@@ -275,9 +371,14 @@ async function generateContent(
         signal: controller.signal,
       });
     }
-  } catch {
+  } catch (error) {
     clearTimeout(timeout);
-    throw invalidResponseError();
+    const aborted = error instanceof Error && error.name === 'AbortError';
+    throw networkResponseError(
+      aborted
+        ? 'Распознавание аудио заняло слишком много времени. Попробуйте короче фрагмент или вставьте текст вручную.'
+        : undefined
+    );
   }
   clearTimeout(timeout);
 
@@ -288,21 +389,54 @@ async function generateContent(
   const data = await response.json().catch(() => null);
   const text = extractText(data);
   if (text) return text;
-  throw invalidResponseError();
+  throw new GeminiOcrError(describeResponseFailure(data));
 }
 
 function extractText(data: unknown): string | null {
   if (!data || typeof data !== 'object') return null;
-  const root = data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+  const root = data as {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+    }>;
+  };
   const candidates = root.candidates;
-  if (!candidates) return null;
+  if (!candidates?.length) return null;
   for (const candidate of candidates) {
     const parts = candidate.content?.parts;
-    if (!parts) continue;
-    const text = parts.map((p) => p.text ?? '').join('\n').trim();
+    if (!parts?.length) continue;
+    const text = parts
+      .filter((part) => !part.thought)
+      .map((part) => part.text ?? '')
+      .join('\n')
+      .trim();
     if (text) return text;
   }
   return null;
+}
+
+function describeResponseFailure(data: unknown): string {
+  if (!data || typeof data !== 'object') {
+    return 'Gemini вернул пустой ответ. Попробуйте вставить текст песни вручную.';
+  }
+  const root = data as {
+    promptFeedback?: { blockReason?: string; blockReasonMessage?: string };
+    candidates?: Array<{ finishReason?: string; finishMessage?: string }>;
+  };
+  const block = root.promptFeedback?.blockReason;
+  if (block) {
+    const detail = root.promptFeedback?.blockReasonMessage;
+    return detail
+      ? `Запрос заблокирован (${block}): ${detail}`
+      : `Запрос заблокирован: ${block}. Вставьте текст песни вручную.`;
+  }
+  const finish = root.candidates?.[0]?.finishReason;
+  if (finish && finish !== 'STOP') {
+    const msg = root.candidates?.[0]?.finishMessage;
+    return msg
+      ? `Gemini не смог обработать аудио (${finish}): ${msg}`
+      : `Gemini не смог обработать аудио (${finish}). Вставьте текст песни вручную.`;
+  }
+  return 'Gemini вернул ответ без текста. Попробуйте другой файл или вставьте текст вручную.';
 }
 
 function humanReadableAPIError(payload: string, status: number, model: string): string {

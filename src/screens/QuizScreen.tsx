@@ -1,5 +1,6 @@
 import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
+import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
@@ -14,29 +15,33 @@ export default function QuizScreen() {
 
   if (!question || question.kind !== 'reverse') {
     return (
-      <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}><WIcon name="patch-question" size={48} style={{ color: 'var(--red)' }} /></div>
-        <h2>{t('quiz.title')}</h2>
-        <p className="muted">{t('quiz.desc')}</p>
-        <button
-          className="primary-btn mt20"
-          onClick={() => store.loadNextQuizQuestion('reverse')}
-        >
-          <span>
-            {t('quiz.start')}
-            <span className="btn-kor">시작</span>
-          </span>
-        </button>
+      <div>
+        <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+        <div className="cards-done center">
+          <div className="empty-state-icon">
+            <WIcon name="patch-question" size={48} style={{ color: 'var(--red)' }} />
+          </div>
+          <h2>{t('quiz.title')}</h2>
+          <p className="muted">{t('quiz.desc')}</p>
+          <button
+            className="primary-btn mt20"
+            onClick={() => store.loadNextQuizQuestion('reverse')}
+          >
+            <span>
+              {t('quiz.start')}
+              <span className="btn-kor">시작</span>
+            </span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
       <div className="card quiz-card" style={{ marginBottom: 16 }}>
-        <p className="quiz-korean" style={{ fontSize: 30 }}>
-          {question.prompt}
-        </p>
+        <p className="quiz-korean quiz-korean-lg">{question.prompt}</p>
         <div className="quiz-options">
           {question.options.map((option, i) => {
             let cls = 'quiz-option';
@@ -47,11 +52,7 @@ export default function QuizScreen() {
               cls += ' selected';
             }
             return (
-              <button
-                key={i}
-                className={cls}
-                onClick={() => store.selectQuizOption(i)}
-              >
+              <button key={i} className={cls} onClick={() => store.selectQuizOption(i)}>
                 {option.text}
                 {option.romaja && store.getShowRomaja() && (
                   <span className="quiz-option-romaja">{option.romaja}</span>
@@ -71,10 +72,7 @@ export default function QuizScreen() {
                 {t('listen.answer')}: {question.options[question.correctOptionIndex].text}
               </span>
             </div>
-            <button
-              className="primary-btn mt20"
-              onClick={() => store.loadNextQuizQuestion('reverse')}
-            >
+            <button className="primary-btn mt20" onClick={() => store.loadNextQuizQuestion('reverse')}>
               <span>
                 {t('common.next')}
                 <span className="btn-kor">다음</span>
@@ -96,9 +94,7 @@ export default function QuizScreen() {
         )}
       </div>
 
-      <p className="quiz-score center">
-        {t('listen.score', { score, total })}
-      </p>
+      <p className="quiz-score center">{t('listen.score', { score, total })}</p>
 
       {reward.rewardGifName && (
         <div className="reward-overlay" onClick={() => store.dismissQuizReward()}>

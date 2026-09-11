@@ -1,5 +1,14 @@
 import { db, newId } from './schema';
-import type { Achievement, Category, Pack, Progression, ReviewRecord, Source, Word } from '../types';
+import type {
+  Achievement,
+  Category,
+  ImportedWordDraft,
+  Pack,
+  Progression,
+  ReviewRecord,
+  Source,
+  Word,
+} from '../types';
 import { DEFAULT_CATEGORIES, NOTEBOOK_WORDS } from '../domain/seed-data';
 import { toRomaja } from '../domain/romaja';
 import { allSeedSources } from '../domain/sources';
@@ -222,6 +231,114 @@ export async function deleteWord(id: string): Promise<void> {
 
 export async function insertCategory(category: Category): Promise<void> {
   await db.categories.add(category);
+}
+
+export async function findCategoryByName(name: string): Promise<Category | undefined> {
+  const trimmed = name.trim();
+  if (!trimmed) return undefined;
+  const lower = trimmed.toLowerCase();
+  const all = await db.categories.toArray();
+  return all.find((c) => c.name.toLowerCase() === lower);
+}
+
+export async function findOrCreateCategory(
+  name: string,
+  emoji = '🎵',
+  colorHex = '#E53935'
+): Promise<Category> {
+  const existing = await findCategoryByName(name);
+  if (existing) return existing;
+  const category: Category = {
+    id: newId(),
+    name: name.trim(),
+    colorHex,
+    emoji,
+    createdAt: Date.now(),
+    isDefault: false,
+  };
+  await db.categories.add(category);
+  return category;
+}
+
+export async function insertSource(source: Source): Promise<void> {
+  await db.sources.add(source);
+}
+
+export async function findSourceByTitle(title: string, type: Source['type'] = 'song'): Promise<Source | undefined> {
+  const lower = title.trim().toLowerCase();
+  if (!lower) return undefined;
+  const all = await db.sources.where('type').equals(type).toArray();
+  return all.find((s) => s.title.toLowerCase() === lower);
+}
+
+export async function findOrCreateSongSource(title: string): Promise<Source> {
+  const existing = await findSourceByTitle(title, 'song');
+  if (existing) return existing;
+  const source: Source = {
+    id: newId(),
+    type: 'song',
+    artistId: null,
+    title: title.trim(),
+    koreanTitle: '',
+    album: null,
+    snippet: null,
+    createdAt: Date.now(),
+  };
+  await db.sources.add(source);
+  return source;
+}
+
+export async function importSongWords(params: {
+  drafts: ImportedWordDraft[];
+  categoryId: string;
+  sourceId: string;
+  soundName: string;
+}): Promise<number> {
+  const existing = await db.words.toArray();
+  const koreanSet = new Set(existing.map((w) => w.korean));
+  const now = Date.now();
+  let added = 0;
+
+  for (const draft of params.drafts) {
+    const korean = draft.korean.trim();
+    const translation = draft.translation.trim();
+    if (!korean || !translation || koreanSet.has(korean)) continue;
+
+    const tagSet = new Set<string>();
+    for (const tag of draft.tags ?? []) {
+      const t = tag.trim();
+      if (t) tagSet.add(t);
+    }
+    tagSet.add(params.soundName);
+
+    const word: Word = {
+      id: newId(),
+      korean,
+      hanja: null,
+      romaja: toRomaja(korean),
+      translation,
+      exampleSentence: null,
+      exampleTranslation: null,
+      categoryId: params.categoryId,
+      sourceId: params.sourceId,
+      tags: [...tagSet],
+      difficulty: 'Начальный',
+      createdAt: now + added,
+      intervalDays: 0,
+      easeFactor: 2.5,
+      repetitions: 0,
+      nextReviewAt: now,
+      lastResult: null,
+      totalReviews: 0,
+      correctReviews: 0,
+      masteredAt: null,
+    };
+    await db.words.add(word);
+    koreanSet.add(korean);
+    added += 1;
+  }
+
+  return added;
 }
 
 export async function recordReview(

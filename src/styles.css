@@ -142,8 +142,23 @@ textarea {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px 20px calc(88px + env(safe-area-inset-bottom));
+  padding: 0 0 calc(88px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
+}
+
+/* Screen content inset — header stays full-bleed */
+.screen > div > :not(.header-row) {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.screen > div > :not(.header-row):first-child {
+  margin-top: calc(16px + env(safe-area-inset-top, 0px));
+}
+
+.screen > .center {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .screen-static {
@@ -260,6 +275,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
+  padding: 16px;
 }
 
 .card-flat {
@@ -276,8 +292,9 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 5;
-  margin: -16px -20px 0;
-  padding: 16px 20px 14px;
+  width: 100%;
+  margin: 0;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 14px;
   background: var(--light-bg);
   background: color-mix(in srgb, var(--light-bg) 80%, transparent);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
@@ -367,8 +384,173 @@ textarea {
   letter-spacing: -0.01em;
   color: var(--text-primary);
   text-align: left;
-  margin: 0 0 14px;
+  margin: 24px 0 14px;
   width: 100%;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+/* ---- Settings ---- */
+.settings-group {
+  margin-top: 24px;
+}
+
+.settings-group:first-of-type {
+  margin-top: 20px;
+}
+
+.settings-group-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 8px 4px;
+}
+
+.settings-group-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+
+.settings-link-row:active {
+  background: var(--surface-soft);
+}
+
+.settings-link-row + .settings-link-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.settings-link-label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.settings-link-value {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.settings-link-chevron {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.settings-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 16px;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.settings-back:active {
+  opacity: 0.7;
+}
+
+.settings-subtitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+}
+
+.settings-row {
+  padding: 14px 16px;
+}
+
+.settings-row + .settings-row {
+  border-top: 1px solid var(--border);
+}
+
+.settings-row-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.settings-row--inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-row--inline .settings-row-label {
+  margin-bottom: 0;
+  font-weight: 400;
+}
+
+.settings-row--inline .settings-row-label strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-row--inline .setting-toggle-subtitle {
+  margin-top: 2px;
+}
+
+.settings-section .section-title {
+  margin: 28px 0 10px;
+}
+
+.settings-section:first-of-type .section-title {
+  margin-top: 0;
+}
+
+.field-hint {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 10px 0 0;
+}
+
+.field-hint a {
+  color: var(--blue, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
 }
 
 .stats-row {
@@ -701,14 +883,65 @@ textarea {
   font-weight: 400;
 }
 
+.empty-state-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
 .cards-done {
   text-align: center;
-  padding: 40px 0;
+  padding: 24px 0 40px;
 }
 
 .cards-done h2 {
   font-size: 24px;
   color: var(--charcoal);
+}
+
+.settings-group-card--padded {
+  padding: 16px;
+}
+
+.settings-group-card--list {
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-group-card--list .cat-row {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-group-card--list .cat-row:last-child {
+  border-bottom: none;
+}
+
+.cards-toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cards-toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cards-tap-hint {
+  font-size: 12px;
+}
+
+.cards-evaluate-hint {
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+.fc-korean-sm {
+  font-size: 26px;
+  margin-top: 12px;
 }
 
 /* ---- Dictionary ---- */
@@ -790,17 +1023,21 @@ textarea {
 
 .bulk-toolbar {
   position: fixed;
-  bottom: 0;
+  bottom: calc(62px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 520px;
   background: var(--surface);
-  border-top: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   display: flex;
   gap: 8px;
   align-items: center;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  padding: 10px 12px;
+  margin: 0 12px;
+  width: calc(100% - 24px);
   z-index: 41;
 }
 
@@ -970,7 +1207,6 @@ textarea {
     color-mix(in srgb, var(--red) 78%, #000) 100%
   );
   color: #fff;
-  font-size: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1007,6 +1243,47 @@ textarea {
   font-weight: 700;
   color: var(--charcoal);
   margin: 12px 0 4px;
+}
+
+.quiz-korean-lg {
+  font-size: 48px;
+}
+
+.quiz-score {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.quiz-option-romaja {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.speaker-btn-lg {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  font-size: 24px;
+}
+
+.listen-prompt-hint {
+  font-size: 14px;
+  margin: 12px 0 4px;
+}
+
+.listen-romaja {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.gallery-xp-track {
+  margin-top: 8px;
+}
+
+.cat-emoji-success {
+  background-color: var(--blue-soft);
 }
 
 .quiz-options {
@@ -1503,6 +1780,33 @@ textarea {
   margin-bottom: 12px;
 }
 
+.song-review-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.song-review-back {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.song-review-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .scanned-word-row {
   display: flex;
   gap: 10px;
@@ -1530,6 +1834,67 @@ textarea {
 
 .scan-check:active {
   transform: scale(0.9);
+}
+
+.import-section {
+  margin-bottom: 16px;
+}
+
+.import-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.import-section-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.import-section-known .import-section-title {
+  color: var(--text-secondary);
+}
+
+.import-section-overlap .import-section-title {
+  color: var(--warning);
+}
+
+.import-word-row--known,
+.import-word-row--inSongCategory {
+  opacity: 0.85;
+}
+
+.import-word-meta {
+  width: 100%;
+  font-size: 11px;
+  padding-left: 54px;
+}
+
+.import-status-badge {
+  flex-shrink: 0;
+  min-width: 44px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.import-status-badge--known {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.import-status-badge--inSongCategory {
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  color: var(--warning);
 }
 
 .textarea {

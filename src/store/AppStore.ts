@@ -100,6 +100,7 @@ function createStore() {
   let isCreateCategoryOpen = false;
   let isGuideOpen = false;
   let isPacksOpen = false;
+  let isSongImportOpen = false;
   let selectedWordForDetail: Word | null = null;
   let editingWord: Word | null = null;
   let prefilledKorean = '';
@@ -246,6 +247,7 @@ function createStore() {
     getIsCreateCategoryOpen: () => isCreateCategoryOpen,
     getIsGuideOpen: () => isGuideOpen,
     getIsPacksOpen: () => isPacksOpen,
+    getIsSongImportOpen: () => isSongImportOpen,
     getPacks: () => packs,
     getSelectedWordForDetail: () => selectedWordForDetail,
     getEditingWord: () => editingWord,
@@ -462,8 +464,20 @@ function createStore() {
       emit();
     },
 
+    openSongImport() {
+      isSongImportOpen = true;
+      emit();
+    },
+
+    closeSongImport() {
+      isSongImportOpen = false;
+      emit();
+    },
+
     openSettings() {
       isScanOcrOpen = false;
+      isSongImportOpen = false;
+      isPacksOpen = false;
       currentTab = 'settings';
       emit();
     },
@@ -667,6 +681,27 @@ function createStore() {
       await refresh();
       await evaluateDailyGamification();
       emit();
+    },
+
+    async importSongWords(drafts: ImportedWordDraft[], soundName: string): Promise<number> {
+      const trimmed = soundName.trim();
+      if (!trimmed) return 0;
+
+      const category = await repo.findOrCreateCategory(trimmed);
+      const source = await repo.findOrCreateSongSource(trimmed);
+      const toImport = drafts.filter((d) => d.korean.trim() && d.translation.trim());
+      const added = await repo.importSongWords({
+        drafts: toImport,
+        categoryId: category.id,
+        sourceId: source.id,
+        soundName: trimmed,
+      });
+
+      isSongImportOpen = false;
+      await refresh();
+      await evaluateDailyGamification();
+      emit();
+      return added;
     },
 
     async deleteWord(word: Word) {

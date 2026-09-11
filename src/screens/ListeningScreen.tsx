@@ -1,5 +1,6 @@
 import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
+import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
@@ -14,29 +15,39 @@ export default function ListeningScreen() {
 
   if (!question) {
     return (
-      <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}><WIcon name="headphones" size={48} style={{ color: 'var(--red)' }} /></div>
-        <h2>{t('listen.needWords')}</h2>
-        <p className="muted">{t('listen.needWordsDesc')}</p>
+      <div>
+        <ScreenHeader title={t('tab.listening')} subtitle="듣기" />
+        <div className="cards-done center">
+          <div className="empty-state-icon">
+            <WIcon name="headphones" size={48} style={{ color: 'var(--red)' }} />
+          </div>
+          <h2>{t('listen.needWords')}</h2>
+          <p className="muted">{t('listen.needWordsDesc')}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      <ScreenHeader title={t('tab.listening')} subtitle="듣기" />
       <div className="card quiz-card" style={{ marginBottom: 16 }}>
         <button
-          className="speaker-btn"
-          style={{ width: 56, height: 56, fontSize: 24, margin: '0 auto' }}
+          className="speaker-btn speaker-btn-lg"
           onClick={() => store.replayQuizAudio()}
+          aria-label={t('listen.tapToListen')}
         >
           <WIcon name="volume-up" size={24} />
         </button>
-        <p className="quiz-korean">{question.prompt}</p>
-        {store.getShowRomaja() && question.promptRomaja && (
-          <p className="muted" style={{ margin: 0 }}>
-            {question.promptRomaja}
-          </p>
+        {!checked ? (
+          <p className="muted listen-prompt-hint">{t('listen.tapToListen')}</p>
+        ) : (
+          <>
+            <p className="quiz-korean">{question.prompt}</p>
+            {store.getShowRomaja() && question.promptRomaja && (
+              <p className="muted listen-romaja">{question.promptRomaja}</p>
+            )}
+          </>
         )}
         <div className="quiz-options">
           {question.options.map((option, i) => {
@@ -48,11 +59,7 @@ export default function ListeningScreen() {
               cls += ' selected';
             }
             return (
-              <button
-                key={i}
-                className={cls}
-                onClick={() => store.selectQuizOption(i)}
-              >
+              <button key={i} className={cls} onClick={() => store.selectQuizOption(i)}>
                 {option.text}
               </button>
             );
@@ -67,13 +74,10 @@ export default function ListeningScreen() {
                 {selected === question.correctOptionIndex ? t('listen.correct') : t('listen.wrong')}
               </span>
               <span>
-                {t('listen.word')}: {question.options[question.correctOptionIndex].text}
+                {t('listen.revealWord')}: {question.options[question.correctOptionIndex].text}
               </span>
             </div>
-            <button
-              className="primary-btn mt20"
-              onClick={() => store.loadNextQuizQuestion('listen')}
-            >
+            <button className="primary-btn mt20" onClick={() => store.loadNextQuizQuestion('listen')}>
               <span>
                 {t('common.next')}
                 <span className="btn-kor">다음</span>
@@ -95,9 +99,7 @@ export default function ListeningScreen() {
         )}
       </div>
 
-      <p className="quiz-score center">
-        {t('listen.score', { score, total })}
-      </p>
+      <p className="quiz-score center">{t('listen.score', { score, total })}</p>
 
       {reward.rewardGifName && (
         <div className="reward-overlay" onClick={() => store.dismissQuizReward()}>

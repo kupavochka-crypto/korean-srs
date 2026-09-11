@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
-import ThreeCirclesLogo from '../components/ThreeCirclesLogo';
+import ScreenHeader from '../components/ScreenHeader';
 import CircularStat from '../components/CircularStat';
 import { greetingById, portraitUrl, randomGreeting } from '../domain/themes';
 import { artistsOfActiveTheme } from '../domain/sources';
@@ -41,15 +41,7 @@ export default function HomeScreen() {
 
   return (
     <div>
-      <header className="header-row">
-        <div className="header-brand">
-          <ThreeCirclesLogo size={40} />
-          <div>
-            <p className="header-title">Woori · 우리</p>
-            <p className="header-subtitle">{t('app.subtitle')}</p>
-          </div>
-        </div>
-      </header>
+      <ScreenHeader title="Woori · 우리" subtitle={t('app.subtitle')} />
 
       <div className="greeting-card card" onClick={() => store.setGreeting(randomGreeting(greeting).id)}>
         <img className="greeting-image" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
@@ -104,7 +96,7 @@ export default function HomeScreen() {
           label={t('home.stats.toReview')}
           koreanLabel="오늘 복습"
           color={colors.red}
-          background={due.length > 0 ? '#FEF2F2' : '#ffffff'}
+          background={due.length > 0 ? 'var(--red-soft)' : 'var(--surface)'}
         />
       </div>
 
@@ -163,6 +155,13 @@ export default function HomeScreen() {
           </span>
           <span className="quick-title">{t('home.quick.scan')}</span>
           <span className="quick-subtitle">텍스트 스캔 (OCR)</span>
+        </button>
+        <button className="quick-action card-flat" onClick={() => store.openSongImport()}>
+          <span className="quick-icon" style={{ background: `${colors.accentPink}1a`, color: colors.accentPink }}>
+            <WIcon name="headphones" size={20} />
+          </span>
+          <span className="quick-title">{t('home.quick.song')}</span>
+          <span className="quick-subtitle">노래로 배우기</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.startDifficultReview()}>
           <span className="quick-icon" style={{ background: `${colors.warning}1a`, color: colors.warning }}>

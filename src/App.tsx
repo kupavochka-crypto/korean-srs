@@ -14,6 +14,7 @@ import CreateCategoryDialog from './components/CreateCategoryDialog';
 import ScanOcrDialog from './components/ScanOcrDialog';
 import GuideDialog from './components/GuideDialog';
 import PacksDialog from './components/PacksDialog';
+import SongImportDialog from './components/SongImportDialog';
 import { loadVoices } from './domain/tts';
 import { t } from './domain/i18n';
 import WIcon from './ui/WIcon';
@@ -66,6 +67,7 @@ export default function App() {
       store.closeCreateCategory();
       store.closeWordDetail();
       store.closeGuide();
+      store.closeSongImport();
     };
   }, []);
 
@@ -91,6 +93,7 @@ export default function App() {
       {store.getIsCreateCategoryOpen() && <CreateCategoryDialog />}
       {store.getIsGuideOpen() && <GuideDialog />}
       {store.getIsPacksOpen() && <PacksDialog />}
+      {store.getIsSongImportOpen() && <SongImportDialog />}
       {store.getSelectedWordForDetail() && <WordDetailDialog />}
 
       <nav ref={(el) => { navRef.current = el; }} className="tab-bar">

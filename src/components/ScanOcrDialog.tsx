@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { recognizeVocabulary, storedApiKey, parseScannedVocabulary } from '../domain/gemini-ocr';
 import { gifUrl, activeTheme } from '../domain/themes';
-import TagInput from './TagInput';
+import ManualKoreanTextBlock from './ManualKoreanTextBlock';
+import ScannedWordsEditor from './ScannedWordsEditor';
 import WIcon from '../ui/WIcon';
 import type { ImportedWordDraft } from '../types';
 
@@ -187,65 +188,24 @@ export default function ScanOcrDialog() {
         {error && <div className="scan-error">{error}</div>}
 
         {showManualEntry && (
-          <div className="mb12">
-            <label className="form-label">Вставьте корейский текст</label>
-            <textarea
-              className="textarea"
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-              placeholder={'커피 - кофе\n차 - чай'}
-            />
-            <button className="primary-btn mt12" onClick={handleManualParse}>
-              Распознать
-            </button>
-          </div>
+          <ManualKoreanTextBlock
+            value={rawText}
+            onChange={setRawText}
+            onParse={handleManualParse}
+          />
         )}
 
         {drafts.length > 0 && (
-          <>
-            <p className="section-title mt12">
-              Распознанные слова ({readyCount} готовых)
-            </p>
-            <div className="mb12">
-              {drafts.map((d, i) => (
-                <div key={i} className="scanned-word-row" style={{ flexWrap: 'wrap' }}>
-                  <button
-                    className={`scan-check ${selected[i] ? 'active' : ''}`}
-                    onClick={() => toggleIndex(i)}
-                    style={
-                      selected[i]
-                        ? { background: 'var(--red)', color: '#fff', border: 'none' }
-                        : {}
-                    }
-                  >
-                    {selected[i] ? '✓' : '○'}
-                  </button>
-                  <input
-                    className="form-input"
-                    value={d.korean}
-                    onChange={(e) => updateField(i, 'korean', e.target.value)}
-                    placeholder="корейское"
-                    style={{ width: 96, flex: 'none', fontWeight: 700, fontSize: 16 }}
-                  />
-                  <input
-                    className="form-input"
-                    value={d.translation}
-                    onChange={(e) => updateField(i, 'translation', e.target.value)}
-                    placeholder="перевод"
-                  />
-                  <TagInput tags={d.tags} onChange={(tags) => updateTags(i, tags)} />
-                </div>
-              ))}
-            </div>
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={readyCount === 0}
-              style={readyCount === 0 ? { opacity: 0.5 } : {}}
-            >
-              Сохранить ({readyCount})
-            </button>
-          </>
+          <ScannedWordsEditor
+            drafts={drafts}
+            selected={selected}
+            readyCount={readyCount}
+            onToggle={toggleIndex}
+            onUpdateField={updateField}
+            onUpdateTags={updateTags}
+            onSave={handleSave}
+            saveLabel={`Сохранить (${readyCount})`}
+          />
         )}
       </div>
     </div>
