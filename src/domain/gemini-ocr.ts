@@ -315,6 +315,7 @@ function humanReadableAPIError(payload: string, status: number, model: string): 
     statusName === 'UNAUTHENTICATED' ||
     statusName === 'PERMISSION_DENIED'
   ) {
+    if (message) return `Ключ Gemini отклонён: ${message}`;
     return 'Ключ Gemini отклонён. Проверьте ключ в AI Studio (обычно начинается с AIza).';
   }
   if (status === 429) {
