@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { store, useStore, TAB_DEFS, type Tab } from './store/AppStore';
 import HomeScreen from './screens/HomeScreen';
 import CardsScreen from './screens/CardsScreen';
@@ -6,13 +6,17 @@ import ListeningScreen from './screens/ListeningScreen';
 import QuizScreen from './screens/QuizScreen';
 import DictionaryScreen from './screens/DictionaryScreen';
 import ProgressScreen from './screens/ProgressScreen';
+import GalleryScreen from './screens/GalleryScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import AddWordDialog from './components/AddWordDialog';
 import WordDetailDialog from './components/WordDetailDialog';
 import CreateCategoryDialog from './components/CreateCategoryDialog';
 import ScanOcrDialog from './components/ScanOcrDialog';
 import GuideDialog from './components/GuideDialog';
+import PacksDialog from './components/PacksDialog';
 import { loadVoices } from './domain/tts';
+import { t } from './domain/i18n';
+import WIcon from './ui/WIcon';
 
 const SCREENS: Record<Tab, () => ReactElement> = {
   home: () => <HomeScreen />,
@@ -21,12 +25,37 @@ const SCREENS: Record<Tab, () => ReactElement> = {
   quiz: () => <QuizScreen />,
   dictionary: () => <DictionaryScreen />,
   progress: () => <ProgressScreen />,
+  gallery: () => <GalleryScreen />,
   settings: () => <SettingsScreen />,
 };
 
 export default function App() {
   const [ready, setReady] = useState(false);
+  const [ind, setInd] = useState({ left: 0, width: 0 });
+  const navRef = useRef<HTMLElement | null>(null);
   useStore();
+
+  const updateIndicator = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const idx = TAB_DEFS.findIndex((d) => d.id === store.getTab());
+    const el = nav.querySelectorAll<HTMLElement>('.tab-item')[idx];
+    if (!el) return;
+    setInd({ left: el.offsetLeft, width: el.offsetWidth });
+  }, []);
+
+  useLayoutEffect(() => {
+    updateIndicator();
+    const nav = navRef.current;
+    if (!nav) return;
+    const ro = new ResizeObserver(updateIndicator);
+    ro.observe(nav);
+    window.addEventListener('resize', updateIndicator);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [updateIndicator, store.getSnapshot()]);
 
   useEffect(() => {
     loadVoices();
@@ -43,7 +72,7 @@ export default function App() {
   if (!ready) {
     return (
       <div className="app">
-        <div className="screen center muted">Загрузка…</div>
+        <div className="screen center muted">{t('common.loading')}</div>
       </div>
     );
   }
@@ -53,23 +82,32 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="screen">{SCREENS[tab]()}</div>
+      <div key={tab} className="screen screen-enter">
+        {SCREENS[tab]()}
+      </div>
 
       {store.getIsAddWordOpen() && <AddWordDialog />}
       {store.getIsScanOcrOpen() && <ScanOcrDialog />}
       {store.getIsCreateCategoryOpen() && <CreateCategoryDialog />}
       {store.getIsGuideOpen() && <GuideDialog />}
+      {store.getIsPacksOpen() && <PacksDialog />}
       {store.getSelectedWordForDetail() && <WordDetailDialog />}
 
-      <nav className="tab-bar">
+      <nav ref={(el) => { navRef.current = el; }} className="tab-bar">
+        <span
+          className="tab-ind"
+          style={{ transform: `translateX(${ind.left}px)`, width: ind.width }}
+        />
         {TAB_DEFS.map((def) => (
           <button
             key={def.id}
             className={`tab-item ${tab === def.id ? 'active' : ''}`}
             onClick={() => store.selectTab(def.id)}
           >
-            <span className="tab-icon">{def.icon}</span>
-            <span>{def.title}</span>
+            <span className="tab-icon">
+              <WIcon name={def.icon} />
+            </span>
+            <span>{t('tab.' + def.id)}</span>
             <span style={{ fontSize: 9, opacity: 0.7 }}>{def.korean}</span>
             {def.id === 'cards' && dueCount > 0 && (
               <span className="tab-badge">{dueCount}</span>

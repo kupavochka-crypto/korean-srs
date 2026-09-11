@@ -1,5 +1,8 @@
 import { store, useStore } from '../store/AppStore';
+import { formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 
 export default function WordDetailDialog() {
   useStore();
@@ -7,15 +10,20 @@ export default function WordDetailDialog() {
   if (!word) return null;
 
   const category = store.categoryFor(word.categoryId);
-  const status = word.repetitions >= 3 ? 'Выучено' : word.nextReviewAt <= Date.now() ? 'К повторению' : 'Изучается';
+  const source = store.sourceFor(word.sourceId);
+  const status = word.repetitions >= 3
+    ? t('detail.mastered')
+    : word.nextReviewAt <= Date.now()
+    ? t('detail.toReview')
+    : t('detail.inProgress');
 
   return (
     <div className="overlay" onClick={() => store.closeWordDetail()}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-header">
-          <h3 className="sheet-title">Слово</h3>
+          <h3 className="sheet-title">{t('detail.title')}</h3>
           <button className="sheet-close" onClick={() => store.closeWordDetail()}>
-            ✕
+            <WIcon name="x-lg" />
           </button>
         </div>
 
@@ -25,7 +33,8 @@ export default function WordDetailDialog() {
               {category.emoji} {category.name}
             </span>
           )}
-          <span className="badge">Ур. {word.difficulty}</span>
+          <span className="badge">{t('word.level')} {word.difficulty}</span>
+          {source && <span className="badge">{formatSource(source)}</span>}
           {word.tags.map((t) => (
             <span className="badge" key={t}>
               #{t}
@@ -39,12 +48,14 @@ export default function WordDetailDialog() {
           </span>
           {word.hanja && <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>{word.hanja}</span>}
           <button className="icon-btn" onClick={() => store.speakText(word.korean)}>
-            🔊
+            <WIcon name="volume-up" />
           </button>
         </div>
-        <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: 0 }}>
-          {word.romaja}
-        </p>
+        {store.getShowRomaja() && (
+          <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: 0 }}>
+            {word.romaja}
+          </p>
+        )}
 
         <div className="card-flat mt16" style={{ padding: 16 }}>
           <p style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{word.translation}</p>
@@ -62,27 +73,26 @@ export default function WordDetailDialog() {
         )}
 
         <div className="card-flat mt12" style={{ padding: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
-          <div>Статус: {status}</div>
-          <div>Повторы: {word.repetitions}</div>
-          <div>Интервал: {word.intervalDays} дн</div>
+          <div>{t('detail.status')}: {status}</div>
+          <div>{t('detail.reps')}: {word.repetitions}</div>
+          <div>{t('cards.interval', { count: word.intervalDays })}</div>
           <div>
-            Следующее повторение:{' '}
-            {new Date(word.nextReviewAt).toLocaleDateString('ru-RU')}
+            {t('detail.nextReview')}: {new Date(word.nextReviewAt).toLocaleDateString('ru-RU')}
           </div>
         </div>
 
         <button className="primary-btn mt20" onClick={() => store.openEditWord(word)}>
-          <span>Изменить</span>
+          <span>{t('common.edit')}</span>
         </button>
         <button
           className="danger-btn"
           onClick={() => {
-            if (confirm('Удалить слово?')) {
+            if (confirm(t('detail.deleteConfirm'))) {
               store.deleteWord(word);
             }
           }}
         >
-          Удалить
+          {t('common.delete')}
         </button>
       </div>
     </div>

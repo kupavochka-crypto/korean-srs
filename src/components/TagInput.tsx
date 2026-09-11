@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { store, useStore } from '../store/AppStore';
+import WIcon from '../ui/WIcon';
 
 interface Props {
   tags: string[];
@@ -66,7 +67,7 @@ export default function TagInput({ tags, onChange }: Props) {
                 onClick={() => removeTag(t)}
                 style={{ background: 'none', color: '#fff', fontSize: 13, padding: 0, lineHeight: 1 }}
               >
-                ✕
+                <WIcon name="x" size={12} />
               </button>
             </span>
           ))}

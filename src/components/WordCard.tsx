@@ -1,16 +1,19 @@
 import type { Word } from '../types';
 import { store } from '../store/AppStore';
+import { formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 
 function srsStatus(word: Word): { text: string; cls: string } {
   if (word.repetitions >= 3) {
-    return { text: 'Выучено', cls: 'badge-mastered' };
+    return { text: t('word.status.mastered'), cls: 'badge-mastered' };
   }
   if (word.nextReviewAt <= Date.now()) {
-    return { text: 'Повторить', cls: 'badge-due' };
+    return { text: t('word.status.due'), cls: 'badge-due' };
   }
   const days = Math.max(1, Math.round((word.nextReviewAt - Date.now()) / (24 * 60 * 60 * 1000)));
-  return { text: `Через ${days} дн`, cls: '' };
+  return { text: t('word.status.in', { count: days }), cls: '' };
 }
 
 export default function WordCard({
@@ -23,6 +26,7 @@ export default function WordCard({
   selected?: boolean;
 }) {
   const category = store.categoryFor(word.categoryId);
+  const source = store.sourceFor(word.sourceId);
   const status = srsStatus(word);
   const difficultyLabel = word.difficulty;
 
@@ -33,14 +37,14 @@ export default function WordCard({
     >
       {selectable && (
         <span className={`word-check ${selected ? 'word-check-on' : ''}`}>
-          {selected ? '✓' : ''}
+          {selected ? <WIcon name="check" size={14} /> : null}
         </span>
       )}
       <div className="word-item-head">
         <div className="word-item-main">
           <span className="word-korean">{word.korean}</span>
           {word.hanja && <span className="word-hanja">{word.hanja}</span>}
-          <span className="word-romaja">{word.romaja}</span>
+          {store.getShowRomaja() && <span className="word-romaja">{word.romaja}</span>}
         </div>
         <button
           className="icon-btn"
@@ -49,7 +53,7 @@ export default function WordCard({
             store.speakText(word.korean);
           }}
         >
-          🔊
+          <WIcon name="volume-up" />
         </button>
       </div>
       <div className="word-translation">{word.translation}</div>
@@ -63,8 +67,9 @@ export default function WordCard({
             {category.emoji} {category.name}
           </span>
         )}
-        <span className="badge">Ур. {difficultyLabel}</span>
+        <span className="badge">{t('word.level')} {difficultyLabel}</span>
         <span className={`badge ${status.cls}`}>{status.text}</span>
+        {source && <span className="badge">{formatSource(source)}</span>}
         {word.tags.map((tag) => (
           <span className="badge" key={tag}>
             #{tag}

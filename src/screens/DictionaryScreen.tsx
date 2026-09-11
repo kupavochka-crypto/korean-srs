@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import WordCard from '../components/WordCard';
 import TagInput from '../components/TagInput';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 
 export default function DictionaryScreen() {
   useStore();
@@ -19,24 +21,22 @@ export default function DictionaryScreen() {
       <div className="search-row">
         <input
           className="search-input"
-          placeholder="Поиск: корейский, перевод, ромадзия…"
+          placeholder={t('dict.search')}
           value={search}
           onChange={(e) => store.setSearchQuery(e.target.value)}
         />
         <button
           className="icon-btn"
           onClick={() => store.toggleSelectionMode()}
-          aria-label={selectionActive ? 'Выйти из выбора' : 'Выбрать слова'}
+          aria-label={selectionActive ? t('dict.selectOnAria') : t('dict.selectOffAria')}
           style={selectionActive ? { background: 'var(--red)', color: '#fff', border: 'none' } : {}}
         >
-          {selectionActive ? '✕' : '☑️'}
+          {selectionActive ? <WIcon name="x-lg" /> : <WIcon name="check-square" />}
         </button>
       </div>
 
       {selectionActive && (
-        <p className="selection-hint">
-          Выбрано: {selectedIds.size}. Нажмите на слово, чтобы выбрать или убрать.
-        </p>
+        <p className="selection-hint">{t('dict.selectionHint', { count: selectedIds.size })}</p>
       )}
 
       <div className="chips-row">
@@ -44,7 +44,7 @@ export default function DictionaryScreen() {
           className={`chip ${selectedCategoryId === null ? 'active' : ''}`}
           onClick={() => store.setSelectedCategory(null)}
         >
-          Все
+          {t('dict.all')}
         </button>
         {categories.map((c) => (
           <button
@@ -58,17 +58,15 @@ export default function DictionaryScreen() {
           </button>
         ))}
         <button className="chip" onClick={() => store.openCreateCategory()}>
-          + Категория
+          {t('dict.addCategory')}
         </button>
       </div>
 
       {words.length === 0 ? (
         <div className="empty-hint">
-          <span style={{ fontSize: 24 }}>📭</span>
+          <span style={{ fontSize: 24 }}><WIcon name="inbox" size={24} style={{ color: 'var(--text-tertiary)' }} /></span>
           <span>
-            {search || selectedCategoryId
-              ? 'Ничего не найдено по вашему запросу.'
-              : 'Словарь пуст. Добавьте слова!'}
+            {search || selectedCategoryId ? t('dict.emptyFound') : t('dict.emptyEmpty')}
           </span>
         </div>
       ) : (
@@ -84,7 +82,7 @@ export default function DictionaryScreen() {
         </div>
       )}
 
-      <button className="fab" onClick={() => store.openAddWord()} aria-label="Добавить слово">
+      <button className="fab" onClick={() => store.openAddWord()} aria-label={t('dict.addWordAria')}>
         +
       </button>
 
@@ -98,13 +96,13 @@ export default function DictionaryScreen() {
               setTagDialog(true);
             }}
           >
-            ✏️ Теги
+            {t('dict.tags')}
           </button>
           <button className="danger-btn" onClick={() => store.deleteSelection()}>
-            🗑 Удалить
+            {t('dict.delete')}
           </button>
           <button className="secondary-btn" onClick={() => store.clearSelection()}>
-            Отмена
+            {t('common.cancel')}
           </button>
         </div>
       )}
@@ -113,14 +111,14 @@ export default function DictionaryScreen() {
         <div className="overlay" onClick={() => setTagDialog(false)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-header">
-              <h3 className="sheet-title">Назначить теги ({selectedIds.size} слов)</h3>
+              <h3 className="sheet-title">{t('dict.tagsDialog', { count: selectedIds.size })}</h3>
               <button className="sheet-close" onClick={() => setTagDialog(false)}>
-                ✕
+                <WIcon name="x-lg" />
               </button>
             </div>
             <TagInput tags={pendingTags} onChange={setPendingTags} />
             <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '8px 0 16px' }}>
-              Теги будут добавлены ко всем выбранным словам (существующие сохранятся).
+              {t('dict.tagsHint')}
             </p>
             <button
               className="primary-btn"
@@ -129,7 +127,7 @@ export default function DictionaryScreen() {
                 setTagDialog(false);
               }}
             >
-              Назначить
+              {t('dict.assign')}
             </button>
           </div>
         </div>

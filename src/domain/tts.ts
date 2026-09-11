@@ -1,3 +1,5 @@
+import type { VoiceCharacter } from './voice-chars';
+
 let cachedKoreanVoice: SpeechSynthesisVoice | null | undefined;
 
 function koreanVoice(): SpeechSynthesisVoice | null {
@@ -27,7 +29,7 @@ export function loadVoices(callback?: () => void) {
   }, { once: true });
 }
 
-export function speak(text: string) {
+export function speak(text: string, character?: VoiceCharacter | null) {
   const synth = window.speechSynthesis;
   if (!synth) return;
   const trimmed = text.trim();
@@ -40,6 +42,7 @@ export function speak(text: string) {
     utterance.voice = voice;
   }
   utterance.lang = 'ko-KR';
-  utterance.rate = 0.9;
+  utterance.rate = character?.rate ?? 0.9;
+  utterance.pitch = character?.pitch ?? 1;
   synth.speak(utterance);
 }

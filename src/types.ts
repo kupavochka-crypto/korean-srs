@@ -18,6 +18,7 @@ export interface Word {
   exampleSentence: string | null;
   exampleTranslation: string | null;
   categoryId: string | null;
+  sourceId: string | null;
   tags: string[];
   difficulty: Difficulty;
   createdAt: number;
@@ -29,6 +30,65 @@ export interface Word {
   totalReviews: number;
   correctReviews: number;
   masteredAt: number | null;
+}
+
+export type SourceType = 'song' | 'post' | 'variety' | 'fanchant' | 'textbook' | 'user';
+
+export interface Source {
+  id: string;
+  type: SourceType;
+  artistId: string | null;
+  title: string;
+  koreanTitle: string;
+  album: string | null;
+  snippet: string | null;
+  createdAt: number;
+}
+
+export interface Artist {
+  id: string;
+  stageName: string;
+  koreanName: string;
+  imageName: string;
+  colorHex: string;
+  role: string;
+  tierThreshold: number;
+}
+
+export interface PackWordDef {
+  korean: string;
+  translation: string;
+  hanja?: string | null;
+  exampleSentence?: string | null;
+  exampleTranslation?: string | null;
+  tags?: string[];
+  difficulty?: Difficulty;
+}
+
+export interface Pack {
+  id: string;
+  title: string;
+  subtitle: string;
+  emoji: string;
+  colorHex: string;
+  difficulty: Difficulty;
+  sourceId: string | null;
+  wordDefs: PackWordDef[];
+  createdAt: number;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  earnedAt: number | null;
+}
+
+export interface Progression {
+  id: string;
+  xp: number;
+  rewardedMissionDate: string | null;
 }
 
 export interface ReviewRecord {

@@ -1,15 +1,18 @@
 {
-  "name": "korean-srs-web",
+  "name": "woori",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run sync:icons && tsc --noEmit && vite build",
     "preview": "vite preview",
+    "postinstall": "node scripts/sync-shoelace-icons.mjs",
+    "sync:icons": "node scripts/sync-shoelace-icons.mjs",
     "deploy": "gh-pages -d dist -b gh-pages"
   },
   "dependencies": {
+    "@shoelace-style/shoelace": "^2.20.1",
     "dexie": "^4.0.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -1,5 +1,7 @@
 import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 
 export default function QuizScreen() {
   useStore();
@@ -13,17 +15,15 @@ export default function QuizScreen() {
   if (!question || question.kind !== 'reverse') {
     return (
       <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🧠</div>
-        <h2>Квиз</h2>
-        <p className="muted">
-          Показано русское слово — выберите правильный вариант по-корейски.
-        </p>
+        <div style={{ fontSize: 48, marginBottom: 12 }}><WIcon name="patch-question" size={48} style={{ color: 'var(--red)' }} /></div>
+        <h2>{t('quiz.title')}</h2>
+        <p className="muted">{t('quiz.desc')}</p>
         <button
           className="primary-btn mt20"
           onClick={() => store.loadNextQuizQuestion('reverse')}
         >
           <span>
-            Начать
+            {t('quiz.start')}
             <span className="btn-kor">시작</span>
           </span>
         </button>
@@ -53,7 +53,9 @@ export default function QuizScreen() {
                 onClick={() => store.selectQuizOption(i)}
               >
                 {option.text}
-                {option.romaja && <span className="quiz-option-romaja">{option.romaja}</span>}
+                {option.romaja && store.getShowRomaja() && (
+                  <span className="quiz-option-romaja">{option.romaja}</span>
+                )}
               </button>
             );
           })}
@@ -63,10 +65,10 @@ export default function QuizScreen() {
           <>
             <div className="reveal-row">
               <span>
-                {selected === question.correctOptionIndex ? '✅ Правильно!' : '❌ Неправильно'}
+                {selected === question.correctOptionIndex ? t('listen.correct') : t('listen.wrong')}
               </span>
               <span>
-                Ответ: {question.options[question.correctOptionIndex].text}
+                {t('listen.answer')}: {question.options[question.correctOptionIndex].text}
               </span>
             </div>
             <button
@@ -74,7 +76,7 @@ export default function QuizScreen() {
               onClick={() => store.loadNextQuizQuestion('reverse')}
             >
               <span>
-                Дальше
+                {t('common.next')}
                 <span className="btn-kor">다음</span>
               </span>
             </button>
@@ -87,7 +89,7 @@ export default function QuizScreen() {
             style={selected === null ? { opacity: 0.5 } : {}}
           >
             <span>
-              Проверить
+              {t('common.check')}
               <span className="btn-kor">확인</span>
             </span>
           </button>
@@ -95,17 +97,17 @@ export default function QuizScreen() {
       </div>
 
       <p className="quiz-score center">
-        Счёт: {score} / {total}
+        {t('listen.score', { score, total })}
       </p>
 
       {reward.rewardGifName && (
         <div className="reward-overlay" onClick={() => store.dismissQuizReward()}>
           <div className="reward-box">
             <img src={gifUrl(reward.rewardGifName)} alt="BTS reward" />
-            <h3>Отлично! 🎉</h3>
-            <p>Продолжайте в том же духе!</p>
+            <h3>{t('reward.title')}</h3>
+            <p>{t('reward.body')}</p>
             <button className="primary-btn" onClick={() => store.dismissQuizReward()}>
-              Продолжить
+              {t('reward.continue')}
             </button>
           </div>
         </div>

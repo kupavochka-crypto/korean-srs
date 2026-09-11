@@ -1,7 +1,10 @@
 import { db, newId } from './schema';
-import type { Category, ReviewRecord, Word } from '../types';
+import type { Achievement, Category, Pack, Progression, ReviewRecord, Source, Word } from '../types';
 import { DEFAULT_CATEGORIES, NOTEBOOK_WORDS } from '../domain/seed-data';
 import { toRomaja } from '../domain/romaja';
+import { allSeedSources } from '../domain/sources';
+import { allSeedPacks } from '../domain/packs';
+import { achievementDefs } from '../domain/gamification';
 import { calculateNextReview, type SrsRatingValue } from '../domain/srs-engine';
 
 export const MASTERED_INTERVAL_DAYS = 21;
@@ -52,6 +55,7 @@ export async function ensureNotebookWords(): Promise<void> {
       exampleSentence: null,
       exampleTranslation: null,
       categoryId: category?.id ?? null,
+      sourceId: null,
       tags: [],
       difficulty: 'Начальный',
       createdAt: now + i,
@@ -71,7 +75,98 @@ export async function ensureNotebookWords(): Promise<void> {
 export async function initialize(): Promise<void> {
   await ensureDefaultCategories();
   await ensureNotebookWords();
+  await ensureSeedSources();
+  await ensureSeedPacks();
+  await ensureAchievements();
   await backfillMasteredAt();
+}
+
+export async function ensureSeedPacks(): Promise<void> {
+  const count = await db.packs.count();
+  if (count > 0) return;
+  await db.packs.bulkAdd(allSeedPacks());
+}
+
+export async function allPacks(): Promise<Pack[]> {
+  return db.packs.orderBy('createdAt').toArray();
+}
+
+export async function addPackWords(pack: Pack): Promise<number> {
+  const existing = await db.words.toArray();
+  const koreanSet = new Set(existing.map((w) => w.korean));
+  const now = Date.now();
+  let added = 0;
+  for (const def of pack.wordDefs) {
+    if (koreanSet.has(def.korean)) continue;
+    const word: Word = {
+      id: newId(),
+      korean: def.korean,
+      hanja: def.hanja ?? null,
+      romaja: toRomaja(def.korean),
+      translation: def.translation,
+      exampleSentence: def.exampleSentence ?? null,
+      exampleTranslation: def.exampleTranslation ?? null,
+      categoryId: null,
+      sourceId: pack.sourceId,
+      tags: def.tags ?? [],
+      difficulty: def.difficulty ?? pack.difficulty,
+      createdAt: now + added,
+      intervalDays: 0,
+      easeFactor: 2.5,
+      repetitions: 0,
+      nextReviewAt: now,
+      lastResult: null,
+      totalReviews: 0,
+      correctReviews: 0,
+      masteredAt: null,
+    };
+    await db.words.add(word);
+    koreanSet.add(def.korean);
+    added += 1;
+  }
+  return added;
+}
+
+export async function ensureSeedSources(): Promise<void> {
+  const count = await db.sources.count();
+  if (count > 0) return;
+  await db.sources.bulkAdd(allSeedSources());
+}
+
+export async function allSources(): Promise<Source[]> {
+  return db.sources.orderBy('createdAt').toArray();
+}
+
+export async function ensureAchievements(): Promise<void> {
+  const count = await db.achievements.count();
+  if (count > 0) return;
+  const defs = achievementDefs();
+  await db.achievements.bulkAdd(defs.map((d) => ({ ...d, earnedAt: null })));
+}
+
+export async function allAchievements(): Promise<Achievement[]> {
+  return db.achievements.toArray();
+}
+
+export async function markAchievementsEarned(ids: string[], now: number = Date.now()): Promise<void> {
+  if (ids.length === 0) return;
+  const defs = await db.achievements.toArray();
+  const patches = defs
+    .filter((a) => ids.includes(a.id) && !a.earnedAt)
+    .map((a) => ({ ...a, earnedAt: now }));
+  if (patches.length > 0) await db.achievements.bulkPut(patches);
+}
+
+export async function getProgression(): Promise<Progression> {
+  const existing = await db.progression.get('main');
+  if (existing) return existing;
+  const fresh: Progression = { id: 'main', xp: 0, rewardedMissionDate: null };
+  await db.progression.put(fresh);
+  return fresh;
+}
+
+export async function putProgression(p: Progression): Promise<void> {
+  await db.progression.put(p);
 }
 
 export async function backfillMasteredAt(): Promise<void> {

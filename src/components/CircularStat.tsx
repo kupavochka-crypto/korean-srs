@@ -5,6 +5,7 @@ interface Props {
   size?: number;
   color: string;
   background?: string;
+  className?: string;
 }
 
 export default function CircularStat({
@@ -14,23 +15,25 @@ export default function CircularStat({
   size = 100,
   color,
   background = '#ffffff',
+  className = '',
 }: Props) {
   const stroke = size * 0.08;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="circular-stat">
-      <svg width={size} height={size}>
+    <div className={`circular-stat ${className}`.trim()}>
+      <svg width={size} height={size} style={{ ['--circ' as string]: circumference }}>
         <circle
+          className="circular-track"
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill={background}
-          stroke="#e2e8f0"
           strokeWidth={stroke}
         />
         <circle
+          className="circular-ring"
           cx={size / 2}
           cy={size / 2}
           r={radius}

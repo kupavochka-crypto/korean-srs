@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { toRomaja } from '../domain/romaja';
 import { lookupNotebookWord } from '../domain/seed-data';
+import { activeThemeSources, formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 import type { Difficulty } from '../types';
 
 const DIFFICULTIES: Difficulty[] = ['Начальный', 'Средний', 'Продвинутый'];
@@ -11,6 +14,7 @@ export default function AddWordDialog() {
   useStore();
   const editing = store.getEditingWord();
   const categories = store.getCategories();
+  const sources = activeThemeSources(store.getSources());
 
   const [korean, setKorean] = useState(store.getPrefilledKorean());
   const [hanja, setHanja] = useState('');
@@ -19,6 +23,7 @@ export default function AddWordDialog() {
   const [exampleSentence, setExampleSentence] = useState('');
   const [exampleTranslation, setExampleTranslation] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(store.getPrefilledCategoryId());
+  const [sourceId, setSourceId] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('Начальный');
   const [error, setError] = useState('');
 
@@ -32,6 +37,7 @@ export default function AddWordDialog() {
       setExampleSentence(w.exampleSentence ?? '');
       setExampleTranslation(w.exampleTranslation ?? '');
       setCategoryId(w.categoryId);
+      setSourceId(w.sourceId);
       setDifficulty(w.difficulty);
     }
   }, []);
@@ -49,11 +55,11 @@ export default function AddWordDialog() {
 
   function handleSave() {
     if (!korean.trim()) {
-      setError('Укажите корейское слово.');
+      setError(t('add.errKorean'));
       return;
     }
     if (!translation.trim()) {
-      setError('Укажите перевод.');
+      setError(t('add.errTranslation'));
       return;
     }
     store.saveWord({
@@ -64,6 +70,7 @@ export default function AddWordDialog() {
       exampleSentence,
       exampleTranslation,
       categoryId,
+      sourceId,
       difficulty,
     });
   }
@@ -72,14 +79,14 @@ export default function AddWordDialog() {
     <div className="overlay" onClick={() => store.closeAddWord()}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-header">
-          <h3 className="sheet-title">{editing ? 'Изменить слово' : 'Добавить слово'}</h3>
+          <h3 className="sheet-title">{editing ? t('add.titleEdit') : t('add.titleNew')}</h3>
           <button className="sheet-close" onClick={() => store.closeAddWord()}>
-            ✕
+            <WIcon name="x-lg" />
           </button>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Корейское слово *</label>
+          <label className="form-label">{t('add.korean')}</label>
           <input
             className="form-input"
             value={korean}
@@ -89,7 +96,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Перевод *</label>
+          <label className="form-label">{t('add.translation')}</label>
           <input
             className="form-input"
             value={translation}
@@ -99,7 +106,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Ромадзия (автозаполнение)</label>
+          <label className="form-label">{t('add.romaja')}</label>
           <input
             className="form-input"
             value={romaja}
@@ -109,7 +116,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Ханча (необязательно)</label>
+          <label className="form-label">{t('add.hanja')}</label>
           <input
             className="form-input"
             value={hanja}
@@ -119,7 +126,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Пример предложения</label>
+          <label className="form-label">{t('add.exampleSentence')}</label>
           <input
             className="form-input"
             value={exampleSentence}
@@ -129,7 +136,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Перевод примера</label>
+          <label className="form-label">{t('add.exampleTranslation')}</label>
           <input
             className="form-input"
             value={exampleTranslation}
@@ -139,7 +146,7 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Категория</label>
+          <label className="form-label">{t('add.category')}</label>
           <div className="flow-layout">
             {categories.map((c) => (
               <button
@@ -154,7 +161,28 @@ export default function AddWordDialog() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Уровень</label>
+          <label className="form-label">{t('add.source')}</label>
+          <div className="flow-layout">
+            <button
+              className={`select-chip ${sourceId === null ? 'active' : ''}`}
+              onClick={() => setSourceId(null)}
+            >
+              {t('add.noSource')}
+            </button>
+            {sources.map((s) => (
+              <button
+                key={s.id}
+                className={`select-chip ${sourceId === s.id ? 'active' : ''}`}
+                onClick={() => setSourceId(s.id)}
+              >
+                {formatSource(s)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">{t('add.level')}</label>
           <div className="flow-layout">
             {DIFFICULTIES.map((d) => (
               <button
@@ -171,7 +199,7 @@ export default function AddWordDialog() {
         {error && <div className="scan-error">{error}</div>}
 
         <button className="save-btn" onClick={handleSave}>
-          {editing ? 'Сохранить' : 'Добавить'}
+          {editing ? t('common.save') : t('common.add')}
         </button>
       </div>
     </div>

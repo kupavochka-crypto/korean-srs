@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import CircularStat from '../components/CircularStat';
 import { colors, colorFromHex } from '../theme/colors';
+import { t } from '../domain/i18n';
+import WIcon from '../ui/WIcon';
 
 export default function ProgressScreen() {
   useStore();
@@ -36,20 +38,20 @@ export default function ProgressScreen() {
     <div>
       <div className="proverb-card">
         <p className="proverb-kor">티끌 모아 태산</p>
-        <p className="proverb-rus">Многие капли образуют гору</p>
+        <p className="proverb-rus">{t('progress.proverb')}</p>
       </div>
 
-      <h2 className="section-title">Статистика</h2>
+      <h2 className="section-title">{t('progress.stat')}</h2>
       <div className="progress-grid">
-        <CircularStat value={`${total}`} label="Всего слов" koreanLabel="총 단어" color={colors.charcoal} />
-        <CircularStat value={`${mastered}`} label="Выучено" koreanLabel="완료" color={colors.success} />
-        <CircularStat value={`${avgDays ?? '—'}`} label="Дней до выуч." koreanLabel="완료까지" color={colors.accentPink} />
-        <CircularStat value={`${due}`} label="К сегодня" koreanLabel="오늘" color={colors.red} />
-        <CircularStat value={`${todayReviews}`} label="Сегодня" koreanLabel="복습" color={colors.blue} />
-        <CircularStat value={`${streak}`} label="Серия дней" koreanLabel="연속" color={colors.warning} />
+        <CircularStat value={`${total}`} label={t('home.stats.words')} koreanLabel="총 단어" color={colors.charcoal} className="circular-stat-charcoal" />
+        <CircularStat value={`${mastered}`} label={t('progress.mastered')} koreanLabel="완료" color={colors.success} />
+        <CircularStat value={`${avgDays ?? '—'}`} label={t('progress.daysToMaster')} koreanLabel="완료까지" color={colors.accentPink} />
+        <CircularStat value={`${due}`} label={t('progress.dueToday')} koreanLabel="오늘" color={colors.red} />
+        <CircularStat value={`${todayReviews}`} label={t('progress.today')} koreanLabel="복습" color={colors.blue} />
+        <CircularStat value={`${streak}`} label={t('progress.streakDays')} koreanLabel="연속" color={colors.warning} />
       </div>
 
-      <h2 className="section-title">Запомнено по месяцам</h2>
+      <h2 className="section-title">{t('progress.byMonth')}</h2>
       <div className="month-bars">
         {byMonth.map((m) => {
           const max = Math.max(1, ...byMonth.map((x) => x.count));
@@ -67,12 +69,12 @@ export default function ProgressScreen() {
       </div>
       {masteredByCat.length > 0 && (
         <>
-          <h2 className="section-title">Выучено по категориям</h2>
+          <h2 className="section-title">{t('progress.byCat')}</h2>
           <div className="cat-breakdown">
             {masteredByCat.map(({ categoryName, count }) => (
               <div key={categoryName} className="cat-row card-flat">
                 <span className="cat-emoji" style={{ backgroundColor: '#DCEDFE' }}>
-                  ✅
+                  <WIcon name="check-lg" size={16} style={{ color: 'var(--success-strong)' }} />
                 </span>
                 <span>{categoryName}</span>
                 <span className="cat-count">{count}</span>
@@ -82,7 +84,7 @@ export default function ProgressScreen() {
         </>
       )}
 
-      <h2 className="section-title">Слова по категориям</h2>
+      <h2 className="section-title">{t('progress.byCatDict')}</h2>
       <div className="cat-breakdown">
         {byCategory.map(({ category, count }) => (
           <div key={category.id} className="cat-row card-flat">
@@ -95,8 +97,10 @@ export default function ProgressScreen() {
         ))}
         {uncategorized > 0 && (
           <div className="cat-row card-flat">
-            <span className="cat-emoji">📄</span>
-            <span>Без категории</span>
+            <span className="cat-emoji">
+              <WIcon name="file-text" size={16} style={{ color: 'var(--text-secondary)' }} />
+            </span>
+            <span>{t('progress.noCategory')}</span>
             <span className="cat-count">{uncategorized}</span>
           </div>
         )}

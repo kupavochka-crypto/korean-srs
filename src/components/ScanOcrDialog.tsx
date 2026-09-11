@@ -3,6 +3,7 @@ import { store, useStore } from '../store/AppStore';
 import { recognizeVocabulary, storedApiKey, parseScannedVocabulary } from '../domain/gemini-ocr';
 import { gifUrl, activeTheme } from '../domain/themes';
 import TagInput from './TagInput';
+import WIcon from '../ui/WIcon';
 import type { ImportedWordDraft } from '../types';
 
 export default function ScanOcrDialog() {
@@ -101,7 +102,7 @@ export default function ScanOcrDialog() {
         <div className="sheet-header">
           <h3 className="sheet-title">Сканирование (OCR)</h3>
           <button className="sheet-close" onClick={() => store.closeScanOcr()}>
-            ✕
+            <WIcon name="x-lg" />
           </button>
         </div>
 
@@ -123,7 +124,7 @@ export default function ScanOcrDialog() {
             onClick={() => cameraInputRef.current?.click()}
             disabled={processing}
           >
-            <span className="scan-tool-icon">📷</span>
+            <span className="scan-tool-icon"><WIcon name="camera" size={22} /></span>
             <span>Камера</span>
           </button>
           <button
@@ -131,7 +132,7 @@ export default function ScanOcrDialog() {
             onClick={() => galleryInputRef.current?.click()}
             disabled={processing}
           >
-            <span className="scan-tool-icon">🖼️</span>
+            <span className="scan-tool-icon"><WIcon name="images" size={22} /></span>
             <span>Галерея</span>
           </button>
           <input
@@ -157,7 +158,7 @@ export default function ScanOcrDialog() {
               setSelected([]);
             }}
           >
-            <span className="scan-tool-icon">📝</span>
+            <span className="scan-tool-icon"><WIcon name="pencil-square" size={22} /></span>
             <span>Текст</span>
           </button>
         </div>
