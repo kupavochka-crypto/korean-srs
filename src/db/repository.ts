@@ -4,6 +4,8 @@ import { DEFAULT_CATEGORIES, NOTEBOOK_WORDS } from '../domain/seed-data';
 import { toRomaja } from '../domain/romaja';
 import { calculateNextReview, type SrsRatingValue } from '../domain/srs-engine';
 
+export const MASTERED_INTERVAL_DAYS = 21;
+
 function dateString(date: number): string {
   const d = new Date(date);
   const y = d.getFullYear();
@@ -60,6 +62,7 @@ export async function ensureNotebookWords(): Promise<void> {
       lastResult: null,
       totalReviews: 0,
       correctReviews: 0,
+      masteredAt: null,
     };
   });
   await db.words.bulkAdd(words);
@@ -68,6 +71,26 @@ export async function ensureNotebookWords(): Promise<void> {
 export async function initialize(): Promise<void> {
   await ensureDefaultCategories();
   await ensureNotebookWords();
+  await backfillMasteredAt();
+}
+
+export async function backfillMasteredAt(): Promise<void> {
+  const words = await db.words.toArray();
+  const needsBackfill = words.filter(
+    (w) => (!w.masteredAt || typeof w.masteredAt !== 'number') && w.intervalDays >= MASTERED_INTERVAL_DAYS
+  );
+  if (needsBackfill.length === 0) return;
+  const reviews = await db.reviews.toArray();
+  const lastReviewAt = new Map<string, number>();
+  for (const r of reviews) {
+    const prev = lastReviewAt.get(r.wordId);
+    if (!prev || r.timestamp > prev) lastReviewAt.set(r.wordId, r.timestamp);
+  }
+  const patches: Word[] = [];
+  for (const w of needsBackfill) {
+    patches.push({ ...w, masteredAt: lastReviewAt.get(w.id) ?? w.createdAt });
+  }
+  if (patches.length > 0) await db.words.bulkPut(patches);
 }
 
 export async function allWords(): Promise<Word[]> {
@@ -126,6 +149,8 @@ export async function recordReview(
   );
 
   const s = result.updatedState;
+  const masteredAt =
+    word.masteredAt ?? (s.intervalDays >= MASTERED_INTERVAL_DAYS ? now : null);
   const updated: Word = {
     ...word,
     intervalDays: s.intervalDays,
@@ -135,6 +160,7 @@ export async function recordReview(
     lastResult: s.lastResult,
     totalReviews: s.totalReviews,
     correctReviews: s.correctReviews,
+    masteredAt,
   };
   await db.words.put(updated);
 

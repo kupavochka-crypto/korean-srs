@@ -13,13 +13,29 @@ function srsStatus(word: Word): { text: string; cls: string } {
   return { text: `Через ${days} дн`, cls: '' };
 }
 
-export default function WordCard({ word }: { word: Word }) {
+export default function WordCard({
+  word,
+  selectable = false,
+  selected = false,
+}: {
+  word: Word;
+  selectable?: boolean;
+  selected?: boolean;
+}) {
   const category = store.categoryFor(word.categoryId);
   const status = srsStatus(word);
   const difficultyLabel = word.difficulty;
 
   return (
-    <div className="word-item card-flat" onClick={() => store.openWordDetail(word)}>
+    <div
+      className={`word-item card-flat ${selectable ? 'word-selectable' : ''} ${selected ? 'word-selected' : ''}`}
+      onClick={() => (selectable ? store.toggleSelectWord(word.id) : store.openWordDetail(word))}
+    >
+      {selectable && (
+        <span className={`word-check ${selected ? 'word-check-on' : ''}`}>
+          {selected ? '✓' : ''}
+        </span>
+      )}
       <div className="word-item-head">
         <div className="word-item-main">
           <span className="word-korean">{word.korean}</span>

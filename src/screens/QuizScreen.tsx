@@ -1,7 +1,7 @@
 import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
 
-export default function ListeningScreen() {
+export default function QuizScreen() {
   useStore();
   const question = store.getQuizQuestion();
   const selected = store.getSelectedOptionIndex();
@@ -10,12 +10,23 @@ export default function ListeningScreen() {
   const total = store.getQuizTotalCount();
   const reward = store.getQuizReward();
 
-  if (!question) {
+  if (!question || question.kind !== 'reverse') {
     return (
       <div className="cards-done center">
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🎧</div>
-        <h2>Нужно минимум 2 слова</h2>
-        <p className="muted">Добавьте слова в словарь, чтобы начать аудирование.</p>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>🧠</div>
+        <h2>Квиз</h2>
+        <p className="muted">
+          Показано русское слово — выберите правильный вариант по-корейски.
+        </p>
+        <button
+          className="primary-btn mt20"
+          onClick={() => store.loadNextQuizQuestion('reverse')}
+        >
+          <span>
+            Начать
+            <span className="btn-kor">시작</span>
+          </span>
+        </button>
       </div>
     );
   }
@@ -23,19 +34,9 @@ export default function ListeningScreen() {
   return (
     <div>
       <div className="card quiz-card" style={{ marginBottom: 16 }}>
-        <button
-          className="speaker-btn"
-          style={{ width: 56, height: 56, fontSize: 24, margin: '0 auto' }}
-          onClick={() => store.replayQuizAudio()}
-        >
-          🔊
-        </button>
-        <p className="quiz-korean">{question.prompt}</p>
-        {question.promptRomaja && (
-          <p className="muted" style={{ margin: 0 }}>
-            {question.promptRomaja}
-          </p>
-        )}
+        <p className="quiz-korean" style={{ fontSize: 30 }}>
+          {question.prompt}
+        </p>
         <div className="quiz-options">
           {question.options.map((option, i) => {
             let cls = 'quiz-option';
@@ -52,6 +53,7 @@ export default function ListeningScreen() {
                 onClick={() => store.selectQuizOption(i)}
               >
                 {option.text}
+                {option.romaja && <span className="quiz-option-romaja">{option.romaja}</span>}
               </button>
             );
           })}
@@ -61,16 +63,15 @@ export default function ListeningScreen() {
           <>
             <div className="reveal-row">
               <span>
-                Ответ:{' '}
                 {selected === question.correctOptionIndex ? '✅ Правильно!' : '❌ Неправильно'}
               </span>
               <span>
-                Слово: {question.options[question.correctOptionIndex].text}
+                Ответ: {question.options[question.correctOptionIndex].text}
               </span>
             </div>
             <button
               className="primary-btn mt20"
-              onClick={() => store.loadNextQuizQuestion('listen')}
+              onClick={() => store.loadNextQuizQuestion('reverse')}
             >
               <span>
                 Дальше

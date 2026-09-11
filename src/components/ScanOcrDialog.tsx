@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { recognizeVocabulary, storedApiKey, parseScannedVocabulary } from '../domain/gemini-ocr';
-import { gifUrl } from '../domain/bts';
+import { gifUrl, activeTheme } from '../domain/themes';
 import TagInput from './TagInput';
 import type { ImportedWordDraft } from '../types';
 
@@ -169,7 +169,7 @@ export default function ScanOcrDialog() {
         {processing && (
           <div className="scan-status">
             <img
-              src={gifUrl('bts_jk_please_wait')}
+              src={gifUrl(activeTheme().statusGifName)}
               alt="BTS"
               style={{
                 width: '100%',

@@ -13,6 +13,11 @@ export class KoreanDB extends Dexie {
       categories: '&id, name, createdAt',
       reviews: '++id, wordId, dateString, timestamp',
     });
+    this.version(2).stores({
+      words: '&id, korean, categoryId, nextReviewAt, createdAt',
+      categories: '&id, name, createdAt',
+      reviews: '++id, wordId, dateString, timestamp',
+    });
   }
 }
 

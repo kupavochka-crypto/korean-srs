@@ -12,6 +12,7 @@ export default function CardsScreen() {
   const queue = store.getCardsQueue();
   const index = store.getCardIndex();
   const flipped = store.getIsCardFlipped();
+  const difficultCount = store.difficultWords().length;
 
   if (queue.length === 0) {
     return (
@@ -25,6 +26,14 @@ export default function CardsScreen() {
             <span className="btn-kor">모든 단어 복습</span>
           </span>
         </button>
+        {difficultCount > 0 && (
+          <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
+            <span>
+              Трудные слова ({difficultCount})
+              <span className="btn-kor">어려운 단어</span>
+            </span>
+          </button>
+        )}
       </div>
     );
   }
@@ -41,6 +50,14 @@ export default function CardsScreen() {
             <span className="btn-kor">모든 단어 복습</span>
           </span>
         </button>
+        {difficultCount > 0 && (
+          <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
+            <span>
+              Трудные слова ({difficultCount})
+              <span className="btn-kor">어려운 단어</span>
+            </span>
+          </button>
+        )}
       </div>
     );
   }
@@ -53,9 +70,18 @@ export default function CardsScreen() {
         <span className="muted" style={{ fontSize: 13 }}>
           Карточка {index + 1} из {queue.length}
         </span>
-        <button className="icon-btn" onClick={() => store.speakText(word.korean)} aria-label="Озвучить">
-          🔊
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="icon-btn"
+            onClick={() => store.openEditWord(word)}
+            aria-label="Редактировать слово"
+          >
+            ✏️
+          </button>
+          <button className="icon-btn" onClick={() => store.speakText(word.korean)} aria-label="Озвучить">
+            🔊
+          </button>
+        </div>
       </div>
       <div className="progress-track">
         <div className="progress-fill" style={{ width: `${((index + 1) / queue.length) * 100}%` }} />

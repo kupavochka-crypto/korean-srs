@@ -1,19 +1,27 @@
 import { useSyncExternalStore } from 'react';
 import * as repo from '../db/repository';
-import type { Category, Difficulty, ImportedWordDraft, QuizQuestion, Word } from '../types';
+import type { Category, Difficulty, ImportedWordDraft, QuizOption, QuizQuestion, Word } from '../types';
 import { toRomaja } from '../domain/romaja';
 import { speak } from '../domain/tts';
-import { randomGifName } from '../domain/bts';
+import { randomGifName } from '../domain/themes';
 import type { SrsRatingValue } from '../domain/srs-engine';
 import { newId } from '../db/schema';
 import { storedRewardThreshold } from '../domain/settings';
 
-export type Tab = 'home' | 'cards' | 'listening' | 'dictionary' | 'progress' | 'settings';
+export type Tab =
+  | 'home'
+  | 'cards'
+  | 'listening'
+  | 'quiz'
+  | 'dictionary'
+  | 'progress'
+  | 'settings';
 
 export const TAB_DEFS: { id: Tab; title: string; korean: string; icon: string }[] = [
   { id: 'home', title: 'Главная', korean: '홈', icon: '🏠' },
   { id: 'cards', title: 'Карточки', korean: '복습', icon: '🗂️' },
   { id: 'listening', title: 'Аудирование', korean: '듣기', icon: '🎧' },
+  { id: 'quiz', title: 'Квиз', korean: '퀴즈', icon: '🧠' },
   { id: 'dictionary', title: 'Словарь', korean: '단어장', icon: '📖' },
   { id: 'progress', title: 'Прогресс', korean: '통계', icon: '📊' },
   { id: 'settings', title: 'Настройки', korean: '설정', icon: '⚙️' },
@@ -32,6 +40,9 @@ function createStore() {
   let searchQuery = '';
   let selectedCategoryId: string | null = null;
 
+  let selectionActive = false;
+  let selectedIds: Set<string> = new Set();
+
   let cardsQueue: Word[] = [];
   let currentCardIndex = 0;
   let isCardFlipped = false;
@@ -46,6 +57,7 @@ function createStore() {
   let isAddWordOpen = false;
   let isScanOcrOpen = false;
   let isCreateCategoryOpen = false;
+  let isGuideOpen = false;
   let selectedWordForDetail: Word | null = null;
   let editingWord: Word | null = null;
   let prefilledKorean = '';
@@ -86,6 +98,8 @@ function createStore() {
     getCategories: () => categories,
     getSearchQuery: () => searchQuery,
     getSelectedCategoryId: () => selectedCategoryId,
+    isSelectionActive: () => selectionActive,
+    getSelectedIds: () => selectedIds,
     getCardsQueue: () => cardsQueue,
     getCardIndex: () => currentCardIndex,
     getIsCardFlipped: () => isCardFlipped,
@@ -98,6 +112,7 @@ function createStore() {
     getIsAddWordOpen: () => isAddWordOpen,
     getIsScanOcrOpen: () => isScanOcrOpen,
     getIsCreateCategoryOpen: () => isCreateCategoryOpen,
+    getIsGuideOpen: () => isGuideOpen,
     getSelectedWordForDetail: () => selectedWordForDetail,
     getEditingWord: () => editingWord,
     getPrefilledKorean: () => prefilledKorean,
@@ -116,8 +131,10 @@ function createStore() {
       emit();
       if (tab === 'cards' && cardsQueue.length === 0) {
         await this.startDueReview();
-      } else if (tab === 'listening' && quizQuestion === null) {
-        await this.loadNextQuizQuestion();
+      } else if (tab === 'listening' && (quizQuestion === null || quizQuestion.kind !== 'listen')) {
+        await this.loadNextQuizQuestion('listen');
+      } else if (tab === 'quiz' && (quizQuestion === null || quizQuestion.kind !== 'reverse')) {
+        await this.loadNextQuizQuestion('reverse');
       }
     },
 
@@ -132,6 +149,15 @@ function createStore() {
 
     async startReviewAll() {
       cardsQueue = [...allWords].sort(() => Math.random() - 0.5);
+      currentCardIndex = 0;
+      isCardFlipped = false;
+      currentTab = 'cards';
+      emit();
+      this.speakCurrentCard();
+    },
+
+    async startDifficultReview() {
+      cardsQueue = this.difficultWords().sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
       currentTab = 'cards';
@@ -165,7 +191,7 @@ function createStore() {
       speak(korean);
     },
 
-    async loadNextQuizQuestion() {
+    async loadNextQuizQuestion(kind: 'listen' | 'reverse') {
       const words = allWords;
       if (words.length < 2) {
         quizQuestion = null;
@@ -174,14 +200,46 @@ function createStore() {
       }
       const target = words[Math.floor(Math.random() * words.length)];
       const distractors = await repo.randomWords(target.id, 3);
-      const options = [...distractors.map((w) => w.translation), target.translation];
-      options.sort(() => Math.random() - 0.5);
-      const correctIdx = options.indexOf(target.translation);
+
+      let options: QuizOption[];
+      let prompt: string;
+      let promptRomaja: string | undefined;
+
+      if (kind === 'listen') {
+        options = [
+          ...distractors.map((w) => ({ text: w.translation })),
+          { text: target.translation },
+        ].sort(() => Math.random() - 0.5);
+        prompt = target.korean;
+        promptRomaja = target.romaja;
+      } else {
+        const korOptions = [target, ...distractors].map((w) => ({
+          text: w.korean,
+          romaja: w.romaja,
+        }));
+        const targetKorean = target.korean;
+        const seen = new Set<string>([targetKorean]);
+        for (const d of distractors) seen.add(d.korean);
+        // Fill if duplicates reduced count (shouldn't happen, but guard)
+        while (korOptions.length < 4 && words.length > 4) {
+          const extra = words[Math.floor(Math.random() * words.length)];
+          if (!seen.has(extra.korean)) {
+            seen.add(extra.korean);
+            korOptions.push({ text: extra.korean, romaja: extra.romaja });
+          }
+        }
+        options = korOptions.sort(() => Math.random() - 0.5);
+        prompt = target.translation;
+        promptRomaja = undefined;
+      }
+
+      const correctIdx = options.findIndex((o) => o.text === (kind === 'listen' ? target.translation : target.korean));
 
       quizQuestion = {
+        kind,
         targetWordId: target.id,
-        korean: target.korean,
-        romaja: target.romaja,
+        prompt,
+        promptRomaja,
         options,
         correctOptionIndex: correctIdx < 0 ? 0 : correctIdx,
       };
@@ -189,7 +247,7 @@ function createStore() {
       isAnswerChecked = false;
       quizReward = { rewardGifName: null, consecutiveCorrect: quizReward.consecutiveCorrect };
       emit();
-      speak(target.korean);
+      if (kind === 'listen') speak(target.korean);
     },
 
     selectQuizOption(index: number) {
@@ -228,7 +286,7 @@ function createStore() {
     },
 
     replayQuizAudio() {
-      if (quizQuestion) speak(quizQuestion.korean);
+      if (quizQuestion?.kind === 'listen') speak(quizQuestion.prompt);
     },
 
     openAddWord(korean = '', categoryId: string | null = null) {
@@ -275,6 +333,16 @@ function createStore() {
 
     closeCreateCategory() {
       isCreateCategoryOpen = false;
+      emit();
+    },
+
+    openGuide() {
+      isGuideOpen = true;
+      emit();
+    },
+
+    closeGuide() {
+      isGuideOpen = false;
       emit();
     },
 
@@ -330,6 +398,7 @@ function createStore() {
           difficulty: params.difficulty,
         };
         await repo.updateWord(updated);
+        cardsQueue = cardsQueue.map((w) => (w.id === updated.id ? updated : w));
       } else {
         const word: Word = {
           id: newId(),
@@ -350,6 +419,7 @@ function createStore() {
           lastResult: null,
           totalReviews: 0,
           correctReviews: 0,
+          masteredAt: null,
         };
         await repo.insertWord(word);
       }
@@ -389,6 +459,7 @@ function createStore() {
           lastResult: null,
           totalReviews: 0,
           correctReviews: 0,
+          masteredAt: null,
         };
         await repo.insertWord(word);
       }
@@ -401,6 +472,59 @@ function createStore() {
         selectedWordForDetail = null;
       }
       await repo.deleteWord(word.id);
+      await refresh();
+    },
+
+    toggleSelectionMode() {
+      selectionActive = !selectionActive;
+      if (!selectionActive) selectedIds = new Set();
+      emit();
+    },
+
+    toggleSelectWord(id: string) {
+      if (selectedIds.has(id)) {
+        selectedIds = new Set(selectedIds);
+        selectedIds.delete(id);
+      } else {
+        selectedIds = new Set(selectedIds);
+        selectedIds.add(id);
+      }
+      emit();
+    },
+
+    clearSelection() {
+      selectionActive = false;
+      selectedIds = new Set();
+      emit();
+    },
+
+    async assignTagsToSelected(tags: string[]) {
+      const clean = Array.from(new Set(tags.map((t) => t.trim()).filter(Boolean)));
+      if (selectedIds.size === 0) return;
+      for (const w of allWords) {
+        if (!selectedIds.has(w.id)) continue;
+        const merged = Array.from(new Set([...w.tags, ...clean]));
+        const changed =
+          merged.length !== w.tags.length || merged.some((t, i) => t !== w.tags[i]);
+        if (changed) {
+          await repo.updateWord({ ...w, tags: merged });
+        }
+      }
+      this.clearSelection();
+      await refresh();
+    },
+
+    async deleteSelection() {
+      const ids = new Set(selectedIds);
+      for (const w of allWords) {
+        if (ids.has(w.id)) {
+          if (selectedWordForDetail?.id === w.id) {
+            selectedWordForDetail = null;
+          }
+          await repo.deleteWord(w.id);
+        }
+      }
+      this.clearSelection();
       await refresh();
     },
 
@@ -424,6 +548,15 @@ function createStore() {
         .sort((a, b) => a.nextReviewAt - b.nextReviewAt);
     },
 
+    difficultWords(): Word[] {
+      return allWords.filter(
+        (w) =>
+          w.lastResult === 'AGAIN' ||
+          w.lastResult === 'HARD' ||
+          (w.totalReviews > 0 && w.easeFactor < 2.0)
+      );
+    },
+
     filteredWords(): Word[] {
       const query = searchQuery.trim().toLowerCase();
       return allWords.filter((w) => {
@@ -444,7 +577,43 @@ function createStore() {
     },
 
     masteredWordsCount(): number {
-      return allWords.filter((w) => w.repetitions >= 3).length;
+      return allWords.filter((w) => !!w.masteredAt).length;
+    },
+
+    avgDaysToMaster(): number | null {
+      const mastered = allWords.filter((w) => !!w.masteredAt);
+      if (mastered.length === 0) return null;
+      const totalDays = mastered.reduce(
+        (acc, w) => acc + Math.max(0, (w.masteredAt! - w.createdAt) / (24 * 60 * 60 * 1000)),
+        0
+      );
+      return Math.round(totalDays / mastered.length);
+    },
+
+    masteredByMonth(): { month: string; count: number }[] {
+      const now = new Date();
+      const months: { month: string; from: number; to: number; label: string }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const label = d.toLocaleString('ru-RU', { month: 'short' });
+        const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        months.push({ month: label, from: d.getTime(), to: next.getTime(), label });
+      }
+      return months.map((m) => ({
+        month: m.label,
+        count: allWords.filter((w) => !!w.masteredAt && w.masteredAt! >= m.from && w.masteredAt! < m.to)
+          .length,
+      }));
+    },
+
+    masteredByCategory(): { categoryName: string; count: number }[] {
+      const names = new Map<string, number>();
+      for (const w of allWords) {
+        if (!w.masteredAt) continue;
+        const name = w.categoryId ? this.categoryName(w.categoryId) : 'Без категории';
+        names.set(name, (names.get(name) ?? 0) + 1);
+      }
+      return Array.from(names.entries()).map(([categoryName, count]) => ({ categoryName, count }));
     },
 
     async todayReviewsCount(): Promise<number> {

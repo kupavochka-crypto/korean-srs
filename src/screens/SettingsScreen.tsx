@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStore } from '../store/AppStore';
+import { store, useStore } from '../store/AppStore';
 import { storedApiKey, saveApiKey } from '../domain/gemini-ocr';
 import {
   storedRewardThreshold,
@@ -7,7 +7,10 @@ import {
   DEFAULT_REWARD_THRESHOLD,
   storedGeminiProxy,
   saveGeminiProxy,
+  storedThemeId,
+  saveThemeId,
 } from '../domain/settings';
+import { THEMES, getTheme, portraitUrl } from '../domain/themes';
 import ThreeCirclesLogo from '../components/ThreeCirclesLogo';
 
 export default function SettingsScreen() {
@@ -15,6 +18,9 @@ export default function SettingsScreen() {
   const [apiKey, setApiKey] = useState(storedApiKey());
   const [threshold, setThreshold] = useState(storedRewardThreshold());
   const [proxyUrl, setProxyUrl] = useState(storedGeminiProxy());
+  const [themeId, setThemeId] = useState(storedThemeId());
+
+  const activeTheme = getTheme(themeId);
 
   function saveThreshold() {
     const n = Math.max(1, Math.floor(Number(threshold) || DEFAULT_REWARD_THRESHOLD));
@@ -71,8 +77,8 @@ export default function SettingsScreen() {
           autoCorrect="off"
         />
         <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '6px 0 0' }}>
-          Оставьте пустым для прямого подключения. Заполняется адресом воркера, чтобы сканирование
-          работало в вашем регионе.
+          По умолчанию уже стоит общий адрес — сканирование работает сразу. Очистите поле для
+          прямого подключения или вставьте свой адрес.
         </p>
       </div>
 
@@ -90,6 +96,60 @@ export default function SettingsScreen() {
         />
         <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '6px 0 0' }}>
           Награда показывается при каждой кратности: {threshold}, {threshold * 2}, {threshold * 3}...
+        </p>
+      </div>
+
+      <h2 className="section-title">Тема</h2>
+      <div className="theme-row">
+        {THEMES.map((t) => {
+          const selected = t.id === themeId;
+          return (
+            <button
+              key={t.id}
+              className={`theme-card ${selected ? 'active' : ''}`}
+              onClick={() => {
+                saveThemeId(t.id);
+                setThemeId(t.id);
+              }}
+            >
+              <span className="theme-emoji">{t.emoji}</span>
+              <span className="theme-name">{t.name}</span>
+              {selected && <span className="theme-check">✓</span>}
+            </button>
+          );
+        })}
+      </div>
+      <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+        Тема меняет приветствия, GIF-награды и картинки в приложении.
+      </p>
+
+      <h2 className="section-title">Тема: предпросмотр</h2>
+      <div className="card">
+        <div className="theme-preview">
+          <img
+            className="greeting-image"
+            src={portraitUrl(activeTheme.greetings[0].imageName)}
+            alt={activeTheme.greetings[0].artistName}
+          />
+          <div>
+            <p className="greeting-text-rus">{activeTheme.greetings[0].russian}</p>
+            <p className="greeting-text-kor">{activeTheme.greetings[0].korean}</p>
+            <p className="greeting-artist">{activeTheme.greetings[0].artistName}</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 className="section-title">Инструкция</h2>
+      <div className="card">
+        <button className="secondary-btn" onClick={() => store.openGuide()}>
+          <span>
+            Как установить и настроить
+            <span className="btn-kor">사용 설명</span>
+          </span>
+        </button>
+        <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '8px 0 0' }}>
+          Пошаговая инструкция для новичков: установка на телефон, подключение распознавания и
+          часто задаваемые вопросы.
         </p>
       </div>
     </div>

@@ -1,15 +1,14 @@
 import { store, useStore } from '../store/AppStore';
 import ThreeCirclesLogo from '../components/ThreeCirclesLogo';
 import CircularStat from '../components/CircularStat';
-import { BTS_GREETINGS, portraitUrl } from '../domain/bts';
+import { greetingById, portraitUrl, randomGreeting } from '../domain/themes';
 import { colors } from '../theme/colors';
 
 export default function HomeScreen() {
   useStore();
   const wordsCount = store.totalWordsCount();
   const due = store.dueWords();
-  const greeting =
-    BTS_GREETINGS.find((g) => g.id === store.getGreetingId()) ?? BTS_GREETINGS[0];
+  const greeting = greetingById(store.getGreetingId());
 
   return (
     <div>
@@ -23,11 +22,7 @@ export default function HomeScreen() {
         </div>
       </header>
 
-      <div className="greeting-card card" onClick={() => {
-        const pool = BTS_GREETINGS.filter((g) => g.id !== greeting.id);
-        const next = pool[Math.floor(Math.random() * pool.length)] ?? BTS_GREETINGS[0];
-        store.setGreeting(next.id);
-      }}>
+      <div className="greeting-card card" onClick={() => store.setGreeting(randomGreeting(greeting).id)}>
         <img className="greeting-image" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
         <div>
           <p className="greeting-text-rus">{greeting.russian}</p>
@@ -77,6 +72,20 @@ export default function HomeScreen() {
           </span>
           <span className="quick-title">Сканировать</span>
           <span className="quick-subtitle">텍스트 스캔 (OCR)</span>
+        </button>
+        <button className="quick-action card-flat" onClick={() => store.startDifficultReview()}>
+          <span className="quick-icon" style={{ background: `${colors.warning}1a`, color: colors.warning }}>
+            ⚠️
+          </span>
+          <span className="quick-title">Трудные ({store.difficultWords().length})</span>
+          <span className="quick-subtitle">어려운 단어 복습</span>
+        </button>
+        <button className="quick-action card-flat" onClick={() => store.openGuide()}>
+          <span className="quick-icon" style={{ background: `${colors.blue}1a`, color: colors.blue }}>
+            ❓
+          </span>
+          <span className="quick-title">Помощь</span>
+          <span className="quick-subtitle">사용 방법</span>
         </button>
       </div>
 

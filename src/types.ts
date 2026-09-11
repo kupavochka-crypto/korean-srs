@@ -28,6 +28,7 @@ export interface Word {
   lastResult: string | null;
   totalReviews: number;
   correctReviews: number;
+  masteredAt: number | null;
 }
 
 export interface ReviewRecord {
@@ -64,10 +65,16 @@ export interface ImportedWordDraft {
   tags: string[];
 }
 
+export interface QuizOption {
+  text: string;
+  romaja?: string;
+}
+
 export interface QuizQuestion {
+  kind: 'listen' | 'reverse';
   targetWordId: string;
-  korean: string;
-  romaja: string;
-  options: string[];
+  prompt: string;
+  promptRomaja?: string;
+  options: QuizOption[];
   correctOptionIndex: number;
 }

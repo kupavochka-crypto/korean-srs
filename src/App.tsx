@@ -3,6 +3,7 @@ import { store, useStore, TAB_DEFS, type Tab } from './store/AppStore';
 import HomeScreen from './screens/HomeScreen';
 import CardsScreen from './screens/CardsScreen';
 import ListeningScreen from './screens/ListeningScreen';
+import QuizScreen from './screens/QuizScreen';
 import DictionaryScreen from './screens/DictionaryScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import SettingsScreen from './screens/SettingsScreen';
@@ -10,12 +11,14 @@ import AddWordDialog from './components/AddWordDialog';
 import WordDetailDialog from './components/WordDetailDialog';
 import CreateCategoryDialog from './components/CreateCategoryDialog';
 import ScanOcrDialog from './components/ScanOcrDialog';
+import GuideDialog from './components/GuideDialog';
 import { loadVoices } from './domain/tts';
 
 const SCREENS: Record<Tab, () => ReactElement> = {
   home: () => <HomeScreen />,
   cards: () => <CardsScreen />,
   listening: () => <ListeningScreen />,
+  quiz: () => <QuizScreen />,
   dictionary: () => <DictionaryScreen />,
   progress: () => <ProgressScreen />,
   settings: () => <SettingsScreen />,
@@ -33,6 +36,7 @@ export default function App() {
       store.closeAddWord();
       store.closeCreateCategory();
       store.closeWordDetail();
+      store.closeGuide();
     };
   }, []);
 
@@ -54,6 +58,7 @@ export default function App() {
       {store.getIsAddWordOpen() && <AddWordDialog />}
       {store.getIsScanOcrOpen() && <ScanOcrDialog />}
       {store.getIsCreateCategoryOpen() && <CreateCategoryDialog />}
+      {store.getIsGuideOpen() && <GuideDialog />}
       {store.getSelectedWordForDetail() && <WordDetailDialog />}
 
       <nav className="tab-bar">
