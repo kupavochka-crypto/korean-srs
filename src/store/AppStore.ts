@@ -199,41 +199,39 @@ function createStore() {
         return;
       }
       const target = words[Math.floor(Math.random() * words.length)];
-      const distractors = await repo.randomWords(target.id, 3);
+      const keyOf = (w: Word) => (kind === 'listen' ? w.translation : w.korean);
+      const targetKey = keyOf(target);
+
+      const used = new Set([targetKey]);
+      const distractors: Word[] = [];
+      const pool = [...words].sort(() => Math.random() - 0.5);
+      for (const w of pool) {
+        if (w.id === target.id) continue;
+        if (used.has(keyOf(w))) continue;
+        used.add(keyOf(w));
+        distractors.push(w);
+        if (distractors.length === 3) break;
+      }
 
       let options: QuizOption[];
       let prompt: string;
       let promptRomaja: string | undefined;
 
       if (kind === 'listen') {
-        options = [
-          ...distractors.map((w) => ({ text: w.translation })),
-          { text: target.translation },
-        ].sort(() => Math.random() - 0.5);
+        options = [{ text: target.translation }];
+        distractors.forEach((d) => options.push({ text: d.translation }));
+        options.sort(() => Math.random() - 0.5);
         prompt = target.korean;
         promptRomaja = target.romaja;
       } else {
-        const korOptions = [target, ...distractors].map((w) => ({
-          text: w.korean,
-          romaja: w.romaja,
-        }));
-        const targetKorean = target.korean;
-        const seen = new Set<string>([targetKorean]);
-        for (const d of distractors) seen.add(d.korean);
-        // Fill if duplicates reduced count (shouldn't happen, but guard)
-        while (korOptions.length < 4 && words.length > 4) {
-          const extra = words[Math.floor(Math.random() * words.length)];
-          if (!seen.has(extra.korean)) {
-            seen.add(extra.korean);
-            korOptions.push({ text: extra.korean, romaja: extra.romaja });
-          }
-        }
-        options = korOptions.sort(() => Math.random() - 0.5);
+        options = [{ text: target.korean, romaja: target.romaja }];
+        distractors.forEach((d) => options.push({ text: d.korean, romaja: d.romaja }));
+        options.sort(() => Math.random() - 0.5);
         prompt = target.translation;
         promptRomaja = undefined;
       }
 
-      const correctIdx = options.findIndex((o) => o.text === (kind === 'listen' ? target.translation : target.korean));
+      const correctIdx = options.findIndex((o) => o.text === targetKey);
 
       quizQuestion = {
         kind,
