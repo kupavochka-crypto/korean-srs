@@ -1,5 +1,6 @@
 import type { ScannedWord } from '../types';
 import { containsHangul } from './romaja';
+import { storedGeminiProxy } from './settings';
 
 const MODEL_CANDIDATES = [
   'gemini-3.8-flash',
@@ -253,17 +254,27 @@ async function generateContent(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45000);
 
+  const proxyUrl = storedGeminiProxy();
   let response: Response;
   try {
-    response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
+    if (proxyUrl) {
+      response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, key: apiKey, body }),
+        signal: controller.signal,
+      });
+    } else {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+    }
   } catch {
     clearTimeout(timeout);
     throw invalidResponseError();

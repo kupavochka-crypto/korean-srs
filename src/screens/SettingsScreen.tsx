@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { useStore } from '../store/AppStore';
 import { storedApiKey, saveApiKey } from '../domain/gemini-ocr';
-import { storedRewardThreshold, saveRewardThreshold, DEFAULT_REWARD_THRESHOLD } from '../domain/settings';
+import {
+  storedRewardThreshold,
+  saveRewardThreshold,
+  DEFAULT_REWARD_THRESHOLD,
+  storedGeminiProxy,
+  saveGeminiProxy,
+} from '../domain/settings';
 import ThreeCirclesLogo from '../components/ThreeCirclesLogo';
 
 export default function SettingsScreen() {
   useStore();
   const [apiKey, setApiKey] = useState(storedApiKey());
   const [threshold, setThreshold] = useState(storedRewardThreshold());
+  const [proxyUrl, setProxyUrl] = useState(storedGeminiProxy());
 
   function saveThreshold() {
     const n = Math.max(1, Math.floor(Number(threshold) || DEFAULT_REWARD_THRESHOLD));
@@ -48,6 +55,24 @@ export default function SettingsScreen() {
           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
             AI Studio
           </a>
+        </p>
+      </div>
+
+      <h2 className="section-title">Обход ограничений региона</h2>
+      <div className="card">
+        <label className="form-label">Адрес прокси (Cloudflare Worker)</label>
+        <input
+          className="form-input"
+          value={proxyUrl}
+          onChange={(e) => setProxyUrl(e.target.value)}
+          onBlur={() => saveGeminiProxy(proxyUrl)}
+          placeholder="https://korean-srs-gemini-proxy.ваш-субдомен.workers.dev"
+          autoCapitalize="off"
+          autoCorrect="off"
+        />
+        <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+          Оставьте пустым для прямого подключения. Заполняется адресом воркера, чтобы сканирование
+          работало в вашем регионе.
         </p>
       </div>
 
