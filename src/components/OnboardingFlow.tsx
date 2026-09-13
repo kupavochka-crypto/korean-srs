@@ -1,27 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
 import WooriLogo from './WooriLogo';
 import { saveOnboardingCompleted, storedDailyWordGoal, saveDailyWordGoal } from '../domain/settings';
+import { GUIDE_CHARACTER } from '../domain/guide-character';
 import { t } from '../domain/i18n';
-import WIcon from '../ui/WIcon';
 
-const STEPS = [
-  'welcome',
-  'srs',
-  'motivation',
-  'cards',
-  'quiz',
-  'listening',
-  'content',
-  'goal',
-] as const;
+const STEPS = ['intro', 'daily', 'play', 'world', 'themes', 'goal'] as const;
+
+function CharacterStory({ children }: { children: ReactNode }) {
+  return (
+    <div className="onboarding-step">
+      <div className="onboard-character">
+        <span className="onboard-avatar">
+          <WooriLogo size={48} />
+        </span>
+        <span className="onboard-character-name">{GUIDE_CHARACTER.name}</span>
+      </div>
+      <div className="onboard-speech">{children}</div>
+    </div>
+  );
+}
+
+function StoryParagraph({ leadKey, bodyKey, hookKey }: { leadKey: string; bodyKey: string; hookKey?: string }) {
+  return (
+    <>
+      <p className="onboard-speech-lead">{t(leadKey)}</p>
+      <p className="onboard-speech-body">{t(bodyKey)}</p>
+      {hookKey ? <p className="onboard-story-accent">{t(hookKey)}</p> : null}
+    </>
+  );
+}
 
 export default function OnboardingFlow() {
   useStore();
   const open = store.getIsOnboardingOpen();
-  const skipWelcome = store.getOnboardingSkipWelcome();
-  const [stepIdx, setStepIdx] = useState(skipWelcome ? 1 : 0);
+  const [stepIdx, setStepIdx] = useState(0);
   const [goal, setGoal] = useState(storedDailyWordGoal());
+
+  useEffect(() => {
+    if (open) setStepIdx(0);
+  }, [open]);
 
   if (!open) return null;
 
@@ -46,17 +64,6 @@ export default function OnboardingFlow() {
     setStepIdx(stepIdx + 1);
   }
 
-  function tryMode(mode: 'cards' | 'quiz' | 'listening', sub?: string) {
-    saveOnboardingCompleted(true);
-    store.closeOnboarding();
-    if (mode === 'cards') store.startDueReview();
-    else if (mode === 'quiz') {
-      store.selectTab('quiz');
-      if (sub === 'write') store.loadNextQuizQuestion('write');
-      else store.loadNextQuizQuestion('reverse');
-    } else store.selectTab('listening');
-  }
-
   return (
     <div className="overlay onboarding-overlay">
       <div className="onboarding-sheet">
@@ -66,87 +73,91 @@ export default function OnboardingFlow() {
           ))}
         </div>
 
-        {step === 'welcome' && (
-          <div className="onboarding-step center">
-            <WooriLogo size={72} />
-            <h2>{t('onboard.welcome')}</h2>
-            <p className="muted">{t('onboard.welcomeDesc')}</p>
-          </div>
+        {step === 'intro' && (
+          <CharacterStory>
+            <p className="onboard-speech-lead">{t('onboard.story.intro.lead')}</p>
+            <div className="onboard-name-etymology">
+              <p className="onboard-name-etymology-title">{t('onboard.story.intro.nameTitle')}</p>
+              <p className="onboard-name-etymology-body">{t('onboard.story.intro.nameBody')}</p>
+            </div>
+            <p className="onboard-speech-body">{t('onboard.story.intro.body')}</p>
+            <p className="onboard-story-accent">{t('onboard.story.intro.hook')}</p>
+          </CharacterStory>
         )}
 
-        {step === 'srs' && (
-          <div className="onboarding-step">
-            <h2>{t('onboard.srs')}</h2>
-            <p className="muted">{t('onboard.srsDesc')}</p>
+        {step === 'daily' && (
+          <CharacterStory>
+            <StoryParagraph
+              leadKey="onboard.story.daily.lead"
+              bodyKey="onboard.story.daily.body"
+              hookKey="onboard.story.daily.hook"
+            />
             <div className="onboard-ratings">
-              {['again', 'hard', 'good', 'easy'].map((r) => (
-                <span key={r} className="badge">{t('onboard.rating.' + r)}</span>
+              {(['again', 'hard', 'good', 'easy'] as const).map((r) => (
+                <span key={r} className="badge">
+                  {t('onboard.rating.' + r)}
+                </span>
               ))}
             </div>
-          </div>
+          </CharacterStory>
         )}
 
-        {step === 'motivation' && (
-          <div className="onboarding-step">
-            <h2>{t('onboard.motivation')}</h2>
-            <p className="muted">{t('onboard.motivationDesc')}</p>
-          </div>
+        {step === 'play' && (
+          <CharacterStory>
+            <StoryParagraph
+              leadKey="onboard.story.play.lead"
+              bodyKey="onboard.story.play.body"
+              hookKey="onboard.story.play.hook"
+            />
+          </CharacterStory>
         )}
 
-        {step === 'cards' && (
-          <div className="onboarding-step">
-            <span className="onboard-icon"><WIcon name="stack" size={32} /></span>
-            <h2>{t('onboard.cards')}</h2>
-            <p className="muted">{t('onboard.cardsDesc')}</p>
-            <button className="secondary-btn" onClick={() => tryMode('cards')}>{t('onboard.try')}</button>
-          </div>
-        )}
-
-        {step === 'quiz' && (
-          <div className="onboarding-step">
-            <span className="onboard-icon"><WIcon name="patch-question" size={32} /></span>
-            <h2>{t('onboard.quiz')}</h2>
-            <p className="muted">{t('onboard.quizDesc')}</p>
-            <div className="flow-layout">
-              <button className="secondary-btn" onClick={() => tryMode('quiz', 'reverse')}>{t('onboard.tryReverse')}</button>
-              <button className="secondary-btn" onClick={() => tryMode('quiz', 'write')}>{t('onboard.tryWrite')}</button>
+        {step === 'world' && (
+          <CharacterStory>
+            <p className="onboard-speech-lead">{t('onboard.story.world.lead')}</p>
+            <p className="onboard-speech-body">{t('onboard.story.world.body')}</p>
+            <div className="onboard-name-etymology">
+              <p className="onboard-name-etymology-title">{t('onboard.story.world.dictTitle')}</p>
+              <p className="onboard-name-etymology-body">{t('onboard.story.world.dictBody')}</p>
+              <p className="onboard-name-etymology-body onboard-name-etymology-body--last">
+                {t('onboard.story.world.dictSoon')}
+              </p>
             </div>
-          </div>
+            <p className="onboard-story-accent">{t('onboard.story.world.hook')}</p>
+          </CharacterStory>
         )}
 
-        {step === 'listening' && (
-          <div className="onboarding-step">
-            <span className="onboard-icon"><WIcon name="headphones" size={32} /></span>
-            <h2>{t('onboard.listening')}</h2>
-            <p className="muted">{t('onboard.listeningDesc')}</p>
-            <button className="secondary-btn" onClick={() => tryMode('listening')}>{t('onboard.try')}</button>
-          </div>
-        )}
-
-        {step === 'content' && (
-          <div className="onboarding-step">
-            <h2>{t('onboard.content')}</h2>
-            <p className="muted">{t('onboard.contentDesc')}</p>
-          </div>
+        {step === 'themes' && (
+          <CharacterStory>
+            <p className="onboard-speech-lead">{t('onboard.story.themes.lead')}</p>
+            <div className="onboard-name-etymology">
+              <p className="onboard-name-etymology-title">{t('onboard.story.world.themesTitle')}</p>
+              <p className="onboard-name-etymology-body">{t('onboard.story.world.themesBody')}</p>
+              <p className="onboard-name-etymology-body onboard-name-etymology-body--last">
+                {t('onboard.story.world.themesTail')}
+              </p>
+            </div>
+          </CharacterStory>
         )}
 
         {step === 'goal' && (
-          <div className="onboarding-step">
-            <h2>{t('onboard.goal')}</h2>
-            <p className="muted">{t('onboard.goalDesc')}</p>
+          <CharacterStory>
+            <StoryParagraph leadKey="onboard.story.goal.lead" bodyKey="onboard.story.goal.body" />
             <input
-              className="form-input"
+              className="form-input onboard-goal-input"
               type="number"
               min={1}
               value={goal}
               onChange={(e) => setGoal(Math.max(1, Number(e.target.value) || 1))}
             />
-          </div>
+          </CharacterStory>
         )}
 
         <div className="onboarding-footer">
-          <button className="text-btn" onClick={skip}>{t('onboard.skip')}</button>
-          <button className="primary-btn" onClick={next}>
+          <button type="button" className="text-btn" onClick={skip}>
+            {t('onboard.skip')}
+          </button>
+          <button type="button" className="primary-btn" onClick={next}>
             {stepIdx >= STEPS.length - 1 ? t('onboard.start') : t('common.next')}
           </button>
         </div>

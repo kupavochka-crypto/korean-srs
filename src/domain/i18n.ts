@@ -633,47 +633,96 @@ const STRINGS: Dict = {
   },
   'settings.guideModes': { ru: 'Режимы обучения', en: 'Learning modes' },
   'settings.guideModesHint': {
-    ru: 'Единый онбординг: карточки, квиз, аудирование, цель на день.',
-    en: 'Unified onboarding: cards, quiz, listening, daily goal.',
+    ru: 'Полное знакомство с Ури — с самого начала.',
+    en: 'Full intro with Uri — from the very beginning.',
   },
 
-  'onboard.welcome': { ru: 'Добро пожаловать в Woori', en: 'Welcome to Woori' },
-  'onboard.welcomeDesc': {
-    ru: 'Учите слова с интервалами — возвращайтесь каждый день.',
-    en: 'Learn words with spaced repetition — come back every day.',
+  'onboard.story.intro.lead': { ru: 'Привет, я — Ури!', en: "Hi, I'm Uri!" },
+  'onboard.story.intro.nameTitle': { ru: 'Woori · 우리', en: 'Woori · 우리' },
+  'onboard.story.intro.nameBody': {
+    ru: 'По-корейски 우리 — это «мы». Не «я зубрю один», а учимся вместе: твои слова, твой прогресс, наша команда.',
+    en: 'In Korean, 우리 means "we". Not studying alone — we learn together: your words, your progress, our team.',
   },
-  'onboard.srs': { ru: 'Карточки SRS', en: 'SRS cards' },
-  'onboard.srsDesc': {
-    ru: 'Переворачивайте карточку и честно оценивайте ответ.',
-    en: 'Flip the card and honestly rate your answer.',
+  'onboard.story.intro.body': {
+    ru: 'Я помогаю учить корейский и китайский — добавляешь слова, повторяешь вовремя, играешь в режимах, а я слежу, чтобы всё шло весело. Вот, что я умею…',
+    en: 'I help you learn Korean and Chinese — add words, review on time, play in different modes, and I keep things fun. Here is what we can do…',
   },
+  'onboard.story.intro.hook': {
+    ru: 'Сейчас за минуту расскажу подробнее — поехали?',
+    en: 'Give me a minute to walk you through it — ready?',
+  },
+
+  'onboard.story.daily.lead': { ru: 'Начнём с главного — карточки!', en: "Let's start with the basics — flashcards!" },
+  'onboard.story.daily.body': {
+    ru: 'Каждый день переворачиваешь карточку, вспоминаешь перевод и честно говоришь, как было. Я сама подскажу, когда повторить: забыл — увидишь скоро, легко — подожду подольше.',
+    en: 'Every day you flip a card, recall the translation, and rate yourself honestly. I schedule the next review: forgot — see it soon, easy — wait longer.',
+  },
+  'onboard.story.daily.hook': {
+    ru: 'Заглядывай каждый день — так слова приживаются.',
+    en: 'Drop in every day — that is how words stick.',
+  },
+
+  'onboard.story.play.lead': { ru: 'Когда слова подружатся с тобой — играем!', en: 'Once words feel familiar — we play!' },
+  'onboard.story.play.body': {
+    ru: 'Слушай — услышишь слово и выберешь перевод. Квиз — перевод на экране, выбираешь ответ. Напиши — сам пишешь слово или иероглиф (для китайского — с pinyin и тонами). Три режима, один заряд.',
+    en: 'Listen — hear a word and pick the translation. Quiz — translation on screen, pick the answer. Write — type the word or hanzi yourself (Chinese includes pinyin and tones). Three modes, one energy boost.',
+  },
+  'onboard.story.play.hook': {
+    ru: 'Попробуешь все — станет ещё интереснее.',
+    en: 'Try them all — it gets more fun.',
+  },
+
+  'onboard.story.world.lead': { ru: 'А вокруг словаря — целый мир!', en: 'Around your dictionary — a whole world!' },
+  'onboard.story.world.body': {
+    ru: 'Коллекции, песни, скан учебника — и фразы из K-pop и C-drama. Выполняешь цель дня. Два профиля — корейский и китайский — каждый со своим словарём.',
+    en: 'Collections, songs, textbook scans — and K-pop and C-drama phrases. Hit your daily goal. Two profiles — Korean and Chinese — each with its own dictionary.',
+  },
+  'onboard.story.world.dictTitle': {
+    ru: 'Словарь и категории',
+    en: 'Dictionary and categories',
+  },
+  'onboard.story.world.dictBody': {
+    ru: 'Добавляй слова вручную или из коллекций и песен — и складывай в категории. Так проще находить нужное, когда приходит время повторять.',
+    en: 'Add words manually or from collections and songs — and organize them into categories. Easier to find what you need when it is time to review.',
+  },
+  'onboard.story.world.dictSoon': {
+    ru: 'Скоро можно будет загружать целые наборы слов из файла.',
+    en: 'Soon you will be able to upload whole word sets from a file.',
+  },
+  'onboard.story.world.themesTitle': {
+    ru: 'Мотивация · твоя группа',
+    en: 'Motivation · your group',
+  },
+  'onboard.story.world.themesBody': {
+    ru: 'Копишь HP за учёбу, выполняешь цели — и открываешь наставников. Выбери тему BTS или Stray Kids — и наставники, приветствия и награды будут от твоей группы.',
+    en: 'Earn HP as you learn, hit your goals — and unlock mentors. Pick BTS or Stray Kids — mentors, greetings, and rewards come from your group.',
+  },
+  'onboard.story.world.themesTail': {
+    ru: 'С любимой командой учить корейский (и китайский!) куда интереснее.',
+    en: 'Learning Korean (and Chinese!) is more interesting with your favorite group.',
+  },
+  'onboard.story.world.hook': {
+    ru: 'Чем больше учишь — тем интереснее становится.',
+    en: 'The more you learn, the more there is to explore.',
+  },
+
+  'onboard.story.themes.lead': {
+    ru: 'Ещё кое-что, что делает учёбу веселее.',
+    en: 'One more thing that makes learning fun.',
+  },
+
+  'onboard.story.goal.lead': { ru: 'Последнее — твой темп.', en: 'Last thing — your pace.' },
+  'onboard.story.goal.body': {
+    ru: 'Сколько новых слов в день тебе комфортно? Я запомню и буду подсказывать.',
+    en: 'How many new words per day feels right? I will remember and nudge you gently.',
+  },
+
   'onboard.rating.again': { ru: 'Забыл', en: 'Again' },
   'onboard.rating.hard': { ru: 'Трудно', en: 'Hard' },
   'onboard.rating.good': { ru: 'Хорошо', en: 'Good' },
   'onboard.rating.easy': { ru: 'Легко', en: 'Easy' },
-  'onboard.motivation': { ru: 'HP и серии', en: 'HP and streaks' },
-  'onboard.motivationDesc': {
-    ru: 'Зарабатывайте HP, выполняйте миссии и не прерывайте серию.',
-    en: 'Earn HP, complete missions and keep your streak.',
-  },
-  'onboard.cards': { ru: 'Режим: карточки', en: 'Mode: cards' },
-  'onboard.cardsDesc': { ru: 'Due, все, трудные или по категории.', en: 'Due, all, difficult or by category.' },
-  'onboard.quiz': { ru: 'Режим: квиз', en: 'Mode: quiz' },
-  'onboard.quizDesc': { ru: 'Listen, reverse и write — напишите по переводу.', en: 'Listen, reverse and write by translation.' },
-  'onboard.tryReverse': { ru: 'Квиз', en: 'Quiz' },
-  'onboard.tryWrite': { ru: 'Write', en: 'Write' },
-  'onboard.listening': { ru: 'Аудирование', en: 'Listening' },
-  'onboard.listeningDesc': { ru: 'Услышьте слово — выберите перевод.', en: 'Hear the word — pick the translation.' },
-  'onboard.content': { ru: 'Контент', en: 'Content' },
-  'onboard.contentDesc': {
-    ru: 'Паки, песни, челлендж дня и фразы из K-pop.',
-    en: 'Packs, songs, daily challenge and K-pop phrases.',
-  },
-  'onboard.goal': { ru: 'Дневная цель', en: 'Daily goal' },
-  'onboard.goalDesc': { ru: 'Сколько новых слов в день?', en: 'How many new words per day?' },
-  'onboard.try': { ru: 'Попробовать', en: 'Try it' },
   'onboard.skip': { ru: 'Пропустить', en: 'Skip' },
-  'onboard.start': { ru: 'Начать', en: 'Start' },
+  'onboard.start': { ru: 'Поехали!', en: "Let's go!" },
 
   'phrases.title': { ru: 'Фразы', en: 'Phrases' },
   'phrases.desc': {

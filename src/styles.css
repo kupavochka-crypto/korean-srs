@@ -3416,6 +3416,103 @@ select:focus-visible,
   flex: 1;
 }
 
+.onboard-character {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.onboard-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--pink-soft);
+  border: 1px solid var(--pink-border);
+  flex-shrink: 0;
+}
+
+.onboard-character-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.onboard-speech {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+.onboard-speech-lead {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.onboard-speech-body {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.onboard-speech-body:last-child,
+.onboard-story-accent:last-child {
+  margin-bottom: 0;
+}
+
+.onboard-story-accent {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--red);
+  line-height: 1.45;
+}
+
+.onboard-name-etymology {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--pink-border);
+  border-radius: var(--radius-md);
+}
+
+.onboard-name-etymology-title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--red);
+  letter-spacing: 0.02em;
+}
+
+.onboard-name-etymology-body {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.onboard-name-etymology-body--last {
+  margin-bottom: 0;
+}
+
+.onboard-speech .onboard-name-etymology {
+  margin: 12px 0;
+}
+
+.onboard-goal-input {
+  margin-top: 14px;
+  max-width: 120px;
+}
+
 .onboarding-footer {
   display: flex;
   justify-content: space-between;
@@ -3435,7 +3532,11 @@ select:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
+}
+
+.onboard-speech .onboard-ratings {
+  margin-bottom: 0;
 }
 
 .translate-overlay {

@@ -439,7 +439,7 @@ export default function SettingsScreen() {
       <div className="settings-page">
         <SettingsDetail title={t('settings.guide')} onBack={() => setView('main')}>
           <div className="card">
-            <button className="secondary-btn" onClick={() => store.openOnboarding(true)}>
+            <button className="secondary-btn" onClick={() => store.openOnboarding(false)}>
               <span>
                 {t('settings.guideModes')}
                 <span className="btn-kor">{tL('btn.guideModes', learningLanguage)}</span>
