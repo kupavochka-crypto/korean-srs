@@ -258,17 +258,19 @@ textarea {
 }
 
 @media (max-width: 520px) {
-  .tab-label {
-    display: none;
+  .tab-item {
+    gap: 1px;
+    padding: 6px 0 4px;
   }
 
-  .tab-item {
-    gap: 0;
-    padding: 10px 0 6px;
+  .tab-label {
+    font-size: 8px;
+    line-height: 1.05;
+    max-width: 100%;
   }
 
   .tab-item .tab-icon {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .tab-badge {
@@ -3529,13 +3531,16 @@ select:focus-visible,
 }
 
 @media (max-width: 390px) {
-  .tab-label,
   .tab-kor {
     display: none;
   }
 
+  .tab-label {
+    font-size: 7px;
+  }
+
   .tab-item {
-    padding: 8px 4px;
+    padding: 6px 2px 4px;
   }
 
   .dup-compare {
