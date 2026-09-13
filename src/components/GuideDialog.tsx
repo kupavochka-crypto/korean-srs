@@ -1,7 +1,8 @@
-import { store } from '../store/AppStore';
+import { store, useStore } from '../store/AppStore';
 import { activeTheme } from '../domain/themes';
 import { DEFAULT_GEMINI_PROXY_URL } from '../domain/settings';
 import { t } from '../domain/i18n';
+import { tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 
 interface Step {
@@ -36,7 +37,9 @@ function Section({
 }
 
 export default function GuideDialog() {
+  useStore();
   const theme = activeTheme();
+  const lang = store.getLearningLanguage();
 
   return (
     <div className="overlay" onClick={() => store.closeGuide()}>
@@ -107,7 +110,7 @@ export default function GuideDialog() {
         <button className="primary-btn mt20" onClick={() => store.closeGuide()}>
           <span>
             {t('guide.ok')}
-            <span className="btn-kor">알겠어요</span>
+            <span className="btn-kor">{tL('btn.guideOk', lang)}</span>
           </span>
         </button>
       </div>

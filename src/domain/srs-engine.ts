@@ -1,10 +1,12 @@
 export type SrsRatingValue = 1 | 2 | 3 | 4;
 
+export type SrsRatingName = 'AGAIN' | 'HARD' | 'GOOD' | 'EASY';
+
 export interface SrsRatingDef {
   value: SrsRatingValue;
   label: string;
   koreanLabel: string;
-  name: string;
+  name: SrsRatingName;
 }
 
 export const SRS_RATINGS: SrsRatingDef[] = [

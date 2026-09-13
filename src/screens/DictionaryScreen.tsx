@@ -4,6 +4,7 @@ import WordCard from '../components/WordCard';
 import TagInput from '../components/TagInput';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
+import { tabSubtitle } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 
 export default function DictionaryScreen() {
@@ -20,7 +21,7 @@ export default function DictionaryScreen() {
 
   return (
     <div>
-      <ScreenHeader title={t('tab.dictionary')} subtitle={lang === 'zh' ? '词典' : '단어장'} />
+      <ScreenHeader title={t('tab.dictionary')} subtitle={tabSubtitle('dictionary', lang)} />
       <div className="search-row">
         <input
           className="search-input"

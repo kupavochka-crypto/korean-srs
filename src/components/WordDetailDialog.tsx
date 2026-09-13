@@ -1,7 +1,7 @@
 import { store, useStore } from '../store/AppStore';
-import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
+import { showReadingEnabled, wordLanguage } from '../domain/language';
+import ChineseReading from './ChineseReading';
 import { formatSource } from '../domain/sources';
-import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
@@ -10,10 +10,8 @@ export default function WordDetailDialog() {
   const word = store.getSelectedWordForDetail();
   if (!word) return null;
 
-  const category = store.categoryFor(word.categoryId);
   const source = store.sourceFor(word.sourceId);
   const isZh = wordLanguage(word) === 'zh';
-  const reading = displayReading(word);
   const status = word.repetitions >= 3
     ? t('detail.mastered')
     : word.nextReviewAt <= Date.now()
@@ -31,12 +29,23 @@ export default function WordDetailDialog() {
         </div>
 
         <div className="word-meta" style={{ marginBottom: 16 }}>
-          {category && (
-            <span className="badge badge-cat" style={{ background: colorFromHex(category.colorHex) }}>
-              {category.emoji} {category.name}
-            </span>
-          )}
-          <span className="badge">{t('word.level')} {word.difficulty}</span>
+          <label className="form-label">{t('add.category')}</label>
+          <select
+            className="form-input"
+            value={word.categoryId ?? ''}
+            onChange={(e) => {
+              const next = e.target.value || null;
+              void store.updateWordCategory(word.id, next);
+            }}
+          >
+            <option value="">{t('progress.noCategory')}</option>
+            {store.getCategories().map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.emoji} {c.name}
+              </option>
+            ))}
+          </select>
+          <span className="badge mt8">{t('word.level')} {word.difficulty}</span>
           {source && <span className="badge">{formatSource(source)}</span>}
           {word.tags.map((t) => (
             <span className="badge" key={t}>
@@ -56,10 +65,13 @@ export default function WordDetailDialog() {
             <WIcon name="volume-up" />
           </button>
         </div>
-        {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
-          <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: 0 }}>
-            {reading}
-          </p>
+        {isZh ? (
+          <ChineseReading word={word} layout="detail" />
+        ) : (
+          showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) &&
+          word.romaja && (
+            <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: 0 }}>{word.romaja}</p>
+          )
         )}
 
         <div className="card-flat mt16" style={{ padding: 16 }}>

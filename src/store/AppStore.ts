@@ -90,15 +90,15 @@ export type Tab =
   | 'gallery'
   | 'settings';
 
-export const TAB_DEFS: { id: Tab; title: string; korean: string; icon: string }[] = [
-  { id: 'home', title: 'Главная', korean: '홈', icon: 'house' },
-  { id: 'cards', title: 'Карточки', korean: '복습', icon: 'stack' },
-  { id: 'listening', title: 'Аудирование', korean: '듣기', icon: 'headphones' },
-  { id: 'quiz', title: 'Квиз', korean: '퀴즈', icon: 'patch-question' },
-  { id: 'dictionary', title: 'Словарь', korean: '단어장', icon: 'book' },
-  { id: 'gallery', title: 'Коллекция', korean: '컬렉션', icon: 'images' },
-  { id: 'progress', title: 'Прогресс', korean: '통계', icon: 'bar-chart' },
-  { id: 'settings', title: 'Настройки', korean: '설정', icon: 'gear' },
+export const TAB_DEFS: { id: Tab; title: string; icon: string }[] = [
+  { id: 'home', title: 'Главная', icon: 'house' },
+  { id: 'cards', title: 'Карточки', icon: 'stack' },
+  { id: 'listening', title: 'Слушай', icon: 'headphones' },
+  { id: 'quiz', title: 'Напиши', icon: 'patch-question' },
+  { id: 'dictionary', title: 'Словарь', icon: 'book' },
+  { id: 'gallery', title: 'Достижения', icon: 'images' },
+  { id: 'progress', title: 'Прогресс', icon: 'bar-chart' },
+  { id: 'settings', title: 'Настройки', icon: 'gear' },
 ];
 
 const COMPLETED_PACKS_KEY = 'completed_pack_ids';
@@ -383,7 +383,8 @@ function createStore() {
 
     getTab: () => currentTab,
     getWords: () => wordsForProfile(),
-    getCategories: () => categories,
+    getCategories: () =>
+      categories.filter((c) => (c.language ?? 'ko') === learningLanguage),
     getSources: () => sources,
     getXp: () => progression.xp,
     getAchievements: () => achievements,
@@ -597,6 +598,7 @@ function createStore() {
       if (currentCardIndex >= cardsQueue.length) return;
       const word = cardsQueue[currentCardIndex];
       await repo.recordReview(word, rating);
+      await repo.recordPracticeEvent(word.id, 'srs', rating >= 2);
       currentCardIndex += 1;
       isCardFlipped = false;
       await refresh();
@@ -723,6 +725,7 @@ function createStore() {
         if (word) await repo.recordReview(word, 2);
         await refresh();
       }
+      await repo.recordPracticeEvent(q.targetWordId, 'quiz_write', isCorrect);
       emit();
     },
 
@@ -739,6 +742,9 @@ function createStore() {
       quizTotalCount += 1;
       const isCorrect = selectedOptionIndex === q.correctOptionIndex;
       if (isCorrect) quizScore += 1;
+      const practiceMode =
+        q.kind === 'listen' ? 'quiz_listen' : q.kind === 'reverse' ? 'quiz_reverse' : 'quiz_write';
+      void repo.recordPracticeEvent(q.targetWordId, practiceMode, isCorrect);
       const next = { ...quizReward };
       if (isCorrect) {
         next.consecutiveCorrect += 1;
@@ -943,9 +949,11 @@ function createStore() {
         return;
       }
 
+      const packLang = pack.language ?? 'ko';
       const category =
-        categories.find((c) => c.name === pack.title) ??
-        (await repo.findCategoryByName(pack.title));
+        categories.find(
+          (c) => c.name === pack.title && (c.language ?? 'ko') === packLang
+        ) ?? (await repo.findCategoryByName(pack.title, packLang));
 
       const now = Date.now();
       const categoryPool = category
@@ -970,8 +978,13 @@ function createStore() {
     async addPack(packId: string) {
       const pack = packs.find((p) => p.id === packId);
       if (!pack) return;
-      const category = await repo.findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
       const packLang = pack.language ?? 'ko';
+      const category = await repo.findOrCreateCategory(
+        pack.title,
+        pack.emoji,
+        pack.colorHex,
+        packLang
+      );
       const payloads: DuplicateWordPayload[] = pack.wordDefs.map((def) => {
         const reading =
           packLang === 'zh'
@@ -1232,7 +1245,7 @@ function createStore() {
       const trimmed = soundName.trim();
       if (!trimmed) return 0;
 
-      const category = await repo.findOrCreateCategory(trimmed);
+      const category = await repo.findOrCreateCategory(trimmed, '🎵', '#E53935', learningLanguage);
       const source = await repo.findOrCreateSongSource(trimmed);
       const payloads: DuplicateWordPayload[] = drafts
         .filter((d) => d.korean.trim() && d.translation.trim())
@@ -1331,6 +1344,7 @@ function createStore() {
         emoji: emoji.trim(),
         createdAt: Date.now(),
         isDefault: false,
+        language: learningLanguage,
       });
       isCreateCategoryOpen = false;
       await refresh();
@@ -1416,6 +1430,35 @@ function createStore() {
 
     async todayReviewsCount(): Promise<number> {
       return repo.todayReviewsCount(learningLanguage);
+    },
+
+    async todayModeCounts(): Promise<repo.ModeDayCounts> {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return repo.modeCountsForDate(`${y}-${m}-${d}`, learningLanguage);
+    },
+
+    async yesterdayModeCounts(): Promise<repo.ModeDayCounts> {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const y = yesterday.getFullYear();
+      const m = String(yesterday.getMonth() + 1).padStart(2, '0');
+      const d = String(yesterday.getDate()).padStart(2, '0');
+      return repo.modeCountsForDate(`${y}-${m}-${d}`, learningLanguage);
+    },
+
+    async updateWordCategory(wordId: string, categoryId: string | null) {
+      const word = allWords.find((w) => w.id === wordId);
+      if (!word) return;
+      await repo.updateWord({ ...word, categoryId });
+      if (categoryId) pushRecentCategoryIdFor(learningLanguage, categoryId);
+      if (selectedWordForDetail?.id === wordId) {
+        selectedWordForDetail = { ...word, categoryId };
+      }
+      await refresh();
+      emit();
     },
 
     async streakCount(): Promise<number> {

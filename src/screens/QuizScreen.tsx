@@ -2,6 +2,7 @@ import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
+import { tabSubtitle, tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 
 export default function QuizScreen() {
@@ -13,11 +14,12 @@ export default function QuizScreen() {
   const total = store.getQuizTotalCount();
   const reward = store.getQuizReward();
   const writeInput = store.getWriteInput();
+  const lang = store.getLearningLanguage();
 
   if (!question) {
     return (
       <div>
-        <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+        <ScreenHeader title={t('tab.quiz')} subtitle={tabSubtitle('quiz', lang)} />
         <div className="cards-done center">
           <div className="empty-state-icon">
             <WIcon name="patch-question" size={48} style={{ color: 'var(--red)' }} />
@@ -63,7 +65,7 @@ export default function QuizScreen() {
 
     return (
       <div>
-        <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+        <ScreenHeader title={t('tab.quiz')} subtitle={tabSubtitle('quiz', lang)} />
         {modeSwitcher}
         <div className="card quiz-card" style={{ marginBottom: 16 }}>
           <p className="quiz-prompt-label">{t('quiz.writePrompt')}</p>
@@ -93,7 +95,7 @@ export default function QuizScreen() {
               <button className="primary-btn mt20" onClick={() => store.loadNextQuizQuestion('write')}>
                 <span>
                   {t('common.next')}
-                  <span className="btn-kor">다음</span>
+                  <span className="btn-kor">{tL('btn.next', lang)}</span>
                 </span>
               </button>
             </>
@@ -106,7 +108,7 @@ export default function QuizScreen() {
             >
               <span>
                 {t('common.check')}
-                <span className="btn-kor">확인</span>
+                <span className="btn-kor">{tL('btn.check', lang)}</span>
               </span>
             </button>
           )}
@@ -122,7 +124,7 @@ export default function QuizScreen() {
 
   return (
     <div>
-      <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+      <ScreenHeader title={t('tab.quiz')} subtitle={tabSubtitle('quiz', lang)} />
       {modeSwitcher}
       <div className="card quiz-card" style={{ marginBottom: 16 }}>
         <p className="quiz-korean quiz-korean-lg">{question.prompt}</p>
@@ -159,7 +161,7 @@ export default function QuizScreen() {
             <button className="primary-btn mt20" onClick={() => store.loadNextQuizQuestion('reverse')}>
               <span>
                 {t('common.next')}
-                <span className="btn-kor">다음</span>
+                <span className="btn-kor">{tL('btn.next', lang)}</span>
               </span>
             </button>
           </>
@@ -172,7 +174,7 @@ export default function QuizScreen() {
           >
             <span>
               {t('common.check')}
-              <span className="btn-kor">확인</span>
+              <span className="btn-kor">{tL('btn.check', lang)}</span>
             </span>
           </button>
         )}

@@ -5,6 +5,7 @@ import { currentLevelIndex, levelProgress, nextArtist } from '../domain/gamifica
 import { portraitUrl } from '../domain/themes';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
+import { tabSubtitle } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 
 function GalleryGroup({
@@ -37,16 +38,18 @@ export default function GalleryScreen() {
   const earnedCount = achievements.filter((a) => a.earnedAt).length;
   const progress = Math.round(levelProgress(xp, artists) * 100);
   const next = nextArtist(xp, artists);
+  const lang = store.getLearningLanguage();
 
   return (
     <div>
-      <ScreenHeader title={t('tab.gallery')} subtitle="컬렉션" />
+      <ScreenHeader title={t('tab.gallery')} subtitle={tabSubtitle('gallery', lang)} />
 
       <GalleryGroup title={t('gallery.title')}>
+        <p className="field-hint mb12">{t('gallery.xpHint')}</p>
         <div className="xp-row">
           <span className="xp-score">
-            <WIcon name="heart" size={14} style={{ color: 'var(--accent-pink)' }} /> {xp}{' '}
-            <span className="muted">XP</span>
+            <WIcon name="heart-fill" size={14} style={{ color: 'var(--accent-pink)' }} /> {xp}{' '}
+            <span className="muted">HP</span>
           </span>
           <span className="xp-label">
             {next
@@ -80,7 +83,7 @@ export default function GalleryScreen() {
                 <p className="photo-name">{artist.stageName}</p>
                 <p className="photo-role">{artist.role || t('gallery.member')}</p>
                 <p className="photo-status">
-                  {unlocked ? t('gallery.unlocked') : `${artist.tierThreshold} XP`}
+                  {unlocked ? t('gallery.unlocked') : `${artist.tierThreshold} HP`}
                 </p>
               </div>
             );

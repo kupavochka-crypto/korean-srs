@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
 import HomeActivityStats from '../components/HomeActivityStats';
+import type { ModeDayCounts } from '../db/repository';
 import { greetingById, portraitUrl, randomGreeting } from '../domain/themes';
 import { artistsOfActiveTheme } from '../domain/sources';
 import {
@@ -12,6 +13,7 @@ import {
   missionProgressRatio,
 } from '../domain/gamification';
 import { t } from '../domain/i18n';
+import { greetingNative, tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 import { packImportedCount } from '../domain/daily-challenge';
 
@@ -33,14 +35,18 @@ export default function HomeScreen() {
   const koreanSet = new Set(store.getWords().map((w) => w.korean));
   const challengeStats = challengePack ? packImportedCount(challengePack, koreanSet) : { imported: 0, total: 0 };
   const challengeProgress = challengeStats.total > 0 ? challengeStats.imported / challengeStats.total : 0;
+  const learningLang = store.getLearningLanguage();
 
-  const [todayReviews, setTodayReviews] = useState(0);
+  const emptyModeCounts = (): ModeDayCounts => ({ srs: 0, quiz: 0, listen: 0 });
+  const [modeToday, setModeToday] = useState<ModeDayCounts>(emptyModeCounts);
+  const [modeYesterday, setModeYesterday] = useState<ModeDayCounts>(emptyModeCounts);
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     let alive = true;
     store.streakCount().then((v) => alive && setStreak(v));
-    store.todayReviewsCount().then((v) => alive && setTodayReviews(v));
+    store.todayModeCounts().then((v) => alive && setModeToday(v));
+    store.yesterdayModeCounts().then((v) => alive && setModeYesterday(v));
     return () => {
       alive = false;
     };
@@ -48,7 +54,10 @@ export default function HomeScreen() {
 
   return (
     <div>
-      <ScreenHeader title="Woori · 우리" subtitle={t('app.subtitle')} />
+      <ScreenHeader
+        title={tL('app.brand', learningLang)}
+        subtitle={learningLang === 'zh' ? t('app.subtitle.zh') : t('app.subtitle')}
+      />
 
       {store.getZhProfileHint() && (
         <div className="profile-hint card-flat mb16">
@@ -63,7 +72,7 @@ export default function HomeScreen() {
         <img className="greeting-image" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
         <div>
           <p className="greeting-text-rus">{greeting.russian}</p>
-          <p className="greeting-text-kor">{greeting.korean}</p>
+          <p className="greeting-text-kor">{greetingNative(greeting, learningLang)}</p>
           <p className="greeting-artist">{greeting.artistName}</p>
         </div>
       </div>
@@ -94,8 +103,8 @@ export default function HomeScreen() {
             </div>
             <p className="mentor-hint">
               {next
-                ? `${xp} XP · ${t('home.mentor.toNext', { name: next.stageName, count: Math.max(0, next.tierThreshold - xp) })}`
-                : `${xp} XP · ${t('home.mentor.allOpen')}`}
+                ? `${xp} HP · ${t('home.mentor.toNext', { name: next.stageName, count: Math.max(0, next.tierThreshold - xp) })}`
+                : `${xp} HP · ${t('home.mentor.allOpen')}`}
             </p>
           </div>
         </div>
@@ -103,10 +112,10 @@ export default function HomeScreen() {
 
       <h2 className="section-title">{t('home.sectionStats')}</h2>
       <HomeActivityStats
-        wordsCount={wordsCount}
         dueCount={due.length}
         dailyGoal={store.getDailyWordGoal()}
-        todayReviews={todayReviews}
+        today={modeToday}
+        yesterday={modeYesterday}
       />
 
       <button className="primary-btn home-primary-cta mb24" onClick={() => store.startDueReview()}>
@@ -116,7 +125,7 @@ export default function HomeScreen() {
               ? `${t('home.startReview')} (${due.length})`
               : t('home.startCards')}
           </span>
-          <span className="btn-kor">시작하기</span>
+          <span className="btn-kor">{tL('btn.go', learningLang)}</span>
         </span>
       </button>
 
@@ -159,7 +168,10 @@ export default function HomeScreen() {
             </p>
             <p className="mission-desc">{t('mission.' + mission.kind + '.desc')}</p>
           </div>
-          <span className="mission-reward">{t('home.mission.reward', { count: mission.rewardXp })}</span>
+          <span className="mission-reward">
+            <WIcon name="heart-fill" size={13} style={{ color: 'var(--accent-pink)' }} />
+            {t('home.mission.reward', { count: mission.rewardXp })}
+          </span>
         </div>
         <div className="progress-track">
           <div
@@ -169,7 +181,7 @@ export default function HomeScreen() {
               totalReviews: 0,
               correctReviews: 0,
               masteredWords: 0,
-              todayReviews,
+              todayReviews: modeToday.srs,
               streak,
             }) * 100)}%` }}
           />
@@ -183,7 +195,7 @@ export default function HomeScreen() {
             <WIcon name="plus" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.add')}</span>
-          <span className="quick-subtitle">단어 추가</span>
+          <span className="quick-subtitle">{tL('home.quick.add', learningLang)}</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.openScanOcr()}>
           <span
@@ -193,14 +205,14 @@ export default function HomeScreen() {
             <WIcon name="camera" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.scan')}</span>
-          <span className="quick-subtitle">텍스트 스캔 (OCR)</span>
+          <span className="quick-subtitle">{tL('home.quick.scan', learningLang)}</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.openSongImport()}>
           <span className="quick-icon" style={{ background: 'var(--pink-soft)', color: 'var(--accent-pink)' }}>
             <WIcon name="headphones" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.song')}</span>
-          <span className="quick-subtitle">노래로 배우기</span>
+          <span className="quick-subtitle">{tL('home.quick.song', learningLang)}</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.startDifficultReview()}>
           <span className="quick-icon" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
@@ -209,21 +221,21 @@ export default function HomeScreen() {
           <span className="quick-title">
             {t('home.quick.difficult', { count: store.difficultWords().length })}
           </span>
-          <span className="quick-subtitle">어려운 단어 복습</span>
+          <span className="quick-subtitle">{tL('home.quick.difficult', learningLang)}</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.selectTab('phrases')}>
           <span className="quick-icon" style={{ background: 'var(--pink-soft)', color: 'var(--accent-pink)' }}>
             <WIcon name="chat-quote" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.phrases')}</span>
-          <span className="quick-subtitle">표현</span>
+          <span className="quick-subtitle">{tL('home.quick.phrases', learningLang)}</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.openTranslate()}>
           <span className="quick-icon" style={{ background: 'var(--blue-soft)', color: 'var(--blue)' }}>
             <WIcon name="globe2" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.translate')}</span>
-          <span className="quick-subtitle">번역</span>
+          <span className="quick-subtitle">{tL('home.quick.translate', learningLang)}</span>
         </button>
       </div>
 

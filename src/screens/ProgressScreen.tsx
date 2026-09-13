@@ -3,6 +3,7 @@ import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
 import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
+import { tabSubtitle, tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 import type { DailyActivity } from '../types';
 import { artistsOfActiveTheme } from '../domain/sources';
@@ -113,13 +114,14 @@ export default function ProgressScreen() {
   }, [categories, words]);
 
   const masteredByCat = store.masteredByCategory();
+  const lang = store.getLearningLanguage();
 
   return (
     <div>
-      <ScreenHeader title={t('tab.progress')} subtitle="진행" />
+      <ScreenHeader title={t('tab.progress')} subtitle={tabSubtitle('progress', lang)} />
 
       <div className="proverb-card">
-        <p className="proverb-kor">티끌 모아 태산</p>
+        <p className="proverb-kor">{tL('progress.proverb', lang)}</p>
         <p className="proverb-rus">{t('progress.proverb')}</p>
       </div>
 
@@ -144,7 +146,7 @@ export default function ProgressScreen() {
           </div>
           <div className="leaderboard-card card-flat">
             <span className="leaderboard-num">{xp}</span>
-            <span className="leaderboard-label">XP</span>
+            <span className="leaderboard-label">HP</span>
             <span className="leaderboard-sub">{t('progress.xpRank', { level: levelIdx + 1 })}</span>
           </div>
           <div className="leaderboard-card card-flat">

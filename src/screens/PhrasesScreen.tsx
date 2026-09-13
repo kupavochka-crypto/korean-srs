@@ -6,6 +6,7 @@ import { ttsLang } from '../domain/language';
 import { activeTheme } from '../domain/themes';
 import { phraseSourcePack, phrasesForProfile } from '../domain/phrases';
 import { t } from '../domain/i18n';
+import { tabSubtitle } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
 
 export default function PhrasesScreen() {
@@ -22,7 +23,7 @@ export default function PhrasesScreen() {
 
   return (
     <div>
-      <ScreenHeader title={t('phrases.title')} subtitle={lang === 'zh' ? '短语' : '표현'} />
+      <ScreenHeader title={t('phrases.title')} subtitle={tabSubtitle('phrases', lang)} />
       <p className="muted mb16">
         {lang === 'zh' ? t('phrases.descZh') : t('phrases.desc', { group: theme.name })}
       </p>

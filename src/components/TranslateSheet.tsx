@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { translateText, TranslateError } from '../domain/translate';
-import { translateLangKey, translatePair } from '../domain/language';
+import { translateLangKey, translateLangNative, translatePair } from '../domain/language';
 import { storedMymemoryEmail, saveMymemoryEmail } from '../domain/settings';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
@@ -164,6 +164,9 @@ export default function TranslateSheet() {
         </div>
 
         <div className="translate-panel translate-panel--source">
+          <span className="translate-panel-lang-hint" aria-hidden="true">
+            {translateLangNative(from)}
+          </span>
           <textarea
             className="translate-panel-input"
             value={text}
@@ -185,6 +188,9 @@ export default function TranslateSheet() {
         <div className="translate-divider" aria-hidden="true" />
 
         <div className="translate-panel translate-panel--target">
+          <span className="translate-panel-lang-hint" aria-hidden="true">
+            {translateLangNative(to)}
+          </span>
           {loading ? (
             <p className="translate-panel-placeholder">{t('translate.loading')}</p>
           ) : result ? (

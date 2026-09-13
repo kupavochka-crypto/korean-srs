@@ -1,4 +1,5 @@
 import type { LearningLanguage, TranslateLang, Word } from '../types';
+import { hanziToReading } from './pinyin';
 
 export function wordLanguage(word: Word): LearningLanguage {
   return word.language ?? 'ko';
@@ -8,9 +9,26 @@ export function lemmaOf(word: Word): string {
   return word.korean;
 }
 
+export function zhReading(word: Word): { pinyin: string; tones: string } {
+  const hanzi = word.korean.trim();
+  if (!hanzi) return { pinyin: '', tones: '' };
+
+  const storedPinyin = word.pinyin?.trim() ?? '';
+  const storedTones = word.tones?.trim() ?? '';
+  if (storedPinyin && storedTones) {
+    return { pinyin: storedPinyin, tones: storedTones };
+  }
+
+  const computed = hanziToReading(hanzi);
+  return {
+    pinyin: storedPinyin || computed.pinyin,
+    tones: storedTones || computed.tones,
+  };
+}
+
 export function displayReading(word: Word): string {
   if (wordLanguage(word) === 'zh') {
-    return word.pinyin ?? '';
+    return zhReading(word).pinyin;
   }
   return word.romaja;
 }
@@ -54,4 +72,11 @@ export function translateLangKey(lang: TranslateLang): 'translate.langKo' | 'tra
   if (lang === 'ko') return 'translate.langKo';
   if (lang === 'ru') return 'translate.langRu';
   return 'translate.langZh';
+}
+
+/** Native script label for in-panel translate hints */
+export function translateLangNative(lang: TranslateLang): string {
+  if (lang === 'ko') return '한국어';
+  if (lang === 'ru') return 'Русский';
+  return '中文';
 }

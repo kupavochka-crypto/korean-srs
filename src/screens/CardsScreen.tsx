@@ -2,7 +2,9 @@ import { store, useStore } from '../store/AppStore';
 import SrsRatingBar from '../components/SrsRatingBar';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
-import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
+import { tabSubtitle, tL } from '../domain/learning-ui';
+import { showReadingEnabled, wordLanguage } from '../domain/language';
+import ChineseReading from '../components/ChineseReading';
 import type { Word } from '../types';
 import WIcon from '../ui/WIcon';
 
@@ -15,14 +17,16 @@ function CardsEmptyState({
   title,
   desc,
   difficultCount,
+  lang,
 }: {
   title: string;
   desc: string;
   difficultCount: number;
+  lang: ReturnType<typeof store.getLearningLanguage>;
 }) {
   return (
     <div>
-      <ScreenHeader title={t('tab.cards')} subtitle="복습" />
+      <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
       <div className="cards-done center">
         <div className="empty-state-icon">
           <WIcon name="stars" size={48} style={{ color: 'var(--warning)' }} />
@@ -32,14 +36,14 @@ function CardsEmptyState({
         <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
           <span>
             {t('cards.reviewAll')}
-            <span className="btn-kor">모든 단어 복습</span>
+            <span className="btn-kor">{tL('cards.reviewAllNative', lang)}</span>
           </span>
         </button>
         {difficultCount > 0 && (
           <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
             <span>
               {t('cards.difficult', { count: difficultCount })}
-              <span className="btn-kor">어려운 단어</span>
+              <span className="btn-kor">{tL('cards.difficultNative', lang)}</span>
             </span>
           </button>
         )}
@@ -54,6 +58,7 @@ export default function CardsScreen() {
   const index = store.getCardIndex();
   const flipped = store.getIsCardFlipped();
   const difficultCount = store.difficultWords().length;
+  const lang = store.getLearningLanguage();
 
   if (queue.length === 0) {
     return (
@@ -61,6 +66,7 @@ export default function CardsScreen() {
         title={t('cards.nothing')}
         desc={t('cards.nothingDesc')}
         difficultCount={difficultCount}
+        lang={lang}
       />
     );
   }
@@ -71,17 +77,17 @@ export default function CardsScreen() {
         title={t('cards.doneTitle')}
         desc={t('cards.doneDesc')}
         difficultCount={difficultCount}
+        lang={lang}
       />
     );
   }
 
   const word = queue[index];
   const isZh = wordLanguage(word) === 'zh';
-  const reading = displayReading(word);
 
   return (
     <div>
-      <ScreenHeader title={t('tab.cards')} subtitle="복습" />
+      <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
       <div className="cards-toolbar-row">
         <span className="muted" style={{ fontSize: 13 }}>
           {t('cards.progress', { i: index + 1, total: queue.length })}
@@ -113,8 +119,11 @@ export default function CardsScreen() {
             <div className="flashcard">
               <span className="fc-korean">{word.korean}</span>
               {!isZh && word.hanja && <span className="fc-hanja">{word.hanja}</span>}
-              {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
-                <span className={isZh ? 'fc-pinyin' : 'fc-romaja'}>{reading}</span>
+              {isZh ? (
+                <ChineseReading word={word} layout="flashcard" />
+              ) : (
+                showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) &&
+                word.romaja && <span className="fc-romaja">{word.romaja}</span>
               )}
               <button
                 className="speaker-btn mt16"
@@ -132,6 +141,7 @@ export default function CardsScreen() {
             <div className="flashcard">
               <span className="fc-translation">{word.translation}</span>
               <span className="fc-korean fc-korean-sm">{word.korean}</span>
+              {isZh ? <ChineseReading word={word} layout="flashcard" /> : null}
               {word.exampleSentence && (
                 <div className="fc-example">
                   <div>{word.exampleSentence}</div>

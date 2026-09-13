@@ -1,6 +1,7 @@
 import type { Word } from '../types';
 import { store } from '../store/AppStore';
-import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
+import { showReadingEnabled, wordLanguage } from '../domain/language';
+import ChineseReading from './ChineseReading';
 import { formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
@@ -31,7 +32,6 @@ export default function WordCard({
   const status = srsStatus(word);
   const difficultyLabel = word.difficulty;
   const isZh = wordLanguage(word) === 'zh';
-  const reading = displayReading(word);
 
   return (
     <div
@@ -47,8 +47,11 @@ export default function WordCard({
         <div className="word-item-main">
           <span className="word-korean">{word.korean}</span>
           {!isZh && word.hanja && <span className="word-hanja">{word.hanja}</span>}
-          {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
-            <span className={isZh ? 'word-pinyin' : 'word-romaja'}>{reading}</span>
+          {isZh ? (
+            <ChineseReading word={word} layout="inline" />
+          ) : (
+            showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) &&
+            word.romaja && <span className="word-romaja">{word.romaja}</span>
           )}
         </div>
         <button
@@ -65,12 +68,17 @@ export default function WordCard({
       {word.exampleSentence && <div className="word-example">{word.exampleSentence}</div>}
       <div className="word-meta">
         {category && (
-          <span
-            className="badge badge-cat"
+          <button
+            type="button"
+            className="badge badge-cat badge-cat-btn"
             style={{ background: colorFromHex(category.colorHex) }}
+            onClick={(e) => {
+              e.stopPropagation();
+              store.openWordDetail(word);
+            }}
           >
             {category.emoji} {category.name}
-          </span>
+          </button>
         )}
         <span className="badge">{t('word.level')} {difficultyLabel}</span>
         <span className={`badge ${status.cls}`}>{status.text}</span>

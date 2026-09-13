@@ -24,6 +24,7 @@ import MissionStartDialog from './components/MissionStartDialog';
 import SongImportDialog from './components/SongImportDialog';
 import { loadVoices } from './domain/tts';
 import { t } from './domain/i18n';
+import { tabSubtitle } from './domain/learning-ui';
 import WIcon from './ui/WIcon';
 
 const SCREENS: Record<Tab, () => ReactElement> = {
@@ -89,6 +90,7 @@ export default function App() {
 
   const tab = store.getTab();
   const dueCount = store.dueWords().length;
+  const learningLang = store.getLearningLanguage();
 
   return (
     <div className="app">
@@ -128,7 +130,7 @@ export default function App() {
               <WIcon name={def.icon} />
             </span>
             <span className="tab-label">{t('tab.' + def.id)}</span>
-            <span className="tab-kor">{def.korean}</span>
+            <span className="tab-kor">{tabSubtitle(def.id, learningLang)}</span>
             {def.id === 'cards' && dueCount > 0 && (
               <span className="tab-badge">{dueCount}</span>
             )}

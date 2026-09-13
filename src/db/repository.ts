@@ -7,6 +7,8 @@ import type {
   LearningLanguage,
   Pack,
   Phrase,
+  PracticeEvent,
+  PracticeMode,
   Progression,
   ReviewRecord,
   Source,
@@ -17,6 +19,7 @@ import {
   ALL_PHRASE_DEFS,
   BTS_PHRASE_PACK_ID,
   SKZ_PHRASE_PACK_ID,
+  ZH_PHRASE_DEFS,
   seedAllPhrases,
   seedPhrasesFromDefs,
 } from '../domain/phrases';
@@ -55,8 +58,15 @@ export async function ensureDefaultCategories(): Promise<void> {
       emoji: c.emoji,
       createdAt: now + i,
       isDefault: true,
+      language: 'ko' as const,
     }))
   );
+}
+
+export async function migrateCategoryLanguage(): Promise<void> {
+  const cats = await db.categories.toArray();
+  const patches = cats.filter((c) => !c.language).map((c) => ({ ...c, language: 'ko' as const }));
+  if (patches.length > 0) await db.categories.bulkPut(patches);
 }
 
 export async function ensureNotebookWords(): Promise<void> {
@@ -122,7 +132,24 @@ export async function initialize(): Promise<void> {
   await ensureAchievements();
   await backfillMasteredAt();
   await backfillWordLanguage();
+  await backfillZhReadings();
   await migrateProgressionProfiles();
+  await migrateCategoryLanguage();
+}
+
+export async function backfillZhReadings(): Promise<void> {
+  const words = await db.words.toArray();
+  const patches: Word[] = [];
+  for (const w of words) {
+    if ((w.language ?? 'ko') !== 'zh') continue;
+    const reading = hanziToReading(w.korean);
+    const pinyin = w.pinyin?.trim() || reading.pinyin || null;
+    const tones = w.tones?.trim() || reading.tones || null;
+    const romaja = w.romaja?.trim() || pinyin || '';
+    if (w.pinyin === pinyin && w.tones === tones && w.romaja === romaja) continue;
+    patches.push({ ...w, pinyin, tones, romaja });
+  }
+  if (patches.length > 0) await db.words.bulkPut(patches);
 }
 
 export async function backfillWordLanguage(): Promise<void> {
@@ -174,15 +201,35 @@ export async function ensureSeedPhrases(): Promise<void> {
       def.sourcePackId ?? (def.themeId === 'stray-kids' ? SKZ_PHRASE_PACK_ID : BTS_PHRASE_PACK_ID),
     ])
   );
+  const defByKorean = new Map(ALL_PHRASE_DEFS.map((def) => [def.korean, def]));
   for (const phrase of all) {
+    const def = defByKorean.get(phrase.korean);
     const nextPackId = sourceByKorean.get(phrase.korean);
-    if (!nextPackId || phrase.sourcePackId === nextPackId) continue;
+    const lang = def?.sourcePackId?.startsWith('seed-zh-') ? 'zh' : 'ko';
+    const patch: Partial<Phrase> = {};
+    if ((phrase.language ?? 'ko') !== lang) patch.language = lang;
+    if (def?.pinyin && phrase.pinyin !== def.pinyin) patch.pinyin = def.pinyin;
     if (
-      !phrase.sourcePackId ||
-      phrase.sourcePackId === BTS_PHRASE_PACK_ID ||
-      phrase.sourcePackId === SKZ_PHRASE_PACK_ID
+      nextPackId &&
+      phrase.sourcePackId !== nextPackId &&
+      (!phrase.sourcePackId ||
+        phrase.sourcePackId === BTS_PHRASE_PACK_ID ||
+        phrase.sourcePackId === SKZ_PHRASE_PACK_ID)
     ) {
-      await db.phrases.update(phrase.id, { sourcePackId: nextPackId });
+      patch.sourcePackId = nextPackId;
+    }
+    if (Object.keys(patch).length > 0) {
+      await db.phrases.update(phrase.id, patch);
+    }
+  }
+
+  all = await db.phrases.toArray();
+  const hasZh = all.some((p) => (p.language ?? 'ko') === 'zh');
+  if (!hasZh) {
+    const existingKoreans = new Set(all.map((p) => p.korean));
+    const zhMissing = ZH_PHRASE_DEFS.filter((def) => !existingKoreans.has(def.korean));
+    if (zhMissing.length > 0) {
+      await db.phrases.bulkAdd(seedPhrasesFromDefs(zhMissing, Date.now()));
     }
   }
 }
@@ -205,10 +252,15 @@ export async function allPacks(): Promise<Pack[]> {
 export async function addPackWords(pack: Pack): Promise<number> {
   const existing = await db.words.toArray();
   const koreanSet = new Set(existing.map((w) => w.korean));
-  const category = await findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
+  const packLang = pack.language ?? 'ko';
+  const category = await findOrCreateCategory(
+    pack.title,
+    pack.emoji,
+    pack.colorHex,
+    packLang
+  );
   const now = Date.now();
   let added = 0;
-  const packLang = pack.language ?? 'ko';
   for (const def of pack.wordDefs) {
     if (koreanSet.has(def.korean)) continue;
     const reading =
@@ -347,20 +399,24 @@ export async function insertCategory(category: Category): Promise<void> {
   await db.categories.add(category);
 }
 
-export async function findCategoryByName(name: string): Promise<Category | undefined> {
+export async function findCategoryByName(
+  name: string,
+  lang: LearningLanguage = 'ko'
+): Promise<Category | undefined> {
   const trimmed = name.trim();
   if (!trimmed) return undefined;
   const lower = trimmed.toLowerCase();
   const all = await db.categories.toArray();
-  return all.find((c) => c.name.toLowerCase() === lower);
+  return all.find((c) => c.name.toLowerCase() === lower && (c.language ?? 'ko') === lang);
 }
 
 export async function findOrCreateCategory(
   name: string,
   emoji = '🎵',
-  colorHex = '#E53935'
+  colorHex = '#E53935',
+  lang: LearningLanguage = 'ko'
 ): Promise<Category> {
-  const existing = await findCategoryByName(name);
+  const existing = await findCategoryByName(name, lang);
   if (existing) return existing;
   const category: Category = {
     id: newId(),
@@ -369,6 +425,7 @@ export async function findOrCreateCategory(
     emoji,
     createdAt: Date.now(),
     isDefault: false,
+    language: lang,
   };
   await db.categories.add(category);
   return category;
@@ -500,6 +557,53 @@ export async function recordReview(
     timestamp: now,
   };
   await db.reviews.add(record);
+}
+
+export async function recordPracticeEvent(
+  wordId: string,
+  mode: PracticeMode,
+  correct: boolean,
+  now: number = Date.now()
+): Promise<void> {
+  const event: PracticeEvent = {
+    wordId,
+    mode,
+    correct,
+    dateString: dateString(now),
+    timestamp: now,
+  };
+  await db.practiceEvents.add(event);
+}
+
+async function practiceEventsForLang(lang?: LearningLanguage): Promise<PracticeEvent[]> {
+  const events = await db.practiceEvents.toArray();
+  if (!lang) return events;
+  const langMap = await wordLanguageById();
+  return events.filter((e) => langMap.get(e.wordId) === lang);
+}
+
+export interface ModeDayCounts {
+  srs: number;
+  quiz: number;
+  listen: number;
+}
+
+export async function modeCountsForDate(
+  dateStr: string,
+  lang?: LearningLanguage
+): Promise<ModeDayCounts> {
+  const srs = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr).length;
+  const events = (await practiceEventsForLang(lang)).filter((e) => e.dateString === dateStr);
+  let quiz = 0;
+  let listen = 0;
+  for (const e of events) {
+    if (e.mode === 'quiz_listen' || e.mode === 'listening') {
+      listen += 1;
+    } else if (e.mode === 'quiz_reverse' || e.mode === 'quiz_write') {
+      if (e.correct) quiz += 1;
+    }
+  }
+  return { srs, quiz, listen };
 }
 
 async function wordLanguageById(): Promise<Map<string, LearningLanguage>> {

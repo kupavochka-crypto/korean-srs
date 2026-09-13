@@ -17,6 +17,23 @@ export interface Category {
   emoji: string;
   createdAt: number;
   isDefault: boolean;
+  language?: LearningLanguage;
+}
+
+export type PracticeMode =
+  | 'srs'
+  | 'quiz_listen'
+  | 'quiz_reverse'
+  | 'quiz_write'
+  | 'listening';
+
+export interface PracticeEvent {
+  id?: number;
+  wordId: string;
+  mode: PracticeMode;
+  correct: boolean;
+  dateString: string;
+  timestamp: number;
 }
 
 export interface Word {
@@ -145,6 +162,7 @@ export interface BTSGreeting {
   imageName: string;
   russian: string;
   korean: string;
+  chinese?: string;
 }
 
 export interface NotebookWord {

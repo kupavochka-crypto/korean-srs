@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { storedApiKey } from '../domain/gemini-ocr';
+import { transcribeSongLyrics } from '../domain/gemini-audio';
 import {
-  extractUniqueVocabularyFromLyrics,
-  recognizeSongVocabularyFromAudio,
-} from '../domain/gemini-audio';
+  extractVocabularyFromLyrics,
+  type SongTranslateProvider,
+} from '../domain/song-translate';
 import { gifUrl, activeTheme } from '../domain/themes';
 import { t } from '../domain/i18n';
 import ManualKoreanTextBlock from './ManualKoreanTextBlock';
@@ -29,9 +30,13 @@ export default function SongImportDialog() {
   const [uploadFileName, setUploadFileName] = useState('');
   const [rawText, setRawText] = useState('');
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const [translateProvider, setTranslateProvider] = useState<SongTranslateProvider>('auto');
 
   const [drafts, setDrafts] = useState<ImportedWordDraft[]>([]);
   const [selected, setSelected] = useState<boolean[]>([]);
+
+  const learningLanguage = store.getLearningLanguage();
+  const hasApiKey = Boolean(storedApiKey());
 
   useEffect(() => {
     setRecordSupported(
@@ -61,6 +66,19 @@ export default function SongImportDialog() {
     setShowManualEntry(false);
   }
 
+  async function parseLyrics(lyrics: string) {
+    const key = storedApiKey();
+    const scanned = await extractVocabularyFromLyrics(lyrics, translateProvider, {
+      apiKey: key,
+      learningLanguage,
+    });
+    if (scanned.length > 0) {
+      applyScannedWords(scanned);
+    } else {
+      setError(t('song.noWords'));
+    }
+  }
+
   async function processAudioFile(file: File) {
     const key = storedApiKey();
     if (!key) {
@@ -74,12 +92,8 @@ export default function SongImportDialog() {
     setSelected([]);
 
     try {
-      const scanned = await recognizeSongVocabularyFromAudio(file, key);
-      if (scanned.length > 0) {
-        applyScannedWords(scanned);
-      } else {
-        setError(t('song.noWords'));
-      }
+      const lyrics = await transcribeSongLyrics(file, key);
+      await parseLyrics(lyrics);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('song.errorUnknown'));
     } finally {
@@ -147,18 +161,10 @@ export default function SongImportDialog() {
   }
 
   async function handleManualParse() {
-    const key = storedApiKey();
-    if (!key) {
-      setError(t('song.noApiKey'));
-      return;
-    }
-
     setProcessing(true);
     setError('');
     try {
-      const scanned = await extractUniqueVocabularyFromLyrics(rawText, key);
-      if (scanned.length === 0) return;
-      applyScannedWords(scanned);
+      await parseLyrics(rawText);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('song.errorUnknown'));
     } finally {
@@ -204,6 +210,12 @@ export default function SongImportDialog() {
     return classified.filter((item) => item.status !== 'new').length;
   }, [drafts, categoryForSong, store.getSnapshot()]);
 
+  const providerChips: { id: SongTranslateProvider; label: string }[] = [
+    { id: 'auto', label: t('song.providerAuto') },
+    { id: 'gemini', label: t('song.providerGemini') },
+    { id: 'mymemory', label: t('song.providerMymemory') },
+  ];
+
   return (
     <div className="overlay" onClick={() => store.closeSongImport()}>
       <div className="sheet sheet-scroll" onClick={(e) => e.stopPropagation()}>
@@ -214,7 +226,7 @@ export default function SongImportDialog() {
           </button>
         </div>
 
-        {!storedApiKey() && (
+        {!hasApiKey && (
           <div className="scan-error">
             {t('song.noApiKey')}{' '}
             <button
@@ -223,49 +235,53 @@ export default function SongImportDialog() {
             >
               {t('song.openSettings')}
             </button>
+            <p className="field-hint mt8">{t('song.audioHint')}</p>
           </div>
         )}
 
-        <label className="form-label">{t('song.nameLabel')}</label>
-        <input
-          className="form-input"
-          value={soundName}
-          onChange={(e) => {
-            const name = e.target.value;
-            setSoundName(name);
-            const tag = name.trim();
-            if (tag) {
-              setDrafts((prev) => prev.map((d) => ({ ...d, tags: [tag] })));
-            }
-          }}
-          placeholder={t('song.namePlaceholder')}
-          style={{ marginBottom: 12 }}
-        />
-        <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '0 0 12px' }}>
-          {t('song.nameHint')}
-        </p>
+        <p className="field-hint mb12">{t('song.intro')}</p>
+
+        <label className="form-label">{t('song.translateProvider')}</label>
+        <div className="flow-layout mb12">
+          {providerChips.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={`select-chip ${translateProvider === id ? 'active' : ''}`}
+              onClick={() => setTranslateProvider(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         <div className="scan-tools">
           <button
             className="scan-tool"
             onClick={() => fileInputRef.current?.click()}
-            disabled={processing || isRecording}
+            disabled={processing || isRecording || !hasApiKey}
           >
             <span className="scan-tool-icon">
               <WIcon name="volume-up" size={22} />
             </span>
-            <span>{t('song.upload')}</span>
+            <span>
+              {t('song.upload')}{' '}
+              <span className="song-mode-badge song-mode-badge--pro">{t('song.badgePro')}</span>
+            </span>
           </button>
           {recordSupported && (
             <button
               className="scan-tool"
               onClick={() => (isRecording ? stopRecording() : startRecording())}
-              disabled={processing}
+              disabled={processing || !hasApiKey}
             >
               <span className="scan-tool-icon">
                 <WIcon name={isRecording ? 'x-lg' : 'play'} size={22} />
               </span>
-              <span>{isRecording ? t('song.stopRecord') : t('song.record')}</span>
+              <span>
+                {isRecording ? t('song.stopRecord') : t('song.record')}{' '}
+                <span className="song-mode-badge song-mode-badge--pro">{t('song.badgePro')}</span>
+              </span>
             </button>
           )}
           <button
@@ -280,7 +296,10 @@ export default function SongImportDialog() {
             <span className="scan-tool-icon">
               <WIcon name="pencil-square" size={22} />
             </span>
-            <span>Текст</span>
+            <span>
+              {t('song.manualText')}{' '}
+              <span className="song-mode-badge song-mode-badge--free">{t('song.badgeFree')}</span>
+            </span>
           </button>
           <input
             ref={fileInputRef}
@@ -314,7 +333,7 @@ export default function SongImportDialog() {
                 marginBottom: 10,
               }}
             />
-            Распознавание…
+            {t('song.parsing')}
           </div>
         )}
 
@@ -330,17 +349,36 @@ export default function SongImportDialog() {
         )}
 
         {drafts.length > 0 && (
-          <ScannedWordsEditor
-            drafts={drafts}
-            selected={selected}
-            readyCount={readyCount}
-            onToggle={toggleIndex}
-            onUpdateField={updateField}
-            onUpdateTags={updateTags}
-            onSave={() => void handleSave()}
-            saveLabel={t('song.save', { count: readyCount })}
-            knownInDictionaryCount={knownInDictionaryCount}
-          />
+          <>
+            <h4 className="section-title mt16">{t('song.saveSection')}</h4>
+            <label className="form-label">{t('song.nameLabel')}</label>
+            <input
+              className="form-input"
+              value={soundName}
+              onChange={(e) => {
+                const name = e.target.value;
+                setSoundName(name);
+                const tag = name.trim();
+                if (tag) {
+                  setDrafts((prev) => prev.map((d) => ({ ...d, tags: [tag] })));
+                }
+              }}
+              placeholder={t('song.namePlaceholder')}
+              style={{ marginBottom: 8 }}
+            />
+            <p className="field-hint mb12">{t('song.nameHint')}</p>
+            <ScannedWordsEditor
+              drafts={drafts}
+              selected={selected}
+              readyCount={readyCount}
+              onToggle={toggleIndex}
+              onUpdateField={updateField}
+              onUpdateTags={updateTags}
+              onSave={() => void handleSave()}
+              saveLabel={t('song.save', { count: readyCount })}
+              knownInDictionaryCount={knownInDictionaryCount}
+            />
+          </>
         )}
       </div>
     </div>

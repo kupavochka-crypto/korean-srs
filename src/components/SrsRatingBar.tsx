@@ -1,4 +1,6 @@
 import { SRS_RATINGS, type SrsRatingValue } from '../domain/srs-engine';
+import { srsRatingNative } from '../domain/learning-ui';
+import { store, useStore } from '../store/AppStore';
 const RATING_COLORS: Record<number, string> = {
   1: 'var(--red)',
   2: 'var(--warning)',
@@ -18,6 +20,9 @@ interface Props {
 }
 
 export default function SrsRatingBar({ onRate }: Props) {
+  useStore();
+  const lang = store.getLearningLanguage();
+
   return (
     <div className="rating-row">
       {SRS_RATINGS.map((r) => (
@@ -28,7 +33,7 @@ export default function SrsRatingBar({ onRate }: Props) {
           onClick={() => onRate(r.value)}
         >
           <span>{r.label}</span>
-          <span className="rating-kor">{r.koreanLabel}</span>
+          <span className="rating-kor">{srsRatingNative(r.name, lang)}</span>
         </button>
       ))}
     </div>
