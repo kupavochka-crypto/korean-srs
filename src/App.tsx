@@ -8,12 +8,19 @@ import DictionaryScreen from './screens/DictionaryScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import PhrasesScreen from './screens/PhrasesScreen';
 import AddWordDialog from './components/AddWordDialog';
+import AppFab from './components/AppFab';
+import DuplicateResolveDialog from './components/DuplicateResolveDialog';
+import OnboardingFlow from './components/OnboardingFlow';
+import TranslateSheet from './components/TranslateSheet';
 import WordDetailDialog from './components/WordDetailDialog';
 import CreateCategoryDialog from './components/CreateCategoryDialog';
 import ScanOcrDialog from './components/ScanOcrDialog';
 import GuideDialog from './components/GuideDialog';
 import PacksDialog from './components/PacksDialog';
+import MissionPickDialog from './components/MissionPickDialog';
+import MissionStartDialog from './components/MissionStartDialog';
 import SongImportDialog from './components/SongImportDialog';
 import { loadVoices } from './domain/tts';
 import { t } from './domain/i18n';
@@ -28,6 +35,7 @@ const SCREENS: Record<Tab, () => ReactElement> = {
   progress: () => <ProgressScreen />,
   gallery: () => <GalleryScreen />,
   settings: () => <SettingsScreen />,
+  phrases: () => <PhrasesScreen />,
 };
 
 export default function App() {
@@ -93,8 +101,14 @@ export default function App() {
       {store.getIsCreateCategoryOpen() && <CreateCategoryDialog />}
       {store.getIsGuideOpen() && <GuideDialog />}
       {store.getIsPacksOpen() && <PacksDialog />}
+      {store.getIsMissionPickOpen() && <MissionPickDialog />}
+      {store.getIsMissionStartOpen() && <MissionStartDialog />}
       {store.getIsSongImportOpen() && <SongImportDialog />}
       {store.getSelectedWordForDetail() && <WordDetailDialog />}
+      {store.getDuplicatePending() && <DuplicateResolveDialog />}
+      {store.getIsOnboardingOpen() && <OnboardingFlow />}
+      {store.getIsTranslateOpen() && <TranslateSheet />}
+      <AppFab />
 
       <nav ref={(el) => { navRef.current = el; }} className="tab-bar">
         <span
@@ -108,7 +122,7 @@ export default function App() {
             className={`tab-item ${tab === def.id ? 'active' : ''}`}
             aria-label={t('tab.' + def.id)}
             title={t('tab.' + def.id)}
-            onClick={() => store.selectTab(def.id)}
+            onClick={() => store.selectTab(def.id, { fromTabBar: true })}
           >
             <span className="tab-icon">
               <WIcon name={def.icon} />

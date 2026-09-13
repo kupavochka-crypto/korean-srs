@@ -69,7 +69,10 @@ export default function WordCard({
         )}
         <span className="badge">{t('word.level')} {difficultyLabel}</span>
         <span className={`badge ${status.cls}`}>{status.text}</span>
-        {source && <span className="badge">{formatSource(source)}</span>}
+        {source?.type === 'song' && (
+          <span className="badge badge-song">{t('word.songBadge', { name: source.title })}</span>
+        )}
+        {source && source.type !== 'song' && <span className="badge">{formatSource(source)}</span>}
         {word.tags.map((tag) => (
           <span className="badge" key={tag}>
             #{tag}

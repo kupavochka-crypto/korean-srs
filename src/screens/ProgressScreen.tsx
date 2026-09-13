@@ -1,10 +1,12 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
-import CircularStat from '../components/CircularStat';
 import ScreenHeader from '../components/ScreenHeader';
-import { colors, colorFromHex } from '../theme/colors';
+import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
+import type { DailyActivity } from '../types';
+import { artistsOfActiveTheme } from '../domain/sources';
+import { currentLevelIndex } from '../domain/gamification';
 
 function ProgressGroup({
   title,
@@ -27,15 +29,70 @@ function ProgressGroup({
   );
 }
 
+function PlanFactChart({ activity, dailyGoal }: { activity: DailyActivity[]; dailyGoal: number }) {
+  const maxVal = Math.max(
+    dailyGoal,
+    ...activity.map((d) => d.newWords + d.reviews),
+    1
+  );
+  let planCumulative = 0;
+  let factCumulative = 0;
+  const points = activity.map((d, i) => {
+    planCumulative += dailyGoal;
+    factCumulative += d.newWords + d.reviews;
+    return { ...d, plan: planCumulative, fact: factCumulative, day: i };
+  });
+  const lastFact = points[points.length - 1]?.fact ?? 0;
+  const avgPerDay = activity.length > 0 ? lastFact / activity.length : 0;
+  const forecastEnd = avgPerDay * activity.length;
+
+  return (
+    <div className="plan-fact-chart">
+      <div className="plan-fact-bars">
+        {activity.map((d) => {
+          const total = d.newWords + d.reviews;
+          const h = Math.round((total / maxVal) * 100);
+          const planH = Math.round((dailyGoal / maxVal) * 100);
+          return (
+            <div key={d.dateString} className="plan-fact-col">
+              <div className="plan-fact-bar-wrap">
+                <div className="plan-bar" style={{ height: `${planH}%` }} title={t('progress.plan')} />
+                <div className="fact-bar" style={{ height: `${h}%` }} title={`${total}`} />
+              </div>
+              <span className="plan-fact-label">{d.dateString.slice(5)}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="plan-fact-legend">
+        <span><span className="legend-plan" /> {t('progress.plan')}</span>
+        <span><span className="legend-fact" /> {t('progress.fact')}</span>
+        {avgPerDay < dailyGoal && (
+          <span className="muted">{t('progress.forecast', { count: Math.round(forecastEnd) })}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ProgressScreen() {
   useStore();
   const [streak, setStreak] = useState(0);
   const [todayReviews, setTodayReviews] = useState(0);
+  const [activity, setActivity] = useState<DailyActivity[]>([]);
+  const [weeklyGrowth, setWeeklyGrowth] = useState(0);
+
+  const dailyGoal = store.getDailyWordGoal();
+  const xp = store.getXp();
+  const artists = artistsOfActiveTheme();
+  const levelIdx = currentLevelIndex(xp, artists);
 
   useEffect(() => {
     let alive = true;
     store.streakCount().then((v) => alive && setStreak(v));
     store.todayReviewsCount().then((v) => alive && setTodayReviews(v));
+    store.dailyActivity(14).then((v) => alive && setActivity(v));
+    store.weeklyGrowth().then((v) => alive && setWeeklyGrowth(v));
     return () => {
       alive = false;
     };
@@ -43,18 +100,19 @@ export default function ProgressScreen() {
 
   const total = store.totalWordsCount();
   const mastered = store.masteredWordsCount();
-  const avgDays = store.avgDaysToMaster();
   const due = store.dueWords().length;
-  const byMonth = store.masteredByMonth();
-  const masteredByCat = store.masteredByCategory();
   const words = store.getWords();
   const categories = store.getCategories();
 
-  const byCategory = categories.map((c) => ({
-    category: c,
-    count: words.filter((w) => w.categoryId === c.id).length,
-  }));
-  const uncategorized = words.filter((w) => w.categoryId === null).length;
+  const topCategories = useMemo(() => {
+    return categories
+      .map((c) => ({ category: c, count: words.filter((w) => w.categoryId === c.id).length }))
+      .filter((x) => x.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [categories, words]);
+
+  const masteredByCat = store.masteredByCategory();
 
   return (
     <div>
@@ -65,65 +123,60 @@ export default function ProgressScreen() {
         <p className="proverb-rus">{t('progress.proverb')}</p>
       </div>
 
-      <ProgressGroup title={t('progress.stat')}>
-        <div className="progress-grid">
-          <CircularStat
-            value={`${total}`}
-            label={t('home.stats.words')}
-            koreanLabel="총 단어"
-            color={colors.charcoal}
-            className="circular-stat-charcoal"
-          />
-          <CircularStat
-            value={`${mastered}`}
-            label={t('progress.mastered')}
-            koreanLabel="완료"
-            color={colors.success}
-          />
-          <CircularStat
-            value={`${avgDays ?? '—'}`}
-            label={t('progress.daysToMaster')}
-            koreanLabel="완료까지"
-            color={colors.accentPink}
-          />
-          <CircularStat
-            value={`${due}`}
-            label={t('progress.dueToday')}
-            koreanLabel="오늘"
-            color={colors.red}
-          />
-          <CircularStat
-            value={`${todayReviews}`}
-            label={t('progress.today')}
-            koreanLabel="복습"
-            color={colors.blue}
-          />
-          <CircularStat
-            value={`${streak}`}
-            label={t('progress.streakDays')}
-            koreanLabel="연속"
-            color={colors.warning}
-          />
+      <ProgressGroup title={t('progress.boards')}>
+        <div className="leaderboard-grid">
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{total}</span>
+            <span className="leaderboard-label">{t('home.stats.words')}</span>
+            <span className="leaderboard-sub">{t('progress.weeklyGrowth', { pct: weeklyGrowth })}</span>
+          </div>
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{mastered}</span>
+            <span className="leaderboard-label">{t('progress.mastered')}</span>
+          </div>
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{due}</span>
+            <span className="leaderboard-label">{t('progress.dueToday')}</span>
+          </div>
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{streak}</span>
+            <span className="leaderboard-label">{t('progress.streakDays')}</span>
+          </div>
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{xp}</span>
+            <span className="leaderboard-label">XP</span>
+            <span className="leaderboard-sub">{t('progress.xpRank', { level: levelIdx + 1 })}</span>
+          </div>
+          <div className="leaderboard-card card-flat">
+            <span className="leaderboard-num">{todayReviews}</span>
+            <span className="leaderboard-label">{t('progress.today')}</span>
+            <span className="leaderboard-sub">{t('progress.goal', { count: dailyGoal })}</span>
+          </div>
         </div>
       </ProgressGroup>
 
-      <ProgressGroup title={t('progress.byMonth')}>
-        <div className="month-bars">
-          {byMonth.map((m) => {
-            const max = Math.max(1, ...byMonth.map((x) => x.count));
-            return (
-              <div key={m.month} className="month-bar-col">
-                <span className="month-bar-num">{m.count > 0 ? m.count : ''}</span>
-                <div
-                  className="month-bar"
-                  style={{ height: `${Math.round((m.count / max) * 100)}%` }}
-                />
-                <span className="month-bar-label">{m.month}</span>
-              </div>
-            );
-          })}
-        </div>
+      <ProgressGroup title={t('progress.planFact')}>
+        <PlanFactChart activity={activity} dailyGoal={dailyGoal} />
       </ProgressGroup>
+
+      {topCategories.length > 0 && (
+        <ProgressGroup title={t('progress.topCategories')} list>
+          <div className="cat-breakdown">
+            {topCategories.map(({ category, count }) => (
+              <div key={category.id} className="cat-row card-flat">
+                <span
+                  className="cat-emoji"
+                  style={{ backgroundColor: `${colorFromHex(category.colorHex)}20` }}
+                >
+                  {category.emoji}
+                </span>
+                <span>{category.name}</span>
+                <span className="cat-count">{count}</span>
+              </div>
+            ))}
+          </div>
+        </ProgressGroup>
+      )}
 
       {masteredByCat.length > 0 && (
         <ProgressGroup title={t('progress.byCat')} list>
@@ -140,32 +193,6 @@ export default function ProgressScreen() {
           </div>
         </ProgressGroup>
       )}
-
-      <ProgressGroup title={t('progress.byCatDict')} list>
-        <div className="cat-breakdown">
-          {byCategory.map(({ category, count }) => (
-            <div key={category.id} className="cat-row card-flat">
-              <span
-                className="cat-emoji"
-                style={{ backgroundColor: `${colorFromHex(category.colorHex)}20` }}
-              >
-                {category.emoji}
-              </span>
-              <span>{category.name}</span>
-              <span className="cat-count">{count}</span>
-            </div>
-          ))}
-          {uncategorized > 0 && (
-            <div className="cat-row card-flat">
-              <span className="cat-emoji">
-                <WIcon name="file-text" size={16} style={{ color: 'var(--text-secondary)' }} />
-              </span>
-              <span>{t('progress.noCategory')}</span>
-              <span className="cat-count">{uncategorized}</span>
-            </div>
-          )}
-        </div>
-      </ProgressGroup>
     </div>
   );
 }

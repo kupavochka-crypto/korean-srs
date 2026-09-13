@@ -41,6 +41,31 @@ export default function DictionaryScreen() {
         <p className="selection-hint">{t('dict.selectionHint', { count: selectedIds.size })}</p>
       )}
 
+      {words.length > 0 && !selectionActive && (
+        <div className="dict-review-row">
+          <button
+            className="secondary-btn"
+            onClick={() =>
+              selectedCategoryId
+                ? store.startCategoryReview(selectedCategoryId, 'all')
+                : store.startFilteredReview(words.map((w) => w.id), 'all')
+            }
+          >
+            <WIcon name="stack" size={16} /> {t('dict.reviewCards')}
+          </button>
+          <button
+            className="secondary-btn"
+            onClick={() =>
+              selectedCategoryId
+                ? store.startCategoryQuiz(selectedCategoryId, 'reverse')
+                : store.startFilteredQuiz(words.map((w) => w.id), 'reverse')
+            }
+          >
+            <WIcon name="patch-question" size={16} /> {t('dict.reviewQuiz')}
+          </button>
+        </div>
+      )}
+
       <div className="chips-row">
         <button
           className={`chip ${selectedCategoryId === null ? 'active' : ''}`}
@@ -83,10 +108,6 @@ export default function DictionaryScreen() {
           ))}
         </div>
       )}
-
-      <button className="fab" onClick={() => store.openAddWord()} aria-label={t('dict.addWordAria')}>
-        <WIcon name="plus" size={24} />
-      </button>
 
       {selectionActive && (
         <div className="bulk-toolbar">

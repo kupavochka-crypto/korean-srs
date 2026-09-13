@@ -17,10 +17,20 @@ export const XP_BY_RATING: Record<SrsRatingValue, number> = {
   4: 5,
 };
 
+export const WRITE_MODE_BONUS_XP = 2;
+export const PACK_COMPLETED_XP = 40;
+export const PACK_IMPORT_XP = 8;
+export const XP_WRITE_MODE_CORRECT = 4;
+export const XP_PACK_COMPLETED = 50;
+
 export function xpForReview(rating: SrsRatingValue, streak: number): number {
   const base = XP_BY_RATING[rating] ?? 0;
   const bonus = streak >= 3 ? 1 : 0;
   return base + bonus;
+}
+
+export function xpForWriteSuccess(streak: number): number {
+  return xpForReview(2, streak) + WRITE_MODE_BONUS_XP;
 }
 
 export function currentLevelIndex(xp: number, artists: Artist[]): number {

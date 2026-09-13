@@ -1,11 +1,16 @@
 import { SRS_RATINGS, type SrsRatingValue } from '../domain/srs-engine';
-import { colors } from '../theme/colors';
-
 const RATING_COLORS: Record<number, string> = {
-  1: colors.red,
-  2: colors.warning,
-  3: colors.success,
-  4: colors.blue,
+  1: 'var(--red)',
+  2: 'var(--warning)',
+  3: 'var(--success)',
+  4: 'var(--blue)',
+};
+
+const RATING_BACKGROUNDS: Record<number, string> = {
+  1: 'var(--red-soft)',
+  2: 'var(--warning-soft)',
+  3: 'var(--success-soft)',
+  4: 'var(--blue-soft)',
 };
 
 interface Props {
@@ -19,7 +24,7 @@ export default function SrsRatingBar({ onRate }: Props) {
         <button
           key={r.value}
           className="rating-btn"
-          style={{ background: `${RATING_COLORS[r.value]}18`, color: RATING_COLORS[r.value] }}
+          style={{ background: RATING_BACKGROUNDS[r.value], color: RATING_COLORS[r.value] }}
           onClick={() => onRate(r.value)}
         >
           <span>{r.label}</span>

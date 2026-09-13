@@ -1,10 +1,34 @@
 import { useSyncExternalStore } from 'react';
 import * as repo from '../db/repository';
-import type { Category, Difficulty, ImportedWordDraft, Progression, Achievement, Pack, QuizOption, QuizQuestion, Source, Word } from '../types';
+import type {
+  Category,
+  Difficulty,
+  DuplicateAction,
+  DuplicateWordPayload,
+  ImportedWordDraft,
+  Progression,
+  Achievement,
+  Pack,
+  Phrase,
+  QuizOption,
+  QuizQuestion,
+  Source,
+  Word,
+  LearningLanguage,
+} from '../types';
 import { toRomaja } from '../domain/romaja';
 import { speak } from '../domain/tts';
 import { randomGreeting, randomGifName, activeTheme } from '../domain/themes';
-import { xpForReview, todayMission, missionCompleted, newlyEarnedAchievements, type GamificationStats } from '../domain/gamification';
+import {
+  xpForReview,
+  todayMission,
+  missionCompleted,
+  newlyEarnedAchievements,
+  XP_WRITE_MODE_CORRECT,
+  XP_PACK_COMPLETED,
+  type GamificationStats,
+} from '../domain/gamification';
+import { packFullyImported, packReviewed } from '../domain/daily-challenge';
 import type { SrsRatingValue } from '../domain/srs-engine';
 import { newId } from '../db/schema';
 import {
@@ -22,8 +46,17 @@ import {
   storedColorTheme,
   saveColorTheme,
   applyColorTheme,
+  storedDailyWordGoal,
+  saveDailyWordGoal,
+  storedOnboardingCompleted,
+  storedLearningLanguage,
+  saveLearningLanguage,
+  pushRecentCategoryId,
+  storedSelectedMissionPackId,
+  saveSelectedMissionPackId,
   type ColorTheme,
 } from '../domain/settings';
+import { activeMissionPack, suggestedMissionPacks } from '../domain/daily-challenge';
 import { voiceCharacter } from '../domain/voice-chars';
 import { setLocale as applyLocale, getLocale as readLocale, type Locale } from '../domain/i18n';
 
@@ -49,6 +82,7 @@ export type Tab =
   | 'listening'
   | 'quiz'
   | 'dictionary'
+  | 'phrases'
   | 'progress'
   | 'gallery'
   | 'settings';
@@ -64,6 +98,27 @@ export const TAB_DEFS: { id: Tab; title: string; korean: string; icon: string }[
   { id: 'settings', title: 'Настройки', korean: '설정', icon: 'gear' },
 ];
 
+const COMPLETED_PACKS_KEY = 'completed_pack_ids';
+
+function storedCompletedPackIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(COMPLETED_PACKS_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw) as unknown;
+    return new Set(Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCompletedPackIds(ids: Set<string>) {
+  try {
+    localStorage.setItem(COMPLETED_PACKS_KEY, JSON.stringify([...ids]));
+  } catch {
+    // storage unavailable
+  }
+}
+
 export interface QuizRewardState {
   consecutiveCorrect: number;
   rewardGifName: string | null;
@@ -71,11 +126,12 @@ export interface QuizRewardState {
 
 function createStore() {
   let currentTab: Tab = 'home';
+  let tabStack: Tab[] = [];
   let allWords: Word[] = [];
   let categories: Category[] = [];
   let sources: Source[] = [];
   let packs: Pack[] = [];
-  let progression: Progression = { id: 'main', xp: 0, rewardedMissionDate: null };
+  let progression: Progression = { id: 'main', xp: 0, rewardedMissionDate: null, completedPackIds: [] };
   let achievements: Achievement[] = [];
 
   let searchQuery = '';
@@ -110,6 +166,26 @@ function createStore() {
   let cardVoiceId: string = storedCardVoice();
   let listenVoiceId: string = storedListenVoice();
   let colorTheme: ColorTheme = storedColorTheme();
+  let phrases: Phrase[] = [];
+  let dailyWordGoal = storedDailyWordGoal();
+  let learningLanguage: LearningLanguage = storedLearningLanguage();
+  let isOnboardingOpen = false;
+  let onboardingSkipWelcome = false;
+  let isTranslateOpen = false;
+  let translateInitialText = '';
+  let prefilledTranslation = '';
+  let duplicatePending: { existing: Word; incoming: DuplicateWordPayload } | null = null;
+  let duplicateQueue: DuplicateWordPayload[] = [];
+  let duplicateResolveCallback: ((added: number) => void) | null = null;
+  let quizWordPool: Word[] | null = null;
+  let quizSource: 'global' | 'category' | 'filtered' = 'global';
+  let quizCategoryId: string | null = null;
+  let writeInput = '';
+  let completedPackIds = storedCompletedPackIds();
+  let selectedMissionPackId = storedSelectedMissionPackId();
+  let isMissionPickOpen = false;
+  let isMissionStartOpen = false;
+  let pendingMissionStartPackId: string | null = null;
 
   const listeners = new Set<() => void>();
   let snapshot = { v: 0 };
@@ -124,7 +200,68 @@ function createStore() {
     categories = await repo.allCategories();
     sources = await repo.allSources();
     packs = await repo.allPacks();
+    phrases = await repo.allPhrases();
     emit();
+  }
+
+  async function checkDuplicate(korean: string): Promise<Word | undefined> {
+    return repo.findWordByKorean(korean);
+  }
+
+  async function insertWordFromPayload(payload: DuplicateWordPayload): Promise<void> {
+    const now = Date.now();
+    const finalRomaja = payload.romaja?.trim() || toRomaja(payload.korean);
+    const word: Word = {
+      id: newId(),
+      korean: payload.korean.trim(),
+      hanja: payload.hanja?.trim() || null,
+      pinyin: payload.pinyin?.trim() || null,
+      tones: payload.tones?.trim() || null,
+      language: payload.language ?? learningLanguage,
+      romaja: finalRomaja,
+      translation: payload.translation.trim(),
+      exampleSentence: payload.exampleSentence?.trim() || null,
+      exampleTranslation: payload.exampleTranslation?.trim() || null,
+      categoryId: payload.categoryId ?? null,
+      sourceId: payload.sourceId ?? null,
+      tags: payload.tags ?? [],
+      difficulty: payload.difficulty ?? 'Начальный',
+      createdAt: now,
+      intervalDays: 0,
+      easeFactor: 2.5,
+      repetitions: 0,
+      nextReviewAt: now,
+      lastResult: null,
+      totalReviews: 0,
+      correctReviews: 0,
+      masteredAt: null,
+    };
+    await repo.insertWord(word);
+    if (word.categoryId) pushRecentCategoryId(word.categoryId);
+  }
+
+  async function processDuplicateQueue(): Promise<number> {
+    let added = 0;
+    while (duplicateQueue.length > 0) {
+      const incoming = duplicateQueue[0];
+      const existing = await checkDuplicate(incoming.korean);
+      if (existing) {
+        duplicatePending = { existing, incoming };
+        emit();
+        return added;
+      }
+      await insertWordFromPayload(incoming);
+      duplicateQueue.shift();
+      added += 1;
+    }
+    return added;
+  }
+
+  async function continueAfterDuplicate(action: DuplicateAction) {
+    if (action === 'skip' || action === 'update' || action === 'keep_both') {
+      if (duplicateQueue.length > 0) duplicateQueue.shift();
+    }
+    await processDuplicateQueue();
   }
 
   async function loadGamification() {
@@ -216,6 +353,11 @@ function createStore() {
       await repo.initialize();
       await refresh();
       await loadGamification();
+      if (!storedOnboardingCompleted()) {
+        isOnboardingOpen = true;
+        onboardingSkipWelcome = false;
+        emit();
+      }
     },
 
     getTab: () => currentTab,
@@ -249,6 +391,9 @@ function createStore() {
     getIsPacksOpen: () => isPacksOpen,
     getIsSongImportOpen: () => isSongImportOpen,
     getPacks: () => packs,
+    getSelectedMissionPackId: () => selectedMissionPackId,
+    getActiveMissionPack: () => activeMissionPack(packs, selectedMissionPackId),
+    getSuggestedMissionPacks: () => suggestedMissionPacks(packs, allWords),
     getSelectedWordForDetail: () => selectedWordForDetail,
     getEditingWord: () => editingWord,
     getPrefilledKorean: () => prefilledKorean,
@@ -259,8 +404,29 @@ function createStore() {
     getCardVoice: () => voiceCharacter(cardVoiceId),
     getListenVoice: () => voiceCharacter(listenVoiceId),
     getLocale: () => readLocale(),
+    getPhrases: () => phrases,
+    getDailyWordGoal: () => dailyWordGoal,
+    getLearningLanguage: () => learningLanguage,
+    getIsOnboardingOpen: () => isOnboardingOpen,
+    getOnboardingSkipWelcome: () => onboardingSkipWelcome,
+    getIsTranslateOpen: () => isTranslateOpen,
+    getTranslateInitialText: () => translateInitialText,
+    getDuplicatePending: () => duplicatePending,
+    getWriteInput: () => writeInput,
+    getPrefilledTranslation: () => prefilledTranslation,
+    getCompletedPackIds: () => completedPackIds,
     setLocale(locale: Locale) {
       applyLocale(locale);
+      emit();
+    },
+    setDailyWordGoal(value: number) {
+      dailyWordGoal = Math.max(1, Math.floor(value));
+      saveDailyWordGoal(dailyWordGoal);
+      emit();
+    },
+    setLearningLanguage(lang: LearningLanguage) {
+      learningLanguage = lang;
+      saveLearningLanguage(lang);
       emit();
     },
 
@@ -268,9 +434,25 @@ function createStore() {
       return snapshot.v > 0;
     },
 
-    async selectTab(tab: Tab) {
+    canGoBack: () => tabStack.length > 0,
+
+    goBack() {
+      if (tabStack.length > 0) {
+        currentTab = tabStack.pop()!;
+      } else {
+        currentTab = 'home';
+      }
+      emit();
+    },
+
+    async selectTab(tab: Tab, options?: { fromTabBar?: boolean }) {
       if (tab !== 'listening' && currentTab === 'listening') {
         quizReward = { consecutiveCorrect: 0, rewardGifName: null };
+      }
+      if (options?.fromTabBar) {
+        tabStack = [];
+      } else if (tab !== currentTab) {
+        tabStack.push(currentTab);
       }
       currentTab = tab;
       emit();
@@ -278,7 +460,9 @@ function createStore() {
         await this.startDueReview();
       } else if (tab === 'listening' && (quizQuestion === null || quizQuestion.kind !== 'listen')) {
         await this.loadNextQuizQuestion('listen');
-      } else if (tab === 'quiz' && (quizQuestion === null || quizQuestion.kind !== 'reverse')) {
+      } else if (tab === 'quiz' && quizWordPool === null && (quizQuestion === null || quizQuestion.kind !== 'reverse')) {
+        quizSource = 'global';
+        quizCategoryId = null;
         await this.loadNextQuizQuestion('reverse');
       }
     },
@@ -310,6 +494,48 @@ function createStore() {
       this.speakCurrentCard();
     },
 
+    async startCategoryReview(categoryId: string, mode: 'due' | 'all' = 'due') {
+      const now = Date.now();
+      let pool = allWords.filter((w) => w.categoryId === categoryId);
+      if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
+      cardsQueue = pool.sort(() => Math.random() - 0.5);
+      currentCardIndex = 0;
+      isCardFlipped = false;
+      currentTab = 'cards';
+      emit();
+      this.speakCurrentCard();
+    },
+
+    async startFilteredReview(wordIds: string[], mode: 'due' | 'all' = 'due') {
+      const idSet = new Set(wordIds);
+      const now = Date.now();
+      let pool = allWords.filter((w) => idSet.has(w.id));
+      if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
+      cardsQueue = pool.sort(() => Math.random() - 0.5);
+      currentCardIndex = 0;
+      isCardFlipped = false;
+      currentTab = 'cards';
+      emit();
+      this.speakCurrentCard();
+    },
+
+    async startCategoryQuiz(categoryId: string, kind: 'listen' | 'reverse' | 'write' = 'reverse') {
+      quizWordPool = allWords.filter((w) => w.categoryId === categoryId);
+      quizSource = 'category';
+      quizCategoryId = categoryId;
+      currentTab = 'quiz';
+      await this.loadNextQuizQuestion(kind);
+    },
+
+    async startFilteredQuiz(wordIds: string[], kind: 'listen' | 'reverse' | 'write' = 'reverse') {
+      const idSet = new Set(wordIds);
+      quizWordPool = allWords.filter((w) => idSet.has(w.id));
+      quizSource = 'filtered';
+      quizCategoryId = null;
+      currentTab = 'quiz';
+      await this.loadNextQuizQuestion(kind);
+    },
+
     flipCard() {
       isCardFlipped = !isCardFlipped;
       emit();
@@ -329,23 +555,52 @@ function createStore() {
 
     speakCurrentCard() {
       if (currentCardIndex < cardsQueue.length) {
-        speak(cardsQueue[currentCardIndex].korean, voiceCharacter(cardVoiceId));
+        const word = cardsQueue[currentCardIndex];
+        const lang = word.language === 'zh' ? 'zh-CN' : 'ko-KR';
+        speak(word.korean, voiceCharacter(cardVoiceId), lang);
       }
     },
 
-    speakText(korean: string) {
-      speak(korean, voiceCharacter(cardVoiceId));
+    speakText(korean: string, language?: LearningLanguage) {
+      const lang = (language ?? learningLanguage) === 'zh' ? 'zh-CN' : 'ko-KR';
+      speak(korean, voiceCharacter(cardVoiceId), lang);
     },
 
-    async loadNextQuizQuestion(kind: 'listen' | 'reverse') {
-      const words = allWords;
+    async loadNextQuizQuestion(kind: 'listen' | 'reverse' | 'write') {
+      const words = quizWordPool ?? allWords.filter((w) => (w.language ?? 'ko') === learningLanguage);
+      if (kind === 'write') {
+        if (words.length < 1) {
+          quizQuestion = null;
+          emit();
+          return;
+        }
+        const target = words[Math.floor(Math.random() * words.length)];
+        const answer = target.korean;
+        quizQuestion = {
+          kind: 'write',
+          targetWordId: target.id,
+          prompt: target.translation,
+          options: [],
+          correctOptionIndex: 0,
+          expectedAnswer: answer,
+          source: quizSource,
+          categoryId: quizCategoryId,
+        };
+        writeInput = '';
+        selectedOptionIndex = null;
+        isAnswerChecked = false;
+        emit();
+        return;
+      }
+
       if (words.length < 2) {
         quizQuestion = null;
         emit();
         return;
       }
       const target = words[Math.floor(Math.random() * words.length)];
-      const keyOf = (w: Word) => (kind === 'listen' ? w.translation : w.korean);
+      const displayText = (w: Word) => w.korean;
+      const keyOf = (w: Word) => (kind === 'listen' ? w.translation : displayText(w));
       const targetKey = keyOf(target);
 
       const used = new Set([targetKey]);
@@ -367,11 +622,13 @@ function createStore() {
         options = [{ text: target.translation }];
         distractors.forEach((d) => options.push({ text: d.translation }));
         options.sort(() => Math.random() - 0.5);
-        prompt = target.korean;
-        promptRomaja = target.romaja;
+        prompt = displayText(target);
+        promptRomaja = target.language === 'zh' ? target.pinyin ?? undefined : target.romaja;
       } else {
-        options = [{ text: target.korean, romaja: target.romaja }];
-        distractors.forEach((d) => options.push({ text: d.korean, romaja: d.romaja }));
+        options = [{ text: displayText(target), romaja: target.romaja }];
+        distractors.forEach((d) =>
+          options.push({ text: displayText(d), romaja: d.language === 'zh' ? d.pinyin ?? undefined : d.romaja })
+        );
         options.sort(() => Math.random() - 0.5);
         prompt = target.translation;
         promptRomaja = undefined;
@@ -391,7 +648,30 @@ function createStore() {
       isAnswerChecked = false;
       quizReward = { rewardGifName: null, consecutiveCorrect: quizReward.consecutiveCorrect };
       emit();
-      if (kind === 'listen') speak(target.korean, voiceCharacter(listenVoiceId));
+      if (kind === 'listen') speak(displayText(target), voiceCharacter(listenVoiceId));
+    },
+
+    setWriteInput(value: string) {
+      writeInput = value;
+      emit();
+    },
+
+    async checkWriteAnswer() {
+      const q = quizQuestion;
+      if (!q || q.kind !== 'write' || !q.expectedAnswer) return;
+      isAnswerChecked = true;
+      quizTotalCount += 1;
+      const normalized = (s: string) => s.trim().normalize('NFC').replace(/\s+/g, '');
+      const isCorrect = normalized(writeInput) === normalized(q.expectedAnswer);
+      if (isCorrect) {
+        quizScore += 1;
+        progression = { ...progression, xp: progression.xp + XP_WRITE_MODE_CORRECT };
+        await repo.putProgression(progression);
+        const word = allWords.find((w) => w.id === q.targetWordId);
+        if (word) await repo.recordReview(word, 2);
+        await refresh();
+      }
+      emit();
     },
 
     selectQuizOption(index: number) {
@@ -451,6 +731,7 @@ function createStore() {
       isAddWordOpen = false;
       editingWord = null;
       prefilledKorean = '';
+      prefilledTranslation = '';
       emit();
     },
 
@@ -502,6 +783,36 @@ function createStore() {
       emit();
     },
 
+    openOnboarding(skipWelcome = false) {
+      isOnboardingOpen = true;
+      onboardingSkipWelcome = skipWelcome;
+      emit();
+    },
+
+    closeOnboarding() {
+      isOnboardingOpen = false;
+      emit();
+    },
+
+    openTranslate(text = '') {
+      translateInitialText = text;
+      isTranslateOpen = true;
+      emit();
+    },
+
+    closeTranslate() {
+      isTranslateOpen = false;
+      translateInitialText = '';
+      emit();
+    },
+
+    openAddWordFromTranslate(korean: string, translation: string) {
+      prefilledKorean = korean;
+      prefilledTranslation = translation;
+      isAddWordOpen = true;
+      emit();
+    },
+
     openPacks() {
       isPacksOpen = true;
       emit();
@@ -512,13 +823,131 @@ function createStore() {
       emit();
     },
 
+    openMissionPick() {
+      isMissionPickOpen = true;
+      emit();
+    },
+
+    closeMissionPick() {
+      isMissionPickOpen = false;
+      emit();
+    },
+
+    getIsMissionPickOpen: () => isMissionPickOpen,
+
+    selectMissionPack(packId: string | null, options?: { promptStart?: boolean }) {
+      selectedMissionPackId = packId?.trim() ?? '';
+      saveSelectedMissionPackId(packId);
+      isMissionPickOpen = false;
+      if (packId?.trim() && options?.promptStart !== false) {
+        pendingMissionStartPackId = packId.trim();
+        isMissionStartOpen = true;
+      } else {
+        pendingMissionStartPackId = null;
+        isMissionStartOpen = false;
+      }
+      emit();
+    },
+
+    getPendingMissionStartPackId: () => pendingMissionStartPackId,
+    getIsMissionStartOpen: () => isMissionStartOpen,
+
+    dismissMissionStart() {
+      isMissionStartOpen = false;
+      pendingMissionStartPackId = null;
+      emit();
+    },
+
+    openMissionStart(packId?: string) {
+      const id = (packId ?? selectedMissionPackId)?.trim();
+      if (!id) return;
+      pendingMissionStartPackId = id;
+      isMissionStartOpen = true;
+      emit();
+    },
+
+    async beginMissionTraining(packId: string) {
+      const pack = packs.find((p) => p.id === packId);
+      if (!pack) return;
+
+      isMissionStartOpen = false;
+      pendingMissionStartPackId = null;
+
+      const packKoreans = new Set(pack.wordDefs.map((d) => d.korean));
+      let pool = allWords.filter((w) => packKoreans.has(w.korean));
+
+      if (pool.length < pack.wordDefs.length) {
+        await this.addPack(packId);
+        await refresh();
+        if (duplicatePending) {
+          emit();
+          return;
+        }
+        pool = allWords.filter((w) => packKoreans.has(w.korean));
+      }
+
+      if (pool.length === 0) {
+        emit();
+        return;
+      }
+
+      const category =
+        categories.find((c) => c.name === pack.title) ??
+        (await repo.findCategoryByName(pack.title));
+
+      const now = Date.now();
+      const categoryPool = category
+        ? allWords.filter((w) => w.categoryId === category.id)
+        : pool;
+
+      const trainPool = categoryPool.length > 0 ? categoryPool : pool;
+      const hasDue = trainPool.some((w) => w.nextReviewAt <= now);
+
+      if (category && hasDue) {
+        await this.startCategoryReview(category.id, 'due');
+      } else if (category && trainPool.length > 0) {
+        await this.startCategoryReview(category.id, 'all');
+      } else {
+        await this.startFilteredReview(
+          trainPool.map((w) => w.id),
+          hasDue ? 'due' : 'all'
+        );
+      }
+    },
+
     async addPack(packId: string) {
       const pack = packs.find((p) => p.id === packId);
       if (!pack) return;
-      await repo.addPackWords(pack);
-      await refresh();
-      await evaluateDailyGamification();
+      const category = await repo.findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
+      const payloads: DuplicateWordPayload[] = pack.wordDefs.map((def) => ({
+        korean: def.korean,
+        translation: def.translation,
+        hanja: def.hanja ?? null,
+        exampleSentence: def.exampleSentence ?? null,
+        exampleTranslation: def.exampleTranslation ?? null,
+        categoryId: category.id,
+        sourceId: pack.sourceId,
+        tags: def.tags ?? [],
+        difficulty: def.difficulty ?? pack.difficulty,
+        language: learningLanguage,
+      }));
+      await this.enqueueWordsForImport(payloads);
+      await this.checkPackCompletion(packId);
+      if (!duplicatePending) await evaluateDailyGamification();
       emit();
+    },
+
+    async checkPackCompletion(packId: string) {
+      const pack = packs.find((p) => p.id === packId);
+      if (!pack || completedPackIds.has(packId)) return;
+      const koreanSet = new Set(allWords.map((w) => w.korean));
+      if (packFullyImported(pack, koreanSet) && packReviewed(pack, allWords)) {
+        completedPackIds = new Set(completedPackIds);
+        completedPackIds.add(packId);
+        saveCompletedPackIds(completedPackIds);
+        progression = { ...progression, xp: progression.xp + XP_PACK_COMPLETED };
+        await repo.putProgression(progression);
+      }
     },
 
     openWordDetail(word: Word) {
@@ -556,7 +985,7 @@ function createStore() {
     setColorTheme(theme: ColorTheme) {
       colorTheme = theme;
       saveColorTheme(theme);
-      applyColorTheme();
+      applyColorTheme(theme);
       emit();
     },
 
@@ -581,6 +1010,8 @@ function createStore() {
     async saveWord(params: {
       korean: string;
       hanja: string;
+      pinyin?: string;
+      tones?: string;
       romaja: string;
       translation: string;
       exampleSentence: string;
@@ -590,7 +1021,6 @@ function createStore() {
       difficulty: Difficulty;
     }) {
       const finalRomaja = params.romaja.trim() || toRomaja(params.korean);
-      const now = Date.now();
       const sourceId = params.sourceId?.trim() ? params.sourceId.trim() : null;
 
       if (editingWord) {
@@ -599,6 +1029,8 @@ function createStore() {
           ...w,
           korean: params.korean.trim(),
           hanja: params.hanja.trim() || null,
+          pinyin: params.pinyin?.trim() || null,
+          tones: params.tones?.trim() || null,
           romaja: finalRomaja,
           translation: params.translation.trim(),
           exampleSentence: params.exampleSentence.trim() || null,
@@ -609,42 +1041,103 @@ function createStore() {
         };
         await repo.updateWord(updated);
         cardsQueue = cardsQueue.map((w) => (w.id === updated.id ? updated : w));
-      } else {
-        const word: Word = {
-          id: newId(),
-          korean: params.korean.trim(),
-          hanja: params.hanja.trim() || null,
-          romaja: finalRomaja,
-          translation: params.translation.trim(),
-          exampleSentence: params.exampleSentence.trim() || null,
-          exampleTranslation: params.exampleTranslation.trim() || null,
-          categoryId: params.categoryId,
-          sourceId,
-          tags: [],
-          difficulty: params.difficulty,
-          createdAt: now,
-          intervalDays: 0,
-          easeFactor: 2.5,
-          repetitions: 0,
-          nextReviewAt: now,
-          lastResult: null,
-          totalReviews: 0,
-          correctReviews: 0,
-          masteredAt: null,
-        };
-        await repo.insertWord(word);
+        if (params.categoryId) pushRecentCategoryId(params.categoryId);
+        isAddWordOpen = false;
+        editingWord = null;
+        prefilledKorean = '';
+        prefilledTranslation = '';
+        await refresh();
+        await evaluateDailyGamification();
+        emit();
+        return;
       }
 
+      const payload: DuplicateWordPayload = {
+        korean: params.korean.trim(),
+        hanja: params.hanja.trim() || null,
+        pinyin: params.pinyin?.trim() || null,
+        tones: params.tones?.trim() || null,
+        romaja: finalRomaja,
+        translation: params.translation.trim(),
+        exampleSentence: params.exampleSentence.trim() || null,
+        exampleTranslation: params.exampleTranslation.trim() || null,
+        categoryId: params.categoryId,
+        sourceId,
+        difficulty: params.difficulty,
+        language: learningLanguage,
+      };
+
+      const existing = await checkDuplicate(payload.korean);
+      if (existing) {
+        duplicatePending = { existing, incoming: payload };
+        emit();
+        return;
+      }
+
+      await insertWordFromPayload(payload);
       isAddWordOpen = false;
       editingWord = null;
       prefilledKorean = '';
+      prefilledTranslation = '';
       await refresh();
       await evaluateDailyGamification();
       emit();
     },
 
+    async resolveDuplicate(action: DuplicateAction) {
+      const pending = duplicatePending;
+      if (!pending) return;
+      duplicatePending = null;
+
+      if (action === 'abort') {
+        duplicateQueue = [];
+        duplicateResolveCallback = null;
+        emit();
+        return;
+      }
+
+      if (action === 'update') {
+        const updated: Word = {
+          ...pending.existing,
+          translation: pending.incoming.translation,
+          hanja: pending.incoming.hanja ?? pending.existing.hanja,
+          romaja: pending.incoming.romaja ?? pending.existing.romaja,
+          exampleSentence: pending.incoming.exampleSentence ?? pending.existing.exampleSentence,
+          exampleTranslation: pending.incoming.exampleTranslation ?? pending.existing.exampleTranslation,
+          categoryId: pending.incoming.categoryId ?? pending.existing.categoryId,
+          sourceId: pending.incoming.sourceId ?? pending.existing.sourceId,
+        };
+        await repo.updateWord(updated);
+      } else if (action === 'keep_both') {
+        await insertWordFromPayload(pending.incoming);
+      }
+
+      await continueAfterDuplicate(action);
+
+      if (duplicateQueue.length === 0 && !duplicatePending) {
+        isAddWordOpen = false;
+        isScanOcrOpen = false;
+        isSongImportOpen = false;
+        duplicateResolveCallback?.(1);
+        duplicateResolveCallback = null;
+      }
+      await refresh();
+      await evaluateDailyGamification();
+      emit();
+    },
+
+    async enqueueWordsForImport(payloads: DuplicateWordPayload[]): Promise<number> {
+      duplicateQueue = [...payloads];
+      const added = await processDuplicateQueue();
+      if (!duplicatePending && duplicateQueue.length === 0) {
+        await refresh();
+        await evaluateDailyGamification();
+      }
+      return added;
+    },
+
     async importWords(drafts: ImportedWordDraft[]) {
-      const now = Date.now();
+      const payloads: DuplicateWordPayload[] = [];
       for (const draft of drafts) {
         const korean = draft.korean.trim();
         const translation = draft.translation.trim();
@@ -653,33 +1146,17 @@ function createStore() {
         const category = categories.find((c) =>
           tags.some((t) => t.toLowerCase() === c.name.toLowerCase())
         );
-        const word: Word = {
-          id: newId(),
+        payloads.push({
           korean,
-          hanja: null,
-          romaja: toRomaja(korean),
           translation,
-          exampleSentence: null,
-          exampleTranslation: null,
-          categoryId: category?.id ?? null,
-          sourceId: null,
+          categoryId: category?.id ?? selectedCategoryId,
           tags,
           difficulty: 'Начальный',
-          createdAt: now,
-          intervalDays: 0,
-          easeFactor: 2.5,
-          repetitions: 0,
-          nextReviewAt: now,
-          lastResult: null,
-          totalReviews: 0,
-          correctReviews: 0,
-          masteredAt: null,
-        };
-        await repo.insertWord(word);
+          language: learningLanguage,
+        });
       }
-      isScanOcrOpen = false;
-      await refresh();
-      await evaluateDailyGamification();
+      await this.enqueueWordsForImport(payloads);
+      if (!duplicatePending) isScanOcrOpen = false;
       emit();
     },
 
@@ -689,19 +1166,32 @@ function createStore() {
 
       const category = await repo.findOrCreateCategory(trimmed);
       const source = await repo.findOrCreateSongSource(trimmed);
-      const toImport = drafts.filter((d) => d.korean.trim() && d.translation.trim());
-      const added = await repo.importSongWords({
-        drafts: toImport,
-        categoryId: category.id,
-        sourceId: source.id,
-        soundName: trimmed,
-      });
+      const payloads: DuplicateWordPayload[] = drafts
+        .filter((d) => d.korean.trim() && d.translation.trim())
+        .map((d) => ({
+          korean: d.korean.trim(),
+          translation: d.translation.trim(),
+          categoryId: category.id,
+          sourceId: source.id,
+          tags: [...(d.tags ?? []), trimmed],
+          difficulty: 'Начальный' as Difficulty,
+          language: learningLanguage,
+        }));
 
-      isSongImportOpen = false;
+      const before = allWords.length;
+      await this.enqueueWordsForImport(payloads);
+      if (!duplicatePending) isSongImportOpen = false;
       await refresh();
-      await evaluateDailyGamification();
       emit();
-      return added;
+      return allWords.length - before;
+    },
+
+    async dailyActivity(days: number) {
+      return repo.dailyActivityLastDays(days);
+    },
+
+    async weeklyGrowth() {
+      return repo.weeklyWordsGrowth();
     },
 
     async deleteWord(word: Word) {

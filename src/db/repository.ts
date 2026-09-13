@@ -2,13 +2,22 @@ import { db, newId } from './schema';
 import type {
   Achievement,
   Category,
+  DailyActivity,
   ImportedWordDraft,
   Pack,
+  Phrase,
   Progression,
   ReviewRecord,
   Source,
   Word,
 } from '../types';
+import {
+  ALL_PHRASE_DEFS,
+  BTS_PHRASE_PACK_ID,
+  SKZ_PHRASE_PACK_ID,
+  seedAllPhrases,
+  seedPhrasesFromDefs,
+} from '../domain/phrases';
 import { DEFAULT_CATEGORIES, NOTEBOOK_WORDS } from '../domain/seed-data';
 import { toRomaja } from '../domain/romaja';
 import { allSeedSources } from '../domain/sources';
@@ -76,9 +85,30 @@ export async function ensureNotebookWords(): Promise<void> {
       totalReviews: 0,
       correctReviews: 0,
       masteredAt: null,
+      language: 'ko',
+      pinyin: null,
+      tones: null,
     };
   });
   await db.words.bulkAdd(words);
+}
+
+export function normalizeKorean(text: string): string {
+  return text.trim().normalize('NFC').replace(/\s+/g, '');
+}
+
+export async function findWordByKorean(korean: string): Promise<Word | undefined> {
+  const norm = normalizeKorean(korean);
+  if (!norm) return undefined;
+  const all = await db.words.toArray();
+  return all.find((w) => normalizeKorean(w.korean) === norm);
+}
+
+export async function findSimilarByTranslation(translation: string): Promise<Word | undefined> {
+  const norm = translation.trim().toLowerCase();
+  if (!norm) return undefined;
+  const all = await db.words.toArray();
+  return all.find((w) => w.translation.trim().toLowerCase() === norm);
 }
 
 export async function initialize(): Promise<void> {
@@ -86,8 +116,55 @@ export async function initialize(): Promise<void> {
   await ensureNotebookWords();
   await ensureSeedSources();
   await ensureSeedPacks();
+  await ensureSeedPhrases();
   await ensureAchievements();
   await backfillMasteredAt();
+}
+
+export async function ensureSeedPhrases(): Promise<void> {
+  const count = await db.phrases.count();
+  if (count === 0) {
+    await db.phrases.bulkAdd(seedAllPhrases());
+    return;
+  }
+
+  let all = await db.phrases.toArray();
+  const seen = new Set<string>();
+  const dups: string[] = [];
+  for (const p of all) {
+    if (seen.has(p.korean)) dups.push(p.id);
+    else seen.add(p.korean);
+  }
+  if (dups.length > 0) await db.phrases.bulkDelete(dups);
+
+  const existingKoreans = new Set(all.map((p) => p.korean));
+  const missingDefs = ALL_PHRASE_DEFS.filter((def) => !existingKoreans.has(def.korean));
+  if (missingDefs.length > 0) {
+    await db.phrases.bulkAdd(seedPhrasesFromDefs(missingDefs, Date.now()));
+    all = await db.phrases.toArray();
+  }
+
+  const sourceByKorean = new Map(
+    ALL_PHRASE_DEFS.map((def) => [
+      def.korean,
+      def.sourcePackId ?? (def.themeId === 'stray-kids' ? SKZ_PHRASE_PACK_ID : BTS_PHRASE_PACK_ID),
+    ])
+  );
+  for (const phrase of all) {
+    const nextPackId = sourceByKorean.get(phrase.korean);
+    if (!nextPackId || phrase.sourcePackId === nextPackId) continue;
+    if (
+      !phrase.sourcePackId ||
+      phrase.sourcePackId === BTS_PHRASE_PACK_ID ||
+      phrase.sourcePackId === SKZ_PHRASE_PACK_ID
+    ) {
+      await db.phrases.update(phrase.id, { sourcePackId: nextPackId });
+    }
+  }
+}
+
+export async function allPhrases(): Promise<Phrase[]> {
+  return db.phrases.orderBy('createdAt').toArray();
 }
 
 export async function ensureSeedPacks(): Promise<void> {
@@ -103,6 +180,7 @@ export async function allPacks(): Promise<Pack[]> {
 export async function addPackWords(pack: Pack): Promise<number> {
   const existing = await db.words.toArray();
   const koreanSet = new Set(existing.map((w) => w.korean));
+  const category = await findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
   const now = Date.now();
   let added = 0;
   for (const def of pack.wordDefs) {
@@ -115,7 +193,7 @@ export async function addPackWords(pack: Pack): Promise<number> {
       translation: def.translation,
       exampleSentence: def.exampleSentence ?? null,
       exampleTranslation: def.exampleTranslation ?? null,
-      categoryId: null,
+      categoryId: category.id,
       sourceId: pack.sourceId,
       tags: def.tags ?? [],
       difficulty: def.difficulty ?? pack.difficulty,
@@ -128,6 +206,9 @@ export async function addPackWords(pack: Pack): Promise<number> {
       totalReviews: 0,
       correctReviews: 0,
       masteredAt: null,
+      language: 'ko',
+      pinyin: null,
+      tones: null,
     };
     await db.words.add(word);
     koreanSet.add(def.korean);
@@ -169,7 +250,7 @@ export async function markAchievementsEarned(ids: string[], now: number = Date.n
 export async function getProgression(): Promise<Progression> {
   const existing = await db.progression.get('main');
   if (existing) return existing;
-  const fresh: Progression = { id: 'main', xp: 0, rewardedMissionDate: null };
+  const fresh: Progression = { id: 'main', xp: 0, rewardedMissionDate: null, completedPackIds: [] };
   await db.progression.put(fresh);
   return fresh;
 }
@@ -332,6 +413,9 @@ export async function importSongWords(params: {
       totalReviews: 0,
       correctReviews: 0,
       masteredAt: null,
+      language: 'ko',
+      pinyin: null,
+      tones: null,
     };
     await db.words.add(word);
     koreanSet.add(korean);
@@ -388,6 +472,37 @@ export async function recordReview(
 export async function todayReviewsCount(now: number = Date.now()): Promise<number> {
   const today = dateString(now);
   return db.reviews.where('dateString').equals(today).count();
+}
+
+export async function wordsCreatedOnDate(dateStr: string): Promise<number> {
+  const all = await db.words.toArray();
+  return all.filter((w) => dateString(w.createdAt) === dateStr).length;
+}
+
+export async function dailyActivityLastDays(days: number, now: number = Date.now()): Promise<DailyActivity[]> {
+  const result: DailyActivity[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const ds = dateString(d.getTime());
+    const reviews = await db.reviews.where('dateString').equals(ds).count();
+    const newWords = await wordsCreatedOnDate(ds);
+    result.push({ dateString: ds, newWords, reviews });
+  }
+  return result;
+}
+
+export async function weeklyWordsGrowth(): Promise<number> {
+  const now = Date.now();
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const thisWeekStart = now - weekMs;
+  const prevWeekStart = now - 2 * weekMs;
+  const all = await db.words.toArray();
+  const thisWeek = all.filter((w) => w.createdAt >= thisWeekStart).length;
+  const prevWeek = all.filter((w) => w.createdAt >= prevWeekStart && w.createdAt < thisWeekStart).length;
+  if (prevWeek === 0) return thisWeek > 0 ? 100 : 0;
+  return Math.round(((thisWeek - prevWeek) / prevWeek) * 100);
 }
 
 export async function streakCount(): Promise<number> {

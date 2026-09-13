@@ -6,6 +6,8 @@ interface Props {
   color: string;
   background?: string;
   className?: string;
+  /** 0–1 fill of the ring; default 0.75 for legacy decorative use */
+  progress?: number;
 }
 
 export default function CircularStat({
@@ -14,12 +16,15 @@ export default function CircularStat({
   koreanLabel,
   size = 100,
   color,
-  background = '#ffffff',
+  background = 'var(--surface)',
   className = '',
+  progress = 0.75,
 }: Props) {
   const stroke = size * 0.08;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(1, progress));
+  const dash = circumference * clamped;
 
   return (
     <div className={`circular-stat ${className}`.trim()}>
@@ -40,7 +45,7 @@ export default function CircularStat({
           fill="none"
           stroke={color}
           strokeWidth={stroke}
-          strokeDasharray={`${circumference * 0.75} ${circumference}`}
+          strokeDasharray={`${dash} ${circumference - dash}`}
           strokeLinecap="round"
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />

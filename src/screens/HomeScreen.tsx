@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
-import CircularStat from '../components/CircularStat';
+import HomeActivityStats from '../components/HomeActivityStats';
 import { greetingById, portraitUrl, randomGreeting } from '../domain/themes';
 import { artistsOfActiveTheme } from '../domain/sources';
 import {
-  currentArtist,
+  currentLevelIndex,
   nextArtist,
   levelProgress,
   todayMission,
   missionProgressRatio,
 } from '../domain/gamification';
-import { colors } from '../theme/colors';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
+import { packImportedCount } from '../domain/daily-challenge';
 
 export default function HomeScreen() {
   useStore();
@@ -22,10 +22,17 @@ export default function HomeScreen() {
   const greeting = greetingById(store.getGreetingId());
   const xp = store.getXp();
   const artists = artistsOfActiveTheme();
-  const mentor = currentArtist(xp, artists);
+  const levelIdx = currentLevelIndex(xp, artists);
+  const mentor = levelIdx >= 0 ? artists[levelIdx] : null;
   const next = nextArtist(xp, artists);
+  const displayArtist = mentor ?? next;
+  const level = levelIdx + 1;
   const progress = Math.round(levelProgress(xp, artists) * 100);
   const mission = todayMission(new Date());
+  const challengePack = store.getActiveMissionPack();
+  const koreanSet = new Set(store.getWords().map((w) => w.korean));
+  const challengeStats = challengePack ? packImportedCount(challengePack, koreanSet) : { imported: 0, total: 0 };
+  const challengeProgress = challengeStats.total > 0 ? challengeStats.imported / challengeStats.total : 0;
 
   const [todayReviews, setTodayReviews] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -52,13 +59,26 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      {mentor ? (
+      {displayArtist && (
         <div className="card mentor-card" onClick={() => store.selectTab('gallery')}>
-          <img className="mentor-avatar" src={portraitUrl(mentor.imageName)} alt={mentor.stageName} />
+          <img
+            className={`mentor-avatar${mentor ? '' : ' mentor-avatar--locked'}`}
+            src={portraitUrl(displayArtist.imageName)}
+            alt={displayArtist.stageName}
+          />
           <div className="mentor-body">
             <p className="mentor-title">
-              {t('home.mentor')} — {mentor.stageName}{' '}
-              <span className="mentor-role">{mentor.role}</span>
+              {mentor ? (
+                <>
+                  {t('home.mentor.level', { n: level })} · {mentor.stageName}{' '}
+                  <span className="mentor-role">{mentor.role}</span>
+                </>
+              ) : (
+                <>
+                  {t('home.mentor.level', { n: 0 })} ·{' '}
+                  {t('home.mentor.next', { name: displayArtist.stageName })}
+                </>
+              )}
             </p>
             <div className="progress-track">
               <div className="progress-fill" style={{ width: `${progress}%` }} />
@@ -70,37 +90,17 @@ export default function HomeScreen() {
             </p>
           </div>
         </div>
-      ) : (
-        <div className="card mentor-card" onClick={() => store.selectTab('gallery')}>
-          <img className="mentor-avatar" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
-          <div className="mentor-body">
-            <p className="mentor-title">{t('home.mentor.none')}</p>
-            <p className="mentor-hint">
-              {xp} XP
-            </p>
-          </div>
-        </div>
       )}
 
       <h2 className="section-title">{t('home.sectionStats')}</h2>
-      <div className="stats-row">
-        <CircularStat
-          value={`${wordsCount}`}
-          label={t('home.stats.words')}
-          koreanLabel="총 단어"
-          color={colors.charcoal}
-          className="circular-stat-charcoal"
-        />
-        <CircularStat
-          value={`${due.length}`}
-          label={t('home.stats.toReview')}
-          koreanLabel="오늘 복습"
-          color={colors.red}
-          background={due.length > 0 ? 'var(--red-soft)' : 'var(--surface)'}
-        />
-      </div>
+      <HomeActivityStats
+        wordsCount={wordsCount}
+        dueCount={due.length}
+        dailyGoal={store.getDailyWordGoal()}
+        todayReviews={todayReviews}
+      />
 
-      <button className="primary-btn mb24" onClick={() => store.startDueReview()}>
+      <button className="primary-btn home-primary-cta mb24" onClick={() => store.startDueReview()}>
         <span>
           <span>
             {due.length > 0
@@ -111,7 +111,37 @@ export default function HomeScreen() {
         </span>
       </button>
 
-      <div className="card mission-card">
+      {challengePack && (
+        <div className="card challenge-card mb24">
+          <div className="challenge-head">
+            <span className="challenge-emoji">{challengePack.emoji}</span>
+            <div>
+              <p className="challenge-title">{t('home.challenge')}</p>
+              <p className="challenge-sub">{challengePack.title}</p>
+            </div>
+            <span className="challenge-pct">{Math.round(challengeProgress * 100)}%</span>
+          </div>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${Math.round(challengeProgress * 100)}%` }} />
+          </div>
+          <div className="challenge-actions">
+            <button className="secondary-btn" onClick={() => store.openMissionPick()}>
+              {t('home.challengePick')}
+            </button>
+            {challengeProgress >= 1 ? (
+              <button className="primary-btn challenge-start-btn" onClick={() => store.openMissionStart(challengePack.id)}>
+                {t('missionStart.start')}
+              </button>
+            ) : (
+              <button className="secondary-btn" onClick={() => store.openMissionStart(challengePack.id)}>
+                {t('home.challengeStart')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="card daily-goal-card">
         <div className="mission-head">
           <span className="mission-icon"><WIcon name="bullseye" /></span>
           <div className="mission-body">
@@ -140,7 +170,7 @@ export default function HomeScreen() {
       <h2 className="section-title">{t('home.sectionQuick')}</h2>
       <div className="quick-actions">
         <button className="quick-action card-flat" onClick={() => store.openAddWord()}>
-          <span className="quick-icon" style={{ background: `${colors.red}1a`, color: colors.red }}>
+          <span className="quick-icon" style={{ background: 'var(--red-soft)', color: 'var(--red)' }}>
             <WIcon name="plus" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.add')}</span>
@@ -157,14 +187,14 @@ export default function HomeScreen() {
           <span className="quick-subtitle">텍스트 스캔 (OCR)</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.openSongImport()}>
-          <span className="quick-icon" style={{ background: `${colors.accentPink}1a`, color: colors.accentPink }}>
+          <span className="quick-icon" style={{ background: 'var(--pink-soft)', color: 'var(--accent-pink)' }}>
             <WIcon name="headphones" size={20} />
           </span>
           <span className="quick-title">{t('home.quick.song')}</span>
           <span className="quick-subtitle">노래로 배우기</span>
         </button>
         <button className="quick-action card-flat" onClick={() => store.startDifficultReview()}>
-          <span className="quick-icon" style={{ background: `${colors.warning}1a`, color: colors.warning }}>
+          <span className="quick-icon" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
             <WIcon name="exclamation-triangle" size={20} />
           </span>
           <span className="quick-title">
@@ -172,19 +202,19 @@ export default function HomeScreen() {
           </span>
           <span className="quick-subtitle">어려운 단어 복습</span>
         </button>
-        <button className="quick-action card-flat" onClick={() => store.openGuide()}>
-          <span className="quick-icon" style={{ background: `${colors.blue}1a`, color: colors.blue }}>
-            <WIcon name="question-circle" size={20} />
+        <button className="quick-action card-flat" onClick={() => store.selectTab('phrases')}>
+          <span className="quick-icon" style={{ background: 'var(--pink-soft)', color: 'var(--accent-pink)' }}>
+            <WIcon name="chat-quote" size={20} />
           </span>
-          <span className="quick-title">{t('home.quick.help')}</span>
-          <span className="quick-subtitle">사용 방법</span>
+          <span className="quick-title">{t('home.quick.phrases')}</span>
+          <span className="quick-subtitle">표현</span>
         </button>
-        <button className="quick-action card-flat" onClick={() => store.openPacks()}>
-          <span className="quick-icon" style={{ background: `${colors.success}1a`, color: colors.success }}>
-            <WIcon name="box-seam" size={20} />
+        <button className="quick-action card-flat" onClick={() => store.openTranslate()}>
+          <span className="quick-icon" style={{ background: 'var(--blue-soft)', color: 'var(--blue)' }}>
+            <WIcon name="globe2" size={20} />
           </span>
-          <span className="quick-title">{t('home.quick.packs')}</span>
-          <span className="quick-subtitle">단어 팩</span>
+          <span className="quick-title">{t('home.quick.translate')}</span>
+          <span className="quick-subtitle">번역</span>
         </button>
       </div>
 

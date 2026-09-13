@@ -1,3 +1,5 @@
+import type { LearningLanguage } from '../types';
+
 const REWARD_THRESHOLD_KEY = 'reward_threshold';
 const GEMINI_PROXY_KEY = 'gemini_proxy_url';
 const THEME_KEY = 'theme_id';
@@ -6,9 +8,18 @@ const GREETING_KEY_PREFIX = 'greeting_';
 const CARD_VOICE_KEY = 'voice_card';
 const LISTEN_VOICE_KEY = 'voice_listen';
 const COLOR_THEME_KEY = 'color_theme';
+const DAILY_WORD_GOAL_KEY = 'daily_word_goal';
+const ONBOARDING_KEY = 'onboarding_completed';
+const MYMEMORY_EMAIL_KEY = 'mymemory_email';
+const LEARNING_LANG_KEY = 'learning_language';
+const RECENT_CATEGORIES_KEY = 'recent_category_ids';
+const SELECTED_MISSION_PACK_KEY = 'selected_mission_pack_id';
 
 export type ColorTheme = 'system' | 'light' | 'dark';
+
+export const DEFAULT_DAILY_WORD_GOAL = 10;
 export const DEFAULT_COLOR_THEME: ColorTheme = 'system';
+export const DEFAULT_LEARNING_LANGUAGE: LearningLanguage = 'ko';
 
 export function storedColorTheme(): ColorTheme {
   try {
@@ -28,8 +39,8 @@ export function saveColorTheme(theme: ColorTheme) {
   }
 }
 
-export function resolveColorTheme(): 'light' | 'dark' {
-  const theme = storedColorTheme();
+export function resolveColorTheme(preference?: ColorTheme): 'light' | 'dark' {
+  const theme = preference ?? storedColorTheme();
   if (theme === 'light') return 'light';
   if (theme === 'dark') return 'dark';
   return typeof window !== 'undefined' &&
@@ -38,12 +49,15 @@ export function resolveColorTheme(): 'light' | 'dark' {
     : 'light';
 }
 
-export function applyColorTheme() {
+export function applyColorTheme(preference?: ColorTheme) {
   try {
-    const resolved = resolveColorTheme();
+    const resolved = resolveColorTheme(preference);
     document.documentElement.dataset.colorTheme = resolved;
     document.documentElement.classList.toggle('sl-theme-dark', resolved === 'dark');
     document.documentElement.classList.toggle('sl-theme-light', resolved !== 'dark');
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', resolved === 'dark' ? '#0F1117' : '#F8F9FA');
   } catch {
     // document unavailable
   }
@@ -178,4 +192,115 @@ export function storedListenVoice(): string {
 
 export function saveListenVoice(id: string) {
   saveSetting(LISTEN_VOICE_KEY, id);
+}
+
+export function storedDailyWordGoal(): number {
+  try {
+    const raw = Number(localStorage.getItem(DAILY_WORD_GOAL_KEY));
+    if (Number.isInteger(raw) && raw >= 1 && raw <= 200) return raw;
+  } catch {
+    // storage unavailable
+  }
+  return DEFAULT_DAILY_WORD_GOAL;
+}
+
+export function saveDailyWordGoal(value: number) {
+  try {
+    const clamped = Math.max(1, Math.min(200, Math.floor(value)));
+    localStorage.setItem(DAILY_WORD_GOAL_KEY, String(clamped));
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedOnboardingCompleted(): boolean {
+  try {
+    return localStorage.getItem(ONBOARDING_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function saveOnboardingCompleted(value: boolean) {
+  try {
+    localStorage.setItem(ONBOARDING_KEY, value ? '1' : '0');
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedMymemoryEmail(): string {
+  try {
+    return localStorage.getItem(MYMEMORY_EMAIL_KEY)?.trim() ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function saveMymemoryEmail(email: string) {
+  try {
+    localStorage.setItem(MYMEMORY_EMAIL_KEY, email.trim());
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedLearningLanguage(): LearningLanguage {
+  try {
+    const raw = localStorage.getItem(LEARNING_LANG_KEY);
+    if (raw === 'ko' || raw === 'zh') return raw;
+  } catch {
+    // storage unavailable
+  }
+  return DEFAULT_LEARNING_LANGUAGE;
+}
+
+export function saveLearningLanguage(lang: LearningLanguage) {
+  try {
+    localStorage.setItem(LEARNING_LANG_KEY, lang);
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedRecentCategoryIds(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_CATEGORIES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string').slice(0, 5) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function pushRecentCategoryId(id: string | null) {
+  if (!id) return;
+  try {
+    const next = [id, ...storedRecentCategoryIds().filter((x) => x !== id)].slice(0, 5);
+    localStorage.setItem(RECENT_CATEGORIES_KEY, JSON.stringify(next));
+  } catch {
+    // storage unavailable
+  }
+}
+
+/** Empty string = auto daily mission rotation */
+export function storedSelectedMissionPackId(): string {
+  try {
+    return localStorage.getItem(SELECTED_MISSION_PACK_KEY)?.trim() ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function saveSelectedMissionPackId(packId: string | null) {
+  try {
+    if (packId?.trim()) {
+      localStorage.setItem(SELECTED_MISSION_PACK_KEY, packId.trim());
+    } else {
+      localStorage.removeItem(SELECTED_MISSION_PACK_KEY);
+    }
+  } catch {
+    // storage unavailable
+  }
 }

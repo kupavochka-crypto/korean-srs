@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Achievement, Category, Pack, Progression, ReviewRecord, Source, Word } from '../types';
+import type { Achievement, Category, Pack, Phrase, Progression, ReviewRecord, Source, Word } from '../types';
 
 export class KoreanDB extends Dexie {
   words!: Table<Word, string>;
@@ -9,6 +9,7 @@ export class KoreanDB extends Dexie {
   packs!: Table<Pack, string>;
   achievements!: Table<Achievement, string>;
   progression!: Table<Progression, string>;
+  phrases!: Table<Phrase, string>;
 
   constructor() {
     super('korean-srs');
@@ -33,6 +34,16 @@ export class KoreanDB extends Dexie {
       packs: '&id, sourceId, difficulty, createdAt',
       achievements: '&id, earnedAt',
       progression: '&id',
+    });
+    this.version(4).stores({
+      words: '&id, korean, categoryId, sourceId, nextReviewAt, createdAt, language',
+      categories: '&id, name, createdAt',
+      reviews: '++id, wordId, dateString, timestamp',
+      sources: '&id, type, artistId, title, createdAt',
+      packs: '&id, sourceId, difficulty, createdAt',
+      achievements: '&id, earnedAt',
+      progression: '&id',
+      phrases: '&id, sourcePackId, createdAt, language',
     });
   }
 }

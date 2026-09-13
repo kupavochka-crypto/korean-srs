@@ -29,7 +29,18 @@ export function loadVoices(callback?: () => void) {
   }, { once: true });
 }
 
-export function speak(text: string, character?: VoiceCharacter | null) {
+function voiceForLang(lang: string): SpeechSynthesisVoice | null {
+  const synth = window.speechSynthesis;
+  if (!synth) return null;
+  const voices = synth.getVoices();
+  return (
+    voices.find((v) => v.lang === lang) ??
+    voices.find((v) => v.lang.toLowerCase().startsWith(lang.split('-')[0])) ??
+    null
+  );
+}
+
+export function speak(text: string, character?: VoiceCharacter | null, lang = 'ko-KR') {
   const synth = window.speechSynthesis;
   if (!synth) return;
   const trimmed = text.trim();
@@ -37,11 +48,9 @@ export function speak(text: string, character?: VoiceCharacter | null) {
 
   synth.cancel();
   const utterance = new SpeechSynthesisUtterance(trimmed);
-  const voice = koreanVoice();
-  if (voice) {
-    utterance.voice = voice;
-  }
-  utterance.lang = 'ko-KR';
+  const voice = lang === 'ko-KR' ? koreanVoice() : voiceForLang(lang);
+  if (voice) utterance.voice = voice;
+  utterance.lang = lang;
   utterance.rate = character?.rate ?? 0.9;
   utterance.pitch = character?.pitch ?? 1;
   synth.speak(utterance);

@@ -8,15 +8,18 @@ import {
   storedGeminiProxy,
   saveGeminiProxy,
   storedThemeId,
+  storedMymemoryEmail,
+  saveMymemoryEmail,
   type ColorTheme,
 } from '../domain/settings';
+import type { LearningLanguage } from '../types';
 import { THEMES, getTheme, portraitUrl } from '../domain/themes';
 import { VOICE_CHARACTERS } from '../domain/voice-chars';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
-type SettingsView = 'main' | 'language' | 'appearance' | 'learning' | 'content' | 'scanning' | 'help';
+type SettingsView = 'main' | 'language' | 'appearance' | 'learning' | 'content' | 'scanning' | 'help' | 'translate';
 
 function SettingsGroup({ title, children }: { title?: string; children: ReactNode }) {
   return (
@@ -105,8 +108,11 @@ export default function SettingsScreen() {
   const [threshold, setThreshold] = useState(storedRewardThreshold());
   const [proxyUrl, setProxyUrl] = useState(storedGeminiProxy());
   const [themeId, setThemeId] = useState(storedThemeId());
+  const [mymemoryEmail, setMymemoryEmail] = useState(storedMymemoryEmail());
+  const [dailyGoal, setDailyGoal] = useState(store.getDailyWordGoal());
 
   const activeTheme = getTheme(themeId);
+  const learningLanguage = store.getLearningLanguage();
   const locale = store.getLocale();
   const colorTheme = store.getColorTheme();
 
@@ -200,10 +206,68 @@ export default function SettingsScreen() {
     );
   }
 
+  if (view === 'translate') {
+    return (
+      <div className="settings-page">
+        <SettingsDetail title={t('settings.translateSection')} onBack={() => setView('main')}>
+          <div className="card">
+            <label className="form-label">{t('settings.mymemoryEmail')}</label>
+            <input
+              className="form-input"
+              type="email"
+              value={mymemoryEmail}
+              onChange={(e) => setMymemoryEmail(e.target.value)}
+              onBlur={() => saveMymemoryEmail(mymemoryEmail)}
+              placeholder="email@example.com"
+            />
+            <p className="field-hint">{t('settings.mymemoryEmailHint')}</p>
+          </div>
+        </SettingsDetail>
+      </div>
+    );
+  }
+
   if (view === 'learning') {
     return (
       <div className="settings-page">
         <SettingsDetail title={t('settings.group.learning')} onBack={() => setView('main')}>
+          <SettingsSection title={t('settings.dailyGoal')}>
+            <div className="card">
+              <label className="form-label">{t('settings.dailyGoalLabel')}</label>
+              <input
+                className="form-input"
+                type="number"
+                min={1}
+                value={dailyGoal}
+                onChange={(e) => setDailyGoal(Math.max(1, Number(e.target.value) || 1))}
+                onBlur={() => store.setDailyWordGoal(dailyGoal)}
+              />
+              <p className="field-hint">{t('settings.dailyGoalHint')}</p>
+            </div>
+          </SettingsSection>
+
+          <SettingsSection title={t('settings.learningLanguage')}>
+            <div className="card">
+              <div className="flow-layout">
+                {(
+                  [
+                    ['ko', '🇰🇷', t('settings.langKo')],
+                    ['zh', '🇨🇳', t('settings.langZh')],
+                  ] as const
+                ).map(([id, flag, label]) => (
+                  <button
+                    key={id}
+                    className={`select-chip ${learningLanguage === id ? 'active' : ''}`}
+                    onClick={() => store.setLearningLanguage(id as LearningLanguage)}
+                  >
+                    {flag} {label}
+                  </button>
+                ))}
+              </div>
+              <p className="field-hint">{t('settings.learningLanguageHint')}</p>
+            </div>
+          </SettingsSection>
+
           <SettingsSection title={t('settings.listenSection')}>
             <div className="card">
               <label className="form-label">{t('settings.listenThreshold')}</label>
@@ -367,6 +431,14 @@ export default function SettingsScreen() {
       <div className="settings-page">
         <SettingsDetail title={t('settings.guide')} onBack={() => setView('main')}>
           <div className="card">
+            <button className="secondary-btn" onClick={() => store.openOnboarding(true)}>
+              <span>
+                {t('settings.guideModes')}
+                <span className="btn-kor">학습 모드</span>
+              </span>
+            </button>
+            <p className="field-hint">{t('settings.guideModesHint')}</p>
+            <div className="settings-divider" />
             <button className="secondary-btn" onClick={() => store.openGuide()}>
               <span>
                 {t('settings.guideHow')}
@@ -396,9 +468,14 @@ export default function SettingsScreen() {
           onClick={() => setView('appearance')}
         />
         <SettingsLinkRow
-          label={t('settings.voices')}
-          value={store.getCardVoice().name}
+          label={t('settings.group.learning')}
+          value={`${dailyGoal} ${t('settings.wordsPerDay')}`}
           onClick={() => setView('learning')}
+        />
+        <SettingsLinkRow
+          label={t('settings.translateSection')}
+          value={mymemoryEmail ? '✓' : '—'}
+          onClick={() => setView('translate')}
         />
         <SettingsLinkRow
           label={t('settings.theme')}

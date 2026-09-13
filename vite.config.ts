@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/favicon.svg'],
+      includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png', 'icons/icon-maskable-512.png'],
       manifest: {
         name: 'Woori · 우리',
         short_name: 'Woori',
@@ -31,7 +31,7 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512.png',
+            src: 'icons/icon-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'

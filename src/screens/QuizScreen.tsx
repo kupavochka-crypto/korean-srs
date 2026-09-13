@@ -12,8 +12,9 @@ export default function QuizScreen() {
   const score = store.getQuizScore();
   const total = store.getQuizTotalCount();
   const reward = store.getQuizReward();
+  const writeInput = store.getWriteInput();
 
-  if (!question || question.kind !== 'reverse') {
+  if (!question) {
     return (
       <div>
         <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
@@ -23,23 +24,102 @@ export default function QuizScreen() {
           </div>
           <h2>{t('quiz.title')}</h2>
           <p className="muted">{t('quiz.desc')}</p>
-          <button
-            className="primary-btn mt20"
-            onClick={() => store.loadNextQuizQuestion('reverse')}
-          >
-            <span>
-              {t('quiz.start')}
-              <span className="btn-kor">시작</span>
-            </span>
-          </button>
+          <div className="quiz-mode-picker">
+            <button className="secondary-btn" onClick={() => store.loadNextQuizQuestion('reverse')}>
+              {t('quiz.modeReverse')}
+            </button>
+            <button className="secondary-btn" onClick={() => store.loadNextQuizQuestion('write')}>
+              {t('quiz.modeWrite')}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  const modeSwitcher = (
+    <div className="quiz-mode-picker mb12">
+      <button
+        className={`select-chip ${question?.kind === 'reverse' ? 'active' : ''}`}
+        onClick={() => store.loadNextQuizQuestion('reverse')}
+      >
+        {t('quiz.modeReverse')}
+      </button>
+      <button
+        className={`select-chip ${question?.kind === 'write' ? 'active' : ''}`}
+        onClick={() => store.loadNextQuizQuestion('write')}
+      >
+        {t('quiz.modeWrite')}
+      </button>
+    </div>
+  );
+
+  if (question.kind === 'write') {
+    const expected = question.writeAnswer ?? question.expectedAnswer ?? '';
+    const correct =
+      checked &&
+      writeInput.trim().normalize('NFC').replace(/\s+/g, '') ===
+        expected.trim().normalize('NFC').replace(/\s+/g, '');
+
+    return (
+      <div>
+        <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+        {modeSwitcher}
+        <div className="card quiz-card" style={{ marginBottom: 16 }}>
+          <p className="quiz-prompt-label">{t('quiz.writePrompt')}</p>
+          <p className="quiz-korean quiz-korean-lg">{question.prompt}</p>
+          <input
+            className="form-input quiz-write-input"
+            value={writeInput}
+            onChange={(e) => store.setWriteInput(e.target.value)}
+            placeholder={t('quiz.writePlaceholder')}
+            disabled={checked}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+          {checked ? (
+            <>
+              <div className="reveal-row">
+                <span>{correct ? t('listen.correct') : t('listen.wrong')}</span>
+                <span>
+                  {t('listen.answer')}: {expected}
+                </span>
+              </div>
+              <button className="primary-btn mt20" onClick={() => store.loadNextQuizQuestion('write')}>
+                <span>
+                  {t('common.next')}
+                  <span className="btn-kor">다음</span>
+                </span>
+              </button>
+            </>
+          ) : (
+            <button
+              className="primary-btn mt20"
+              onClick={() => store.checkWriteAnswer()}
+              disabled={!writeInput.trim()}
+              style={!writeInput.trim() ? { opacity: 0.5 } : {}}
+            >
+              <span>
+                {t('common.check')}
+                <span className="btn-kor">확인</span>
+              </span>
+            </button>
+          )}
+        </div>
+        <p className="quiz-score center">{t('listen.score', { score, total })}</p>
+      </div>
+    );
+  }
+
+  if (question.kind !== 'reverse') {
+    return null;
+  }
+
   return (
     <div>
       <ScreenHeader title={t('tab.quiz')} subtitle="퀴즈" />
+      {modeSwitcher}
       <div className="card quiz-card" style={{ marginBottom: 16 }}>
         <p className="quiz-korean quiz-korean-lg">{question.prompt}</p>
         <div className="quiz-options">
