@@ -219,6 +219,12 @@ const STRINGS: Dict = {
 
   'listen.subtitle': { ru: 'слушай и выбирай', en: 'listen and choose' },
   'listen.tapToListen': { ru: 'Нажмите, чтобы прослушать', en: 'Tap to listen' },
+  'listen.modeBadgeAria': {
+    ru: 'Режим: угадай слово по звуку',
+    en: 'Mode: guess the word by sound',
+  },
+  'listen.showWord': { ru: 'Показать слово', en: 'Show word' },
+  'listen.hideWord': { ru: 'Скрыть слово', en: 'Hide word' },
   'listen.revealWord': { ru: 'Слово', en: 'Word' },
 
   'quiz.subtitle': { ru: 'listen · выбор · ввод', en: 'listen · choice · write' },

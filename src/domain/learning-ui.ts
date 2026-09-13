@@ -52,6 +52,8 @@ const UI: Record<string, Bilingual> = {
   'source.user': { ko: '직접', zh: '自制' },
 
   'progress.proverb': { ko: '티끌 모아 태산', zh: '积少成多' },
+
+  'quiz.modeListenWord': { ko: '한글', zh: '汉字' },
 };
 
 export function tL(key: string, lang: LearningLanguage): string {

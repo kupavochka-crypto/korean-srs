@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { gifUrl } from '../domain/themes';
 import ScreenHeader from '../components/ScreenHeader';
+import { showReadingEnabled } from '../domain/language';
 import { t } from '../domain/i18n';
 import { tabSubtitle, tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
@@ -14,6 +16,11 @@ export default function ListeningScreen() {
   const total = store.getQuizTotalCount();
   const reward = store.getQuizReward();
   const lang = store.getLearningLanguage();
+  const [wordRevealed, setWordRevealed] = useState(false);
+
+  useEffect(() => {
+    setWordRevealed(false);
+  }, [question?.prompt, question?.targetWordId]);
 
   if (!question) {
     return (
@@ -33,7 +40,17 @@ export default function ListeningScreen() {
   return (
     <div>
       <ScreenHeader title={t('tab.listening')} subtitle={tabSubtitle('listening', lang)} />
-      <div className="card quiz-card" style={{ marginBottom: 16 }}>
+      <div className="card quiz-card quiz-card--listen" style={{ marginBottom: 16 }}>
+        <button
+          type="button"
+          className={`quiz-mode-badge ${wordRevealed ? 'quiz-mode-badge--revealed' : ''}`}
+          onClick={() => setWordRevealed((v) => !v)}
+          aria-label={wordRevealed ? t('listen.hideWord') : t('listen.showWord')}
+          aria-pressed={wordRevealed}
+        >
+          <WIcon name="headphones" size={13} style={{ color: 'var(--red)' }} />
+          <span className="quiz-mode-badge-lang">{tL('quiz.modeListenWord', lang)}</span>
+        </button>
         <button
           className="speaker-btn speaker-btn-lg"
           onClick={() => store.replayQuizAudio()}
@@ -41,15 +58,15 @@ export default function ListeningScreen() {
         >
           <WIcon name="volume-up" size={24} />
         </button>
-        {!checked ? (
-          <p className="muted listen-prompt-hint">{t('listen.tapToListen')}</p>
-        ) : (
+        {checked || wordRevealed ? (
           <>
             <p className="quiz-korean">{question.prompt}</p>
-            {store.getShowRomaja() && question.promptRomaja && (
+            {showReadingEnabled(store.getShowRomaja(), lang) && question.promptRomaja && (
               <p className="muted listen-romaja">{question.promptRomaja}</p>
             )}
           </>
+        ) : (
+          <p className="muted listen-prompt-hint">{t('listen.tapToListen')}</p>
         )}
         <div className="quiz-options">
           {question.options.map((option, i) => {
