@@ -1,4 +1,5 @@
 import { store, useStore } from '../store/AppStore';
+import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
 import { formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
@@ -11,6 +12,8 @@ export default function WordDetailDialog() {
 
   const category = store.categoryFor(word.categoryId);
   const source = store.sourceFor(word.sourceId);
+  const isZh = wordLanguage(word) === 'zh';
+  const reading = displayReading(word);
   const status = word.repetitions >= 3
     ? t('detail.mastered')
     : word.nextReviewAt <= Date.now()
@@ -46,14 +49,16 @@ export default function WordDetailDialog() {
           <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--charcoal)' }}>
             {word.korean}
           </span>
-          {word.hanja && <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>{word.hanja}</span>}
+          {!isZh && word.hanja && (
+            <span style={{ fontSize: 18, color: 'var(--text-secondary)' }}>{word.hanja}</span>
+          )}
           <button className="icon-btn" onClick={() => store.speakText(word.korean)}>
             <WIcon name="volume-up" />
           </button>
         </div>
-        {store.getShowRomaja() && (
+        {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
           <p style={{ fontSize: 16, color: 'var(--text-secondary)', margin: 0 }}>
-            {word.romaja}
+            {reading}
           </p>
         )}
 

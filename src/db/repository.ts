@@ -4,6 +4,7 @@ import type {
   Category,
   DailyActivity,
   ImportedWordDraft,
+  LearningLanguage,
   Pack,
   Phrase,
   Progression,
@@ -11,6 +12,7 @@ import type {
   Source,
   Word,
 } from '../types';
+import { hanziToReading } from '../domain/pinyin';
 import {
   ALL_PHRASE_DEFS,
   BTS_PHRASE_PACK_ID,
@@ -119,6 +121,28 @@ export async function initialize(): Promise<void> {
   await ensureSeedPhrases();
   await ensureAchievements();
   await backfillMasteredAt();
+  await backfillWordLanguage();
+  await migrateProgressionProfiles();
+}
+
+export async function backfillWordLanguage(): Promise<void> {
+  const words = await db.words.toArray();
+  const patches = words.filter((w) => !w.language).map((w) => ({ ...w, language: 'ko' as const }));
+  if (patches.length > 0) await db.words.bulkPut(patches);
+}
+
+export async function migrateProgressionProfiles(): Promise<void> {
+  const main = await db.progression.get('main');
+  if (main) {
+    await db.progression.put({ ...main, id: 'ko' });
+    await db.progression.delete('main');
+  }
+  if (!(await db.progression.get('ko'))) {
+    await db.progression.put({ id: 'ko', xp: 0, rewardedMissionDate: null, completedPackIds: [] });
+  }
+  if (!(await db.progression.get('zh'))) {
+    await db.progression.put({ id: 'zh', xp: 0, rewardedMissionDate: null, completedPackIds: [] });
+  }
 }
 
 export async function ensureSeedPhrases(): Promise<void> {
@@ -168,9 +192,10 @@ export async function allPhrases(): Promise<Phrase[]> {
 }
 
 export async function ensureSeedPacks(): Promise<void> {
-  const count = await db.packs.count();
-  if (count > 0) return;
-  await db.packs.bulkAdd(allSeedPacks());
+  const existing = await db.packs.toArray();
+  const ids = new Set(existing.map((p) => p.id));
+  const missing = allSeedPacks().filter((p) => !ids.has(p.id));
+  if (missing.length > 0) await db.packs.bulkAdd(missing);
 }
 
 export async function allPacks(): Promise<Pack[]> {
@@ -183,13 +208,20 @@ export async function addPackWords(pack: Pack): Promise<number> {
   const category = await findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
   const now = Date.now();
   let added = 0;
+  const packLang = pack.language ?? 'ko';
   for (const def of pack.wordDefs) {
     if (koreanSet.has(def.korean)) continue;
+    const reading =
+      packLang === 'zh'
+        ? def.pinyin
+          ? { pinyin: def.pinyin, tones: hanziToReading(def.korean).tones }
+          : hanziToReading(def.korean)
+        : { pinyin: null as string | null, tones: null as string | null };
     const word: Word = {
       id: newId(),
       korean: def.korean,
       hanja: def.hanja ?? null,
-      romaja: toRomaja(def.korean),
+      romaja: packLang === 'zh' ? (reading.pinyin ?? '') : toRomaja(def.korean),
       translation: def.translation,
       exampleSentence: def.exampleSentence ?? null,
       exampleTranslation: def.exampleTranslation ?? null,
@@ -206,9 +238,9 @@ export async function addPackWords(pack: Pack): Promise<number> {
       totalReviews: 0,
       correctReviews: 0,
       masteredAt: null,
-      language: 'ko',
-      pinyin: null,
-      tones: null,
+      language: packLang,
+      pinyin: reading.pinyin,
+      tones: reading.tones,
     };
     await db.words.add(word);
     koreanSet.add(def.korean);
@@ -247,10 +279,11 @@ export async function markAchievementsEarned(ids: string[], now: number = Date.n
   if (patches.length > 0) await db.achievements.bulkPut(patches);
 }
 
-export async function getProgression(): Promise<Progression> {
-  const existing = await db.progression.get('main');
+export async function getProgression(lang: LearningLanguage = 'ko'): Promise<Progression> {
+  await migrateProgressionProfiles();
+  const existing = await db.progression.get(lang);
   if (existing) return existing;
-  const fresh: Progression = { id: 'main', xp: 0, rewardedMissionDate: null, completedPackIds: [] };
+  const fresh: Progression = { id: lang, xp: 0, rewardedMissionDate: null, completedPackIds: [] };
   await db.progression.put(fresh);
   return fresh;
 }
@@ -469,44 +502,68 @@ export async function recordReview(
   await db.reviews.add(record);
 }
 
-export async function todayReviewsCount(now: number = Date.now()): Promise<number> {
+async function wordLanguageById(): Promise<Map<string, LearningLanguage>> {
+  const words = await db.words.toArray();
+  return new Map(words.map((w) => [w.id, w.language ?? 'ko']));
+}
+
+async function reviewsForLang(lang?: LearningLanguage): Promise<ReviewRecord[]> {
+  const records = await db.reviews.toArray();
+  if (!lang) return records;
+  const langMap = await wordLanguageById();
+  return records.filter((r) => langMap.get(r.wordId) === lang);
+}
+
+export async function todayReviewsCount(
+  lang?: LearningLanguage,
+  now: number = Date.now()
+): Promise<number> {
   const today = dateString(now);
-  return db.reviews.where('dateString').equals(today).count();
+  const records = await reviewsForLang(lang);
+  return records.filter((r) => r.dateString === today).length;
 }
 
-export async function wordsCreatedOnDate(dateStr: string): Promise<number> {
+export async function wordsCreatedOnDate(dateStr: string, lang?: LearningLanguage): Promise<number> {
   const all = await db.words.toArray();
-  return all.filter((w) => dateString(w.createdAt) === dateStr).length;
+  return all.filter(
+    (w) => dateString(w.createdAt) === dateStr && (!lang || (w.language ?? 'ko') === lang)
+  ).length;
 }
 
-export async function dailyActivityLastDays(days: number, now: number = Date.now()): Promise<DailyActivity[]> {
+export async function dailyActivityLastDays(
+  days: number,
+  lang?: LearningLanguage,
+  now: number = Date.now()
+): Promise<DailyActivity[]> {
+  const records = await reviewsForLang(lang);
   const result: DailyActivity[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     d.setHours(0, 0, 0, 0);
     const ds = dateString(d.getTime());
-    const reviews = await db.reviews.where('dateString').equals(ds).count();
-    const newWords = await wordsCreatedOnDate(ds);
+    const reviews = records.filter((r) => r.dateString === ds).length;
+    const newWords = await wordsCreatedOnDate(ds, lang);
     result.push({ dateString: ds, newWords, reviews });
   }
   return result;
 }
 
-export async function weeklyWordsGrowth(): Promise<number> {
+export async function weeklyWordsGrowth(lang?: LearningLanguage): Promise<number> {
   const now = Date.now();
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   const thisWeekStart = now - weekMs;
   const prevWeekStart = now - 2 * weekMs;
   const all = await db.words.toArray();
-  const thisWeek = all.filter((w) => w.createdAt >= thisWeekStart).length;
-  const prevWeek = all.filter((w) => w.createdAt >= prevWeekStart && w.createdAt < thisWeekStart).length;
+  const scoped = lang ? all.filter((w) => (w.language ?? 'ko') === lang) : all;
+  const thisWeek = scoped.filter((w) => w.createdAt >= thisWeekStart).length;
+  const prevWeek = scoped.filter((w) => w.createdAt >= prevWeekStart && w.createdAt < thisWeekStart).length;
   if (prevWeek === 0) return thisWeek > 0 ? 100 : 0;
   return Math.round(((thisWeek - prevWeek) / prevWeek) * 100);
 }
 
-export async function streakCount(): Promise<number> {
-  const records = await db.reviews.toArray();
+export async function streakCount(lang?: LearningLanguage): Promise<number> {
+  const records = await reviewsForLang(lang);
   const dateSet = new Set(records.map((r) => r.dateString));
   if (dateSet.size === 0) return 0;
 

@@ -1,4 +1,5 @@
 import type { Pack } from '../types';
+import { zhSeedPacks } from './packs-zh';
 
 export function allSeedPacks(): Pack[] {
   return [
@@ -98,5 +99,6 @@ export function allSeedPacks(): Pack[] {
       ],
       createdAt: 5,
     },
+    ...zhSeedPacks(),
   ];
 }

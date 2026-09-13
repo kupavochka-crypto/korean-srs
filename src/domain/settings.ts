@@ -9,11 +9,18 @@ const CARD_VOICE_KEY = 'voice_card';
 const LISTEN_VOICE_KEY = 'voice_listen';
 const COLOR_THEME_KEY = 'color_theme';
 const DAILY_WORD_GOAL_KEY = 'daily_word_goal';
+const DAILY_WORD_GOAL_KO_KEY = 'daily_goal_ko';
+const DAILY_WORD_GOAL_ZH_KEY = 'daily_goal_zh';
 const ONBOARDING_KEY = 'onboarding_completed';
 const MYMEMORY_EMAIL_KEY = 'mymemory_email';
 const LEARNING_LANG_KEY = 'learning_language';
 const RECENT_CATEGORIES_KEY = 'recent_category_ids';
+const RECENT_CATEGORIES_KO_KEY = 'recent_categories_ko';
+const RECENT_CATEGORIES_ZH_KEY = 'recent_categories_zh';
 const SELECTED_MISSION_PACK_KEY = 'selected_mission_pack_id';
+const SELECTED_MISSION_KO_KEY = 'selected_mission_ko';
+const SELECTED_MISSION_ZH_KEY = 'selected_mission_zh';
+const PROFILE_SETTINGS_MIGRATED_KEY = 'profile_settings_migrated_v1';
 
 export type ColorTheme = 'system' | 'light' | 'dark';
 
@@ -194,23 +201,39 @@ export function saveListenVoice(id: string) {
   saveSetting(LISTEN_VOICE_KEY, id);
 }
 
-export function storedDailyWordGoal(): number {
+function readDailyGoalKey(key: string): number | null {
   try {
-    const raw = Number(localStorage.getItem(DAILY_WORD_GOAL_KEY));
+    const raw = Number(localStorage.getItem(key));
     if (Number.isInteger(raw) && raw >= 1 && raw <= 200) return raw;
   } catch {
     // storage unavailable
   }
-  return DEFAULT_DAILY_WORD_GOAL;
+  return null;
 }
 
-export function saveDailyWordGoal(value: number) {
+export function storedDailyWordGoalFor(lang: LearningLanguage): number {
+  const key = lang === 'zh' ? DAILY_WORD_GOAL_ZH_KEY : DAILY_WORD_GOAL_KO_KEY;
+  return readDailyGoalKey(key) ?? DEFAULT_DAILY_WORD_GOAL;
+}
+
+export function saveDailyWordGoalFor(lang: LearningLanguage, value: number) {
   try {
     const clamped = Math.max(1, Math.min(200, Math.floor(value)));
-    localStorage.setItem(DAILY_WORD_GOAL_KEY, String(clamped));
+    const key = lang === 'zh' ? DAILY_WORD_GOAL_ZH_KEY : DAILY_WORD_GOAL_KO_KEY;
+    localStorage.setItem(key, String(clamped));
   } catch {
     // storage unavailable
   }
+}
+
+/** @deprecated use storedDailyWordGoalFor(activeLang) */
+export function storedDailyWordGoal(): number {
+  return storedDailyWordGoalFor(storedLearningLanguage());
+}
+
+/** @deprecated use saveDailyWordGoalFor(activeLang, value) */
+export function saveDailyWordGoal(value: number) {
+  saveDailyWordGoalFor(storedLearningLanguage(), value);
 }
 
 export function storedOnboardingCompleted(): boolean {
@@ -263,9 +286,9 @@ export function saveLearningLanguage(lang: LearningLanguage) {
   }
 }
 
-export function storedRecentCategoryIds(): string[] {
+function readRecentCategoryIds(key: string): string[] {
   try {
-    const raw = localStorage.getItem(RECENT_CATEGORIES_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string').slice(0, 5) : [];
@@ -274,32 +297,89 @@ export function storedRecentCategoryIds(): string[] {
   }
 }
 
-export function pushRecentCategoryId(id: string | null) {
+export function storedRecentCategoryIdsFor(lang: LearningLanguage): string[] {
+  const key = lang === 'zh' ? RECENT_CATEGORIES_ZH_KEY : RECENT_CATEGORIES_KO_KEY;
+  return readRecentCategoryIds(key);
+}
+
+export function pushRecentCategoryIdFor(lang: LearningLanguage, id: string | null) {
   if (!id) return;
   try {
-    const next = [id, ...storedRecentCategoryIds().filter((x) => x !== id)].slice(0, 5);
-    localStorage.setItem(RECENT_CATEGORIES_KEY, JSON.stringify(next));
+    const key = lang === 'zh' ? RECENT_CATEGORIES_ZH_KEY : RECENT_CATEGORIES_KO_KEY;
+    const next = [id, ...storedRecentCategoryIdsFor(lang).filter((x) => x !== id)].slice(0, 5);
+    localStorage.setItem(key, JSON.stringify(next));
   } catch {
     // storage unavailable
   }
 }
 
+/** @deprecated use storedRecentCategoryIdsFor(activeLang) */
+export function storedRecentCategoryIds(): string[] {
+  return storedRecentCategoryIdsFor(storedLearningLanguage());
+}
+
+/** @deprecated use pushRecentCategoryIdFor(activeLang, id) */
+export function pushRecentCategoryId(id: string | null) {
+  pushRecentCategoryIdFor(storedLearningLanguage(), id);
+}
+
 /** Empty string = auto daily mission rotation */
-export function storedSelectedMissionPackId(): string {
+export function storedSelectedMissionPackIdFor(lang: LearningLanguage): string {
   try {
-    return localStorage.getItem(SELECTED_MISSION_PACK_KEY)?.trim() ?? '';
+    const key = lang === 'zh' ? SELECTED_MISSION_ZH_KEY : SELECTED_MISSION_KO_KEY;
+    return localStorage.getItem(key)?.trim() ?? '';
   } catch {
     return '';
   }
 }
 
-export function saveSelectedMissionPackId(packId: string | null) {
+export function saveSelectedMissionPackIdFor(lang: LearningLanguage, packId: string | null) {
   try {
+    const key = lang === 'zh' ? SELECTED_MISSION_ZH_KEY : SELECTED_MISSION_KO_KEY;
     if (packId?.trim()) {
-      localStorage.setItem(SELECTED_MISSION_PACK_KEY, packId.trim());
+      localStorage.setItem(key, packId.trim());
     } else {
-      localStorage.removeItem(SELECTED_MISSION_PACK_KEY);
+      localStorage.removeItem(key);
     }
+  } catch {
+    // storage unavailable
+  }
+}
+
+/** @deprecated use storedSelectedMissionPackIdFor(activeLang) */
+export function storedSelectedMissionPackId(): string {
+  return storedSelectedMissionPackIdFor(storedLearningLanguage());
+}
+
+/** @deprecated use saveSelectedMissionPackIdFor(activeLang, packId) */
+export function saveSelectedMissionPackId(packId: string | null) {
+  saveSelectedMissionPackIdFor(storedLearningLanguage(), packId);
+}
+
+/** One-time migration: legacy single-profile keys → per-lang keys */
+export function migrateProfileSettings(): void {
+  try {
+    if (localStorage.getItem(PROFILE_SETTINGS_MIGRATED_KEY) === '1') return;
+
+    const legacyGoal = readDailyGoalKey(DAILY_WORD_GOAL_KEY);
+    if (legacyGoal !== null && readDailyGoalKey(DAILY_WORD_GOAL_KO_KEY) === null) {
+      localStorage.setItem(DAILY_WORD_GOAL_KO_KEY, String(legacyGoal));
+    }
+    if (readDailyGoalKey(DAILY_WORD_GOAL_ZH_KEY) === null) {
+      localStorage.setItem(DAILY_WORD_GOAL_ZH_KEY, String(DEFAULT_DAILY_WORD_GOAL));
+    }
+
+    const legacyMission = localStorage.getItem(SELECTED_MISSION_PACK_KEY)?.trim();
+    if (legacyMission && !localStorage.getItem(SELECTED_MISSION_KO_KEY)) {
+      localStorage.setItem(SELECTED_MISSION_KO_KEY, legacyMission);
+    }
+
+    const legacyRecent = localStorage.getItem(RECENT_CATEGORIES_KEY);
+    if (legacyRecent && !localStorage.getItem(RECENT_CATEGORIES_KO_KEY)) {
+      localStorage.setItem(RECENT_CATEGORIES_KO_KEY, legacyRecent);
+    }
+
+    localStorage.setItem(PROFILE_SETTINGS_MIGRATED_KEY, '1');
   } catch {
     // storage unavailable
   }

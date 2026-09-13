@@ -1,5 +1,6 @@
 import type { Word } from '../types';
 import { store } from '../store/AppStore';
+import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
 import { formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
@@ -29,6 +30,8 @@ export default function WordCard({
   const source = store.sourceFor(word.sourceId);
   const status = srsStatus(word);
   const difficultyLabel = word.difficulty;
+  const isZh = wordLanguage(word) === 'zh';
+  const reading = displayReading(word);
 
   return (
     <div
@@ -43,8 +46,10 @@ export default function WordCard({
       <div className="word-item-head">
         <div className="word-item-main">
           <span className="word-korean">{word.korean}</span>
-          {word.hanja && <span className="word-hanja">{word.hanja}</span>}
-          {store.getShowRomaja() && <span className="word-romaja">{word.romaja}</span>}
+          {!isZh && word.hanja && <span className="word-hanja">{word.hanja}</span>}
+          {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
+            <span className={isZh ? 'word-pinyin' : 'word-romaja'}>{reading}</span>
+          )}
         </div>
         <button
           className="icon-btn"

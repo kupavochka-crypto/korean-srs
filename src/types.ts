@@ -73,6 +73,7 @@ export interface PackWordDef {
   korean: string;
   translation: string;
   hanja?: string | null;
+  pinyin?: string | null;
   exampleSentence?: string | null;
   exampleTranslation?: string | null;
   tags?: string[];
@@ -91,6 +92,7 @@ export interface Pack {
   createdAt: number;
   kind?: 'words' | 'phrases';
   releaseDate?: string | null;
+  language?: LearningLanguage;
 }
 
 export interface Phrase {
@@ -123,7 +125,7 @@ export interface Achievement {
 }
 
 export interface Progression {
-  id: string;
+  id: LearningLanguage;
   xp: number;
   rewardedMissionDate: string | null;
   completedPackIds?: string[];

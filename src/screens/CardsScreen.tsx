@@ -2,6 +2,7 @@ import { store, useStore } from '../store/AppStore';
 import SrsRatingBar from '../components/SrsRatingBar';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
+import { displayReading, showReadingEnabled, wordLanguage } from '../domain/language';
 import type { Word } from '../types';
 import WIcon from '../ui/WIcon';
 
@@ -75,6 +76,8 @@ export default function CardsScreen() {
   }
 
   const word = queue[index];
+  const isZh = wordLanguage(word) === 'zh';
+  const reading = displayReading(word);
 
   return (
     <div>
@@ -109,8 +112,10 @@ export default function CardsScreen() {
           <div className="flip-face flip-front">
             <div className="flashcard">
               <span className="fc-korean">{word.korean}</span>
-              {word.hanja && <span className="fc-hanja">{word.hanja}</span>}
-              {store.getShowRomaja() && <span className="fc-romaja">{word.romaja}</span>}
+              {!isZh && word.hanja && <span className="fc-hanja">{word.hanja}</span>}
+              {showReadingEnabled(store.getShowRomaja(), wordLanguage(word)) && reading && (
+                <span className={isZh ? 'fc-pinyin' : 'fc-romaja'}>{reading}</span>
+              )}
               <button
                 className="speaker-btn mt16"
                 onClick={(e) => {

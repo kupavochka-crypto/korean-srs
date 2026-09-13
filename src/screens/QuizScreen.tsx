@@ -72,7 +72,11 @@ export default function QuizScreen() {
             className="form-input quiz-write-input"
             value={writeInput}
             onChange={(e) => store.setWriteInput(e.target.value)}
-            placeholder={t('quiz.writePlaceholder')}
+            placeholder={
+              store.getLearningLanguage() === 'zh'
+                ? t('quiz.writePlaceholderZh')
+                : t('quiz.writePlaceholder')
+            }
             disabled={checked}
             autoComplete="off"
             autoCorrect="off"

@@ -20,6 +20,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

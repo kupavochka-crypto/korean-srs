@@ -68,7 +68,18 @@ export const SKZ_PHRASE_DEFS: PackPhraseDef[] = [
   { korean: '자신감 넘쳐', translation: 'Уверенность переполняет', sourcePackId: S_CLASS, themeId: 'stray-kids' },
 ];
 
-export const ALL_PHRASE_DEFS: PackPhraseDef[] = [...BTS_PHRASE_DEFS, ...SKZ_PHRASE_DEFS];
+export const ZH_PHRASE_DEFS: PackPhraseDef[] = [
+  { korean: '从前从前', translation: 'Когда-то, давным-давно', sourcePackId: 'seed-zh-qingtian', pinyin: 'cóng qián cóng qián' },
+  { korean: '故事的开始', translation: 'Начало истории', sourcePackId: 'seed-zh-qingtian', pinyin: 'gù shi de kāi shǐ' },
+  { korean: '童年的纸飞机', translation: 'Бумажный самолётик детства', sourcePackId: 'seed-zh-daoxiang', pinyin: 'tóng nián de zhǐ fēi jī' },
+  { korean: '回家吧', translation: 'Вернись домой', sourcePackId: 'seed-zh-daoxiang', pinyin: 'huí jiā ba' },
+  { korean: '只是因为在人群中多看了你一眼', translation: 'Просто потому что я лишний раз взглянул на тебя в толпе', sourcePackId: 'seed-zh-chuanqi', pinyin: 'zhǐ shì yīn wèi zài rén qún zhōng duō kàn le nǐ yī yǎn' },
+  { korean: '你好，很高兴认识你', translation: 'Привет, рад познакомиться', sourcePackId: 'seed-zh-basics', pinyin: 'nǐ hǎo, hěn gāo xìng rèn shi nǐ' },
+  { korean: '没关系，慢慢来', translation: 'Ничего страшного, не торопись', sourcePackId: 'seed-zh-basics', pinyin: 'méi guān xi, màn màn lái' },
+  { korean: '明天见', translation: 'До завтра', sourcePackId: 'seed-zh-basics', pinyin: 'míng tiān jiàn' },
+];
+
+export const ALL_PHRASE_DEFS: PackPhraseDef[] = [...BTS_PHRASE_DEFS, ...SKZ_PHRASE_DEFS, ...ZH_PHRASE_DEFS];
 
 const LEGACY_PHRASE_PACK_IDS = new Set([BTS_PHRASE_PACK_ID, SKZ_PHRASE_PACK_ID]);
 
@@ -102,6 +113,12 @@ export function phrasesForTheme(phrases: Phrase[], themeId: string): Phrase[] {
   return phrases.filter((phrase) => phraseThemeId(phrase) === themeId);
 }
 
+export function phrasesForProfile(phrases: Phrase[], lang: 'ko' | 'zh', themeId?: string): Phrase[] {
+  const byLang = phrases.filter((p) => (p.language ?? 'ko') === lang);
+  if (lang === 'zh') return byLang;
+  return themeId ? phrasesForTheme(byLang, themeId) : byLang;
+}
+
 export function phraseSourcePack(phrase: Phrase, packs: Pack[]): Pack | null {
   const packId = phraseSourcePackId(phrase);
   if (!packId) return null;
@@ -117,7 +134,7 @@ export function seedPhrasesFromDefs(defs: PackPhraseDef[], now = Date.now()): Ph
     sourcePackId: def.sourcePackId ?? legacyPhrasePackId(def.themeId ?? 'bts'),
     difficulty: def.difficulty ?? 'Начальный',
     createdAt: now + i,
-    language: 'ko',
+    language: def.sourcePackId?.startsWith('seed-zh-') ? 'zh' : 'ko',
     pinyin: def.pinyin ?? null,
   }));
 }

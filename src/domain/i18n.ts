@@ -282,6 +282,11 @@ const STRINGS: Dict = {
   'quiz.start': { ru: 'Начать', en: 'Start' },
 
   'dict.search': { ru: 'Поиск: корейский, перевод, ромадзия…', en: 'Search: Korean, translation, romanization…' },
+  'dict.searchZh': { ru: 'Поиск: иероглиф, pinyin, перевод…', en: 'Search: hanzi, pinyin, translation…' },
+  'dict.emptyZh': {
+    ru: 'Китайский профиль пуст — добавьте слова или выберите Mandopop-миссию.',
+    en: 'Chinese profile is empty — add words or pick a Mandopop mission.',
+  },
   'dict.selectOnAria': { ru: 'Выйти из выбора', en: 'Exit selection' },
   'dict.selectOffAria': { ru: 'Выбрать слова', en: 'Select words' },
   'dict.selectionHint': {
@@ -518,6 +523,7 @@ const STRINGS: Dict = {
   'quiz.modeWrite': { ru: 'Написать по переводу', en: 'Write by translation' },
   'quiz.writePrompt': { ru: 'Напишите слово:', en: 'Write the word:' },
   'quiz.writePlaceholder': { ru: 'Корейское слово…', en: 'Korean word…' },
+  'quiz.writePlaceholderZh': { ru: 'Иероглиф…', en: 'Hanzi…' },
 
   'translate.title': { ru: 'Перевод', en: 'Translate' },
   'translate.btn': { ru: 'Перевести', en: 'Translate' },
@@ -552,8 +558,12 @@ const STRINGS: Dict = {
   'settings.langKo': { ru: 'Корейский', en: 'Korean' },
   'settings.langZh': { ru: 'Китайский (MVP)', en: 'Chinese (MVP)' },
   'settings.learningLanguageHint': {
-    ru: 'MVP: один язык на пользователя. Китайский — hanzi/pinyin на карточках.',
-    en: 'MVP: one language per user. Chinese adds hanzi/pinyin on cards.',
+    ru: 'Два независимых профиля: словарь, SRS, XP и цели хранятся отдельно для ko и zh.',
+    en: 'Two independent profiles: dictionary, SRS, XP, and goals are separate for ko and zh.',
+  },
+  'home.zhProfileHint': {
+    ru: 'Китайский профиль пуст — добавьте слова или выберите Mandopop-миссию на главной.',
+    en: 'Chinese profile is empty — add words or pick a Mandopop mission on Home.',
   },
   'settings.translateSection': { ru: 'Перевод (MyMemory)', en: 'Translation (MyMemory)' },
   'settings.mymemoryEmail': { ru: 'Email для MyMemory', en: 'MyMemory email' },
@@ -611,6 +621,11 @@ const STRINGS: Dict = {
     en: 'Phrases from {group} songs — tap 🔊 to listen (Web Speech).',
   },
   'phrases.empty': { ru: 'Фразы загружаются при первом запуске.', en: 'Phrases load on first launch.' },
+  'phrases.descZh': {
+    ru: 'Фразы из Mandopop и C-drama — нажмите 🔊 для озвучки.',
+    en: 'Mandopop and C-drama phrases — tap 🔊 to listen.',
+  },
+  'phrases.emptyZh': { ru: 'Китайские фразы появятся после обновления приложения.', en: 'Chinese phrases appear after app update.' },
   'phrases.fromSong': { ru: 'из песни «{song}»', en: 'from «{song}»' },
 
   'add.hanzi': { ru: 'Иероглиф (hanzi) *', en: 'Hanzi *' },

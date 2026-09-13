@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run sync:icons && python3 scripts/generate-icons.py && tsc --noEmit && vite build",
+    "build": "npm run sync:icons && tsc --noEmit && vite build",
+    "icons:generate": "python3 scripts/generate-icons.py",
     "preview": "vite preview",
     "postinstall": "node scripts/sync-shoelace-icons.mjs",
     "sync:icons": "node scripts/sync-shoelace-icons.mjs",
@@ -14,6 +15,7 @@
   "dependencies": {
     "@shoelace-style/shoelace": "^2.20.1",
     "dexie": "^4.0.8",
+    "pinyin-pro": "^3.29.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

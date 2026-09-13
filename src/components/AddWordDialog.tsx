@@ -5,7 +5,8 @@ import { lookupNotebookWord } from '../domain/seed-data';
 import { activeThemeSources, formatSource } from '../domain/sources';
 import { colorFromHex } from '../theme/colors';
 import { suggestCategories } from '../domain/suggest-category';
-import { storedRecentCategoryIds } from '../domain/settings';
+import { storedRecentCategoryIdsFor } from '../domain/settings';
+import { hanziToReading } from '../domain/pinyin';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 import type { Difficulty } from '../types';
@@ -40,7 +41,7 @@ export default function AddWordDialog() {
         {
           words: store.getWords(),
           categories,
-          recentCategoryIds: storedRecentCategoryIds(),
+          recentCategoryIds: storedRecentCategoryIdsFor(learningLanguage),
           contextCategoryId: store.getSelectedCategoryId(),
         }
       ),
@@ -75,6 +76,22 @@ export default function AddWordDialog() {
       setRomaja(toRomaja(value));
     }
   }
+
+  function handleHanziChange(value: string) {
+    setHanzi(value);
+    setKorean(value);
+    const reading = hanziToReading(value);
+    setPinyin(reading.pinyin);
+    setTones(reading.tones);
+    setRomaja(reading.pinyin);
+  }
+
+  useEffect(() => {
+    if (!editing && learningLanguage === 'zh' && store.getIsAddWordOpen()) {
+      const prefilled = store.getPrefilledKorean().trim();
+      if (prefilled) handleHanziChange(prefilled);
+    }
+  }, [store.getSnapshot()]);
 
   function handleSave() {
     const lemma = learningLanguage === 'zh' ? (hanzi || korean) : korean;
@@ -119,7 +136,7 @@ export default function AddWordDialog() {
             className="form-input"
             value={learningLanguage === 'zh' ? hanzi || korean : korean}
             onChange={(e) => {
-              if (learningLanguage === 'zh') setHanzi(e.target.value);
+              if (learningLanguage === 'zh') handleHanziChange(e.target.value);
               else handleKoreanChange(e.target.value);
             }}
             placeholder={learningLanguage === 'zh' ? '你好' : '커피'}
@@ -159,25 +176,29 @@ export default function AddWordDialog() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">{t('add.romaja')}</label>
-          <input
-            className="form-input"
-            value={romaja}
-            onChange={(e) => setRomaja(e.target.value)}
-            placeholder="keopi"
-          />
-        </div>
+        {learningLanguage !== 'zh' && (
+          <>
+            <div className="form-group">
+              <label className="form-label">{t('add.romaja')}</label>
+              <input
+                className="form-input"
+                value={romaja}
+                onChange={(e) => setRomaja(e.target.value)}
+                placeholder="keopi"
+              />
+            </div>
 
-        <div className="form-group">
-          <label className="form-label">{t('add.hanja')}</label>
-          <input
-            className="form-input"
-            value={hanja}
-            onChange={(e) => setHanja(e.target.value)}
-            placeholder="咖啡"
-          />
-        </div>
+            <div className="form-group">
+              <label className="form-label">{t('add.hanja')}</label>
+              <input
+                className="form-input"
+                value={hanja}
+                onChange={(e) => setHanja(e.target.value)}
+                placeholder="咖啡"
+              />
+            </div>
+          </>
+        )}
 
         <div className="form-group">
           <label className="form-label">{t('add.exampleSentence')}</label>

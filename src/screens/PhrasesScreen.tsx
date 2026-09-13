@@ -2,19 +2,19 @@ import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
 import { speak } from '../domain/tts';
 import { voiceCharacter } from '../domain/voice-chars';
-import { storedLearningLanguage } from '../domain/settings';
+import { ttsLang } from '../domain/language';
 import { activeTheme } from '../domain/themes';
-import { phraseSourcePack, phrasesForTheme } from '../domain/phrases';
+import { phraseSourcePack, phrasesForProfile } from '../domain/phrases';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 
 export default function PhrasesScreen() {
   useStore();
   const theme = activeTheme();
-  const phrases = phrasesForTheme(store.getPhrases(), theme.id);
+  const lang = store.getLearningLanguage();
+  const phrases = phrasesForProfile(store.getPhrases(), lang, theme.id);
   const packs = store.getPacks();
-  const lang = storedLearningLanguage();
-  const voiceLang = lang === 'zh' ? 'zh-CN' : 'ko-KR';
+  const voiceLang = ttsLang(lang);
 
   function speakPhrase(text: string) {
     speak(text, voiceCharacter(store.getCardVoice().id), voiceLang);
@@ -22,11 +22,15 @@ export default function PhrasesScreen() {
 
   return (
     <div>
-      <ScreenHeader title={t('phrases.title')} subtitle="표현" />
-      <p className="muted mb16">{t('phrases.desc', { group: theme.name })}</p>
+      <ScreenHeader title={t('phrases.title')} subtitle={lang === 'zh' ? '短语' : '표현'} />
+      <p className="muted mb16">
+        {lang === 'zh' ? t('phrases.descZh') : t('phrases.desc', { group: theme.name })}
+      </p>
 
       {phrases.length === 0 ? (
-        <div className="empty-hint">{t('phrases.empty')}</div>
+        <div className="empty-hint">
+          {lang === 'zh' ? t('phrases.emptyZh') : t('phrases.empty')}
+        </div>
       ) : (
         <div className="phrase-list">
           {phrases.map((p) => {
@@ -39,6 +43,7 @@ export default function PhrasesScreen() {
                     <WIcon name="volume-up" />
                   </button>
                 </div>
+                {p.pinyin ? <p className="phrase-pinyin">{p.pinyin}</p> : null}
                 <p className="phrase-translation">{p.translation}</p>
                 {source ? (
                   <p className="phrase-source">

@@ -16,14 +16,15 @@ export default function DictionaryScreen() {
   const selectedIds = store.getSelectedIds();
   const [tagDialog, setTagDialog] = useState(false);
   const [pendingTags, setPendingTags] = useState<string[]>([]);
+  const lang = store.getLearningLanguage();
 
   return (
     <div>
-      <ScreenHeader title={t('tab.dictionary')} subtitle="단어장" />
+      <ScreenHeader title={t('tab.dictionary')} subtitle={lang === 'zh' ? '词典' : '단어장'} />
       <div className="search-row">
         <input
           className="search-input"
-          placeholder={t('dict.search')}
+          placeholder={lang === 'zh' ? t('dict.searchZh') : t('dict.search')}
           value={search}
           onChange={(e) => store.setSearchQuery(e.target.value)}
         />
@@ -93,7 +94,11 @@ export default function DictionaryScreen() {
         <div className="empty-hint">
           <span className="empty-state-icon"><WIcon name="inbox" size={24} style={{ color: 'var(--text-tertiary)' }} /></span>
           <span>
-            {search || selectedCategoryId ? t('dict.emptyFound') : t('dict.emptyEmpty')}
+            {search || selectedCategoryId
+              ? t('dict.emptyFound')
+              : lang === 'zh'
+                ? t('dict.emptyZh')
+                : t('dict.emptyEmpty')}
           </span>
         </div>
       ) : (

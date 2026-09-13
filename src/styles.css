@@ -947,7 +947,8 @@ textarea {
   color: var(--text-secondary);
 }
 
-.flashcard .fc-romaja {
+.flashcard .fc-romaja,
+.flashcard .fc-pinyin {
   font-size: 18px;
   color: var(--slate);
 }
@@ -1316,8 +1317,32 @@ textarea {
   color: var(--charcoal);
 }
 
-.word-romaja {
+.word-romaja,
+.word-pinyin {
   font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.phrase-pinyin {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.profile-hint {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-soft);
+  border-radius: var(--radius-md);
+}
+
+.profile-hint p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--text-secondary);
 }
 

@@ -46,17 +46,20 @@ import {
   storedColorTheme,
   saveColorTheme,
   applyColorTheme,
-  storedDailyWordGoal,
-  saveDailyWordGoal,
+  storedDailyWordGoalFor,
+  saveDailyWordGoalFor,
   storedOnboardingCompleted,
   storedLearningLanguage,
   saveLearningLanguage,
-  pushRecentCategoryId,
-  storedSelectedMissionPackId,
-  saveSelectedMissionPackId,
+  pushRecentCategoryIdFor,
+  storedSelectedMissionPackIdFor,
+  saveSelectedMissionPackIdFor,
+  migrateProfileSettings,
   type ColorTheme,
 } from '../domain/settings';
 import { activeMissionPack, suggestedMissionPacks } from '../domain/daily-challenge';
+import { wordLanguage } from '../domain/language';
+import { hanziToReading } from '../domain/pinyin';
 import { voiceCharacter } from '../domain/voice-chars';
 import { setLocale as applyLocale, getLocale as readLocale, type Locale } from '../domain/i18n';
 
@@ -111,14 +114,6 @@ function storedCompletedPackIds(): Set<string> {
   }
 }
 
-function saveCompletedPackIds(ids: Set<string>) {
-  try {
-    localStorage.setItem(COMPLETED_PACKS_KEY, JSON.stringify([...ids]));
-  } catch {
-    // storage unavailable
-  }
-}
-
 export interface QuizRewardState {
   consecutiveCorrect: number;
   rewardGifName: string | null;
@@ -131,7 +126,7 @@ function createStore() {
   let categories: Category[] = [];
   let sources: Source[] = [];
   let packs: Pack[] = [];
-  let progression: Progression = { id: 'main', xp: 0, rewardedMissionDate: null, completedPackIds: [] };
+  let progression: Progression = { id: 'ko', xp: 0, rewardedMissionDate: null, completedPackIds: [] };
   let achievements: Achievement[] = [];
 
   let searchQuery = '';
@@ -167,8 +162,9 @@ function createStore() {
   let listenVoiceId: string = storedListenVoice();
   let colorTheme: ColorTheme = storedColorTheme();
   let phrases: Phrase[] = [];
-  let dailyWordGoal = storedDailyWordGoal();
   let learningLanguage: LearningLanguage = storedLearningLanguage();
+  let dailyWordGoal = storedDailyWordGoalFor(learningLanguage);
+  let zhProfileHint = false;
   let isOnboardingOpen = false;
   let onboardingSkipWelcome = false;
   let isTranslateOpen = false;
@@ -181,8 +177,8 @@ function createStore() {
   let quizSource: 'global' | 'category' | 'filtered' = 'global';
   let quizCategoryId: string | null = null;
   let writeInput = '';
-  let completedPackIds = storedCompletedPackIds();
-  let selectedMissionPackId = storedSelectedMissionPackId();
+  let completedPackIds = new Set<string>();
+  let selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
   let isMissionPickOpen = false;
   let isMissionStartOpen = false;
   let pendingMissionStartPackId: string | null = null;
@@ -193,6 +189,14 @@ function createStore() {
   function emit() {
     snapshot = { v: snapshot.v + 1 };
     listeners.forEach((l) => l());
+  }
+
+  function wordsForProfile(): Word[] {
+    return allWords.filter((w) => wordLanguage(w) === learningLanguage);
+  }
+
+  function packsForProfile(): Pack[] {
+    return packs.filter((p) => (p.language ?? 'ko') === learningLanguage);
   }
 
   async function refresh() {
@@ -237,7 +241,7 @@ function createStore() {
       masteredAt: null,
     };
     await repo.insertWord(word);
-    if (word.categoryId) pushRecentCategoryId(word.categoryId);
+    if (word.categoryId) pushRecentCategoryIdFor(wordLanguage(word), word.categoryId);
   }
 
   async function processDuplicateQueue(): Promise<number> {
@@ -265,26 +269,39 @@ function createStore() {
   }
 
   async function loadGamification() {
-    progression = await repo.getProgression();
+    progression = await repo.getProgression(learningLanguage);
+    completedPackIds = new Set(progression.completedPackIds ?? []);
+    const legacy = storedCompletedPackIds();
+    if (legacy.size > 0 && completedPackIds.size === 0 && learningLanguage === 'ko') {
+      completedPackIds = legacy;
+      progression = { ...progression, completedPackIds: [...legacy] };
+      await repo.putProgression(progression);
+      try {
+        localStorage.removeItem(COMPLETED_PACKS_KEY);
+      } catch {
+        // storage unavailable
+      }
+    }
     achievements = await repo.allAchievements();
   }
 
   function statsSnapshot(todayReviews: number, streak: number): GamificationStats {
-    const totalReviews = allWords.reduce((acc, w) => acc + w.totalReviews, 0);
-    const correctReviews = allWords.reduce((acc, w) => acc + w.correctReviews, 0);
+    const profileWords = wordsForProfile();
+    const totalReviews = profileWords.reduce((acc, w) => acc + w.totalReviews, 0);
+    const correctReviews = profileWords.reduce((acc, w) => acc + w.correctReviews, 0);
     return {
-      totalWords: allWords.length,
+      totalWords: profileWords.length,
       totalReviews,
       correctReviews,
-      masteredWords: allWords.filter((w) => !!w.masteredAt).length,
+      masteredWords: profileWords.filter((w) => !!w.masteredAt).length,
       todayReviews,
       streak,
     };
   }
 
   async function applyReviewGamification(rating: SrsRatingValue) {
-    const todayReviews = await repo.todayReviewsCount();
-    const streak = await repo.streakCount();
+    const todayReviews = await repo.todayReviewsCount(learningLanguage);
+    const streak = await repo.streakCount(learningLanguage);
     const stats = statsSnapshot(todayReviews, streak);
 
     progression = { ...progression, xp: progression.xp + xpForReview(rating, streak) };
@@ -311,8 +328,8 @@ function createStore() {
   }
 
   async function evaluateDailyGamification() {
-    const todayReviews = await repo.todayReviewsCount();
-    const streak = await repo.streakCount();
+    const todayReviews = await repo.todayReviewsCount(learningLanguage);
+    const streak = await repo.streakCount(learningLanguage);
     const stats = statsSnapshot(todayReviews, streak);
 
     const todayStr = localToday();
@@ -350,7 +367,11 @@ function createStore() {
     },
 
     async init() {
+      migrateProfileSettings();
       await repo.initialize();
+      learningLanguage = storedLearningLanguage();
+      dailyWordGoal = storedDailyWordGoalFor(learningLanguage);
+      selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
       await refresh();
       await loadGamification();
       if (!storedOnboardingCompleted()) {
@@ -361,7 +382,7 @@ function createStore() {
     },
 
     getTab: () => currentTab,
-    getWords: () => allWords,
+    getWords: () => wordsForProfile(),
     getCategories: () => categories,
     getSources: () => sources,
     getXp: () => progression.xp,
@@ -390,10 +411,15 @@ function createStore() {
     getIsGuideOpen: () => isGuideOpen,
     getIsPacksOpen: () => isPacksOpen,
     getIsSongImportOpen: () => isSongImportOpen,
-    getPacks: () => packs,
+    getPacks: () => packsForProfile(),
     getSelectedMissionPackId: () => selectedMissionPackId,
-    getActiveMissionPack: () => activeMissionPack(packs, selectedMissionPackId),
-    getSuggestedMissionPacks: () => suggestedMissionPacks(packs, allWords),
+    getActiveMissionPack: () => activeMissionPack(packsForProfile(), selectedMissionPackId),
+    getSuggestedMissionPacks: () => suggestedMissionPacks(packsForProfile(), wordsForProfile()),
+    getZhProfileHint: () => zhProfileHint,
+    dismissZhProfileHint() {
+      zhProfileHint = false;
+      emit();
+    },
     getSelectedWordForDetail: () => selectedWordForDetail,
     getEditingWord: () => editingWord,
     getPrefilledKorean: () => prefilledKorean,
@@ -421,12 +447,35 @@ function createStore() {
     },
     setDailyWordGoal(value: number) {
       dailyWordGoal = Math.max(1, Math.floor(value));
-      saveDailyWordGoal(dailyWordGoal);
+      saveDailyWordGoalFor(learningLanguage, dailyWordGoal);
       emit();
     },
-    setLearningLanguage(lang: LearningLanguage) {
+    async setLearningLanguage(lang: LearningLanguage) {
+      if (lang === learningLanguage) return;
+
+      saveDailyWordGoalFor(learningLanguage, dailyWordGoal);
+      saveSelectedMissionPackIdFor(learningLanguage, selectedMissionPackId || null);
+      progression = {
+        ...progression,
+        completedPackIds: [...completedPackIds],
+      };
+      await repo.putProgression(progression);
+
       learningLanguage = lang;
       saveLearningLanguage(lang);
+      dailyWordGoal = storedDailyWordGoalFor(lang);
+      selectedMissionPackId = storedSelectedMissionPackIdFor(lang);
+      progression = await repo.getProgression(lang);
+      completedPackIds = new Set(progression.completedPackIds ?? []);
+
+      cardsQueue = cardsQueue.filter((w) => wordLanguage(w) === lang);
+      if (currentCardIndex >= cardsQueue.length) currentCardIndex = 0;
+      quizWordPool = null;
+      quizQuestion = null;
+      selectedCategoryId = null;
+      searchQuery = '';
+
+      zhProfileHint = lang === 'zh' && wordsForProfile().length === 0;
       emit();
     },
 
@@ -468,7 +517,10 @@ function createStore() {
     },
 
     async startDueReview() {
-      cardsQueue = await repo.dueWords();
+      const now = Date.now();
+      cardsQueue = wordsForProfile()
+        .filter((w) => w.nextReviewAt <= now)
+        .sort((a, b) => a.nextReviewAt - b.nextReviewAt);
       currentCardIndex = 0;
       isCardFlipped = false;
       currentTab = 'cards';
@@ -477,7 +529,7 @@ function createStore() {
     },
 
     async startReviewAll() {
-      cardsQueue = [...allWords].sort(() => Math.random() - 0.5);
+      cardsQueue = [...wordsForProfile()].sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
       currentTab = 'cards';
@@ -496,7 +548,7 @@ function createStore() {
 
     async startCategoryReview(categoryId: string, mode: 'due' | 'all' = 'due') {
       const now = Date.now();
-      let pool = allWords.filter((w) => w.categoryId === categoryId);
+      let pool = wordsForProfile().filter((w) => w.categoryId === categoryId);
       if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
       cardsQueue = pool.sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
@@ -509,7 +561,7 @@ function createStore() {
     async startFilteredReview(wordIds: string[], mode: 'due' | 'all' = 'due') {
       const idSet = new Set(wordIds);
       const now = Date.now();
-      let pool = allWords.filter((w) => idSet.has(w.id));
+      let pool = wordsForProfile().filter((w) => idSet.has(w.id));
       if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
       cardsQueue = pool.sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
@@ -520,7 +572,7 @@ function createStore() {
     },
 
     async startCategoryQuiz(categoryId: string, kind: 'listen' | 'reverse' | 'write' = 'reverse') {
-      quizWordPool = allWords.filter((w) => w.categoryId === categoryId);
+      quizWordPool = wordsForProfile().filter((w) => w.categoryId === categoryId);
       quizSource = 'category';
       quizCategoryId = categoryId;
       currentTab = 'quiz';
@@ -529,7 +581,7 @@ function createStore() {
 
     async startFilteredQuiz(wordIds: string[], kind: 'listen' | 'reverse' | 'write' = 'reverse') {
       const idSet = new Set(wordIds);
-      quizWordPool = allWords.filter((w) => idSet.has(w.id));
+      quizWordPool = wordsForProfile().filter((w) => idSet.has(w.id));
       quizSource = 'filtered';
       quizCategoryId = null;
       currentTab = 'quiz';
@@ -567,7 +619,7 @@ function createStore() {
     },
 
     async loadNextQuizQuestion(kind: 'listen' | 'reverse' | 'write') {
-      const words = quizWordPool ?? allWords.filter((w) => (w.language ?? 'ko') === learningLanguage);
+      const words = quizWordPool ?? wordsForProfile();
       if (kind === 'write') {
         if (words.length < 1) {
           quizQuestion = null;
@@ -837,7 +889,7 @@ function createStore() {
 
     selectMissionPack(packId: string | null, options?: { promptStart?: boolean }) {
       selectedMissionPackId = packId?.trim() ?? '';
-      saveSelectedMissionPackId(packId);
+      saveSelectedMissionPackIdFor(learningLanguage, packId);
       isMissionPickOpen = false;
       if (packId?.trim() && options?.promptStart !== false) {
         pendingMissionStartPackId = packId.trim();
@@ -874,7 +926,7 @@ function createStore() {
       pendingMissionStartPackId = null;
 
       const packKoreans = new Set(pack.wordDefs.map((d) => d.korean));
-      let pool = allWords.filter((w) => packKoreans.has(w.korean));
+      let pool = wordsForProfile().filter((w) => packKoreans.has(w.korean));
 
       if (pool.length < pack.wordDefs.length) {
         await this.addPack(packId);
@@ -883,7 +935,7 @@ function createStore() {
           emit();
           return;
         }
-        pool = allWords.filter((w) => packKoreans.has(w.korean));
+        pool = wordsForProfile().filter((w) => packKoreans.has(w.korean));
       }
 
       if (pool.length === 0) {
@@ -897,7 +949,7 @@ function createStore() {
 
       const now = Date.now();
       const categoryPool = category
-        ? allWords.filter((w) => w.categoryId === category.id)
+        ? wordsForProfile().filter((w) => w.categoryId === category.id)
         : pool;
 
       const trainPool = categoryPool.length > 0 ? categoryPool : pool;
@@ -919,18 +971,30 @@ function createStore() {
       const pack = packs.find((p) => p.id === packId);
       if (!pack) return;
       const category = await repo.findOrCreateCategory(pack.title, pack.emoji, pack.colorHex);
-      const payloads: DuplicateWordPayload[] = pack.wordDefs.map((def) => ({
-        korean: def.korean,
-        translation: def.translation,
-        hanja: def.hanja ?? null,
-        exampleSentence: def.exampleSentence ?? null,
-        exampleTranslation: def.exampleTranslation ?? null,
-        categoryId: category.id,
-        sourceId: pack.sourceId,
-        tags: def.tags ?? [],
-        difficulty: def.difficulty ?? pack.difficulty,
-        language: learningLanguage,
-      }));
+      const packLang = pack.language ?? 'ko';
+      const payloads: DuplicateWordPayload[] = pack.wordDefs.map((def) => {
+        const reading =
+          packLang === 'zh'
+            ? def.pinyin
+              ? { pinyin: def.pinyin, tones: hanziToReading(def.korean).tones }
+              : hanziToReading(def.korean)
+            : { pinyin: null as string | null, tones: null as string | null };
+        return {
+          korean: def.korean,
+          translation: def.translation,
+          hanja: def.hanja ?? null,
+          pinyin: reading.pinyin,
+          tones: reading.tones,
+          romaja: packLang === 'zh' ? (reading.pinyin ?? '') : undefined,
+          exampleSentence: def.exampleSentence ?? null,
+          exampleTranslation: def.exampleTranslation ?? null,
+          categoryId: category.id,
+          sourceId: pack.sourceId,
+          tags: def.tags ?? [],
+          difficulty: def.difficulty ?? pack.difficulty,
+          language: packLang,
+        };
+      });
       await this.enqueueWordsForImport(payloads);
       await this.checkPackCompletion(packId);
       if (!duplicatePending) await evaluateDailyGamification();
@@ -940,12 +1004,16 @@ function createStore() {
     async checkPackCompletion(packId: string) {
       const pack = packs.find((p) => p.id === packId);
       if (!pack || completedPackIds.has(packId)) return;
-      const koreanSet = new Set(allWords.map((w) => w.korean));
-      if (packFullyImported(pack, koreanSet) && packReviewed(pack, allWords)) {
+      const profileWords = wordsForProfile();
+      const koreanSet = new Set(profileWords.map((w) => w.korean));
+      if (packFullyImported(pack, koreanSet) && packReviewed(pack, profileWords)) {
         completedPackIds = new Set(completedPackIds);
         completedPackIds.add(packId);
-        saveCompletedPackIds(completedPackIds);
-        progression = { ...progression, xp: progression.xp + XP_PACK_COMPLETED };
+        progression = {
+          ...progression,
+          xp: progression.xp + XP_PACK_COMPLETED,
+          completedPackIds: [...completedPackIds],
+        };
         await repo.putProgression(progression);
       }
     },
@@ -1041,7 +1109,7 @@ function createStore() {
         };
         await repo.updateWord(updated);
         cardsQueue = cardsQueue.map((w) => (w.id === updated.id ? updated : w));
-        if (params.categoryId) pushRecentCategoryId(params.categoryId);
+        if (params.categoryId) pushRecentCategoryIdFor(learningLanguage, params.categoryId);
         isAddWordOpen = false;
         editingWord = null;
         prefilledKorean = '';
@@ -1187,11 +1255,11 @@ function createStore() {
     },
 
     async dailyActivity(days: number) {
-      return repo.dailyActivityLastDays(days);
+      return repo.dailyActivityLastDays(days, learningLanguage);
     },
 
     async weeklyGrowth() {
-      return repo.weeklyWordsGrowth();
+      return repo.weeklyWordsGrowth(learningLanguage);
     },
 
     async deleteWord(word: Word) {
@@ -1270,13 +1338,13 @@ function createStore() {
 
     // computed
     dueWords(): Word[] {
-      return allWords
+      return wordsForProfile()
         .filter((w) => w.nextReviewAt <= Date.now())
         .sort((a, b) => a.nextReviewAt - b.nextReviewAt);
     },
 
     difficultWords(): Word[] {
-      return allWords.filter(
+      return wordsForProfile().filter(
         (w) =>
           w.lastResult === 'AGAIN' ||
           w.lastResult === 'HARD' ||
@@ -1286,7 +1354,7 @@ function createStore() {
 
     filteredWords(): Word[] {
       const query = searchQuery.trim().toLowerCase();
-      return allWords.filter((w) => {
+      return wordsForProfile().filter((w) => {
         const matchesCategory = selectedCategoryId === null || w.categoryId === selectedCategoryId;
         if (!matchesCategory) return false;
         if (!query) return true;
@@ -1294,21 +1362,23 @@ function createStore() {
           w.korean.toLowerCase().includes(query) ||
           w.translation.toLowerCase().includes(query) ||
           w.romaja.toLowerCase().includes(query) ||
-          (w.hanja?.toLowerCase().includes(query) ?? false)
+          (w.hanja?.toLowerCase().includes(query) ?? false) ||
+          (w.pinyin?.toLowerCase().includes(query) ?? false) ||
+          (w.tones?.toLowerCase().includes(query) ?? false)
         );
       });
     },
 
     totalWordsCount(): number {
-      return allWords.length;
+      return wordsForProfile().length;
     },
 
     masteredWordsCount(): number {
-      return allWords.filter((w) => !!w.masteredAt).length;
+      return wordsForProfile().filter((w) => !!w.masteredAt).length;
     },
 
     avgDaysToMaster(): number | null {
-      const mastered = allWords.filter((w) => !!w.masteredAt);
+      const mastered = wordsForProfile().filter((w) => !!w.masteredAt);
       if (mastered.length === 0) return null;
       const totalDays = mastered.reduce(
         (acc, w) => acc + Math.max(0, (w.masteredAt! - w.createdAt) / (24 * 60 * 60 * 1000)),
@@ -1328,14 +1398,15 @@ function createStore() {
       }
       return months.map((m) => ({
         month: m.label,
-        count: allWords.filter((w) => !!w.masteredAt && w.masteredAt! >= m.from && w.masteredAt! < m.to)
-          .length,
+        count: wordsForProfile().filter(
+          (w) => !!w.masteredAt && w.masteredAt! >= m.from && w.masteredAt! < m.to
+        ).length,
       }));
     },
 
     masteredByCategory(): { categoryName: string; count: number }[] {
       const names = new Map<string, number>();
-      for (const w of allWords) {
+      for (const w of wordsForProfile()) {
         if (!w.masteredAt) continue;
         const name = w.categoryId ? this.categoryName(w.categoryId) : 'Без категории';
         names.set(name, (names.get(name) ?? 0) + 1);
@@ -1344,16 +1415,17 @@ function createStore() {
     },
 
     async todayReviewsCount(): Promise<number> {
-      return repo.todayReviewsCount();
+      return repo.todayReviewsCount(learningLanguage);
     },
 
     async streakCount(): Promise<number> {
-      return repo.streakCount();
+      return repo.streakCount(learningLanguage);
     },
 
     accuracyPercent(): number {
-      const total = allWords.reduce((acc, w) => acc + w.totalReviews, 0);
-      const correct = allWords.reduce((acc, w) => acc + w.correctReviews, 0);
+      const profileWords = wordsForProfile();
+      const total = profileWords.reduce((acc, w) => acc + w.totalReviews, 0);
+      const correct = profileWords.reduce((acc, w) => acc + w.correctReviews, 0);
       return total > 0 ? Math.round((correct / total) * 100) : 100;
     },
 

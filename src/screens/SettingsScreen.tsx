@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { storedApiKey, saveApiKey } from '../domain/gemini-ocr';
 import {
@@ -113,6 +113,10 @@ export default function SettingsScreen() {
 
   const activeTheme = getTheme(themeId);
   const learningLanguage = store.getLearningLanguage();
+
+  useEffect(() => {
+    setDailyGoal(store.getDailyWordGoal());
+  }, [store.getSnapshot()]);
   const locale = store.getLocale();
   const colorTheme = store.getColorTheme();
 
@@ -258,7 +262,7 @@ export default function SettingsScreen() {
                   <button
                     key={id}
                     className={`select-chip ${learningLanguage === id ? 'active' : ''}`}
-                    onClick={() => store.setLearningLanguage(id as LearningLanguage)}
+                    onClick={() => void store.setLearningLanguage(id as LearningLanguage)}
                   >
                     {flag} {label}
                   </button>

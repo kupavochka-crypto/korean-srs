@@ -50,6 +50,15 @@ export default function HomeScreen() {
     <div>
       <ScreenHeader title="Woori · 우리" subtitle={t('app.subtitle')} />
 
+      {store.getZhProfileHint() && (
+        <div className="profile-hint card-flat mb16">
+          <p>{t('home.zhProfileHint')}</p>
+          <button type="button" className="secondary-btn" onClick={() => store.dismissZhProfileHint()}>
+            {t('common.close')}
+          </button>
+        </div>
+      )}
+
       <div className="greeting-card card" onClick={() => store.setGreeting(randomGreeting(greeting).id)}>
         <img className="greeting-image" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
         <div>
