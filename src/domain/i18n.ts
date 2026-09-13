@@ -56,10 +56,10 @@ const STRINGS: Dict = {
 
   'tab.home': { ru: 'Главная', en: 'Home' },
   'tab.cards': { ru: 'Карточки', en: 'Cards' },
-  'tab.listening': { ru: 'Аудирование', en: 'Listening' },
+  'tab.listening': { ru: 'Аудио', en: 'Listening' },
   'tab.quiz': { ru: 'Квиз', en: 'Quiz' },
   'tab.dictionary': { ru: 'Словарь', en: 'Dictionary' },
-  'tab.gallery': { ru: 'Коллекция', en: 'Collection' },
+  'tab.gallery': { ru: 'Альбом', en: 'Gallery' },
   'tab.progress': { ru: 'Прогресс', en: 'Progress' },
   'tab.settings': { ru: 'Настройки', en: 'Settings' },
 

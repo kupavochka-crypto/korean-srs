@@ -10,7 +10,17 @@ import { setBasePath } from '@shoelace-style/shoelace';
 
 setBasePath(import.meta.env.BASE_URL + 'shoelace');
 
-registerSW({ immediate: true });
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  navigator.serviceWorker?.getRegistration().then((reg) => reg?.update());
+});
 
 applyColorTheme();
 
