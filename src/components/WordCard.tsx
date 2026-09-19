@@ -27,7 +27,7 @@ export default function WordCard({
   selectable?: boolean;
   selected?: boolean;
 }) {
-  const category = store.categoryFor(word.categoryId);
+  const wordCategories = store.categoriesForWord(word);
   const source = store.sourceFor(word.sourceId);
   const status = srsStatus(word);
   const difficultyLabel = word.difficulty;
@@ -67,8 +67,9 @@ export default function WordCard({
       <div className="word-translation">{word.translation}</div>
       {word.exampleSentence && <div className="word-example">{word.exampleSentence}</div>}
       <div className="word-meta">
-        {category && (
+        {wordCategories.map((category) => (
           <button
+            key={category.id}
             type="button"
             className="badge badge-cat badge-cat-btn"
             style={{ background: colorFromHex(category.colorHex) }}
@@ -79,18 +80,13 @@ export default function WordCard({
           >
             {category.emoji} {category.name}
           </button>
-        )}
+        ))}
         <span className="badge">{t('word.level')} {difficultyLabel}</span>
         <span className={`badge ${status.cls}`}>{status.text}</span>
         {source?.type === 'song' && (
           <span className="badge badge-song">{t('word.songBadge', { name: source.title })}</span>
         )}
         {source && source.type !== 'song' && <span className="badge">{formatSource(source)}</span>}
-        {word.tags.map((tag) => (
-          <span className="badge" key={tag}>
-            #{tag}
-          </span>
-        ))}
       </div>
     </div>
   );

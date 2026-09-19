@@ -1,4 +1,4 @@
-import TagInput from './TagInput';
+import CategoryMultiPicker from './CategoryMultiPicker';
 import type { ImportedWordDraft } from '../types';
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
   readyCount: number;
   onToggle: (index: number) => void;
   onUpdateField: (index: number, field: 'korean' | 'translation', value: string) => void;
-  onUpdateTags: (index: number, tags: string[]) => void;
+  onUpdateCategoryIds: (index: number, categoryIds: string[]) => void;
   onSave: () => void;
   saveLabel: string;
   knownInDictionaryCount?: number;
@@ -22,7 +22,7 @@ export default function ScannedWordsEditor({
   readyCount,
   onToggle,
   onUpdateField,
-  onUpdateTags,
+  onUpdateCategoryIds,
   onSave,
   saveLabel,
   knownInDictionaryCount,
@@ -75,7 +75,13 @@ export default function ScannedWordsEditor({
                 placeholder="перевод"
                 readOnly={locked}
               />
-              {!locked && <TagInput tags={d.tags} onChange={(tags) => onUpdateTags(i, tags)} />}
+              {!locked && (
+                <CategoryMultiPicker
+                  compact
+                  categoryIds={d.categoryIds ?? []}
+                  onChange={(categoryIds) => onUpdateCategoryIds(i, categoryIds)}
+                />
+              )}
               {rowMeta?.(i)}
             </div>
           );

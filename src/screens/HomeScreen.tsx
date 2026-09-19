@@ -15,7 +15,7 @@ import {
 import { t } from '../domain/i18n';
 import { greetingNative, tL } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
-import { packImportedCount } from '../domain/daily-challenge';
+import { packSessionStats } from '../domain/mission-word-count';
 
 export default function HomeScreen() {
   useStore();
@@ -33,7 +33,9 @@ export default function HomeScreen() {
   const mission = todayMission(new Date());
   const challengePack = store.getActiveMissionPack();
   const koreanSet = new Set(store.getWords().map((w) => w.korean));
-  const challengeStats = challengePack ? packImportedCount(challengePack, koreanSet) : { imported: 0, total: 0 };
+  const challengeStats = challengePack
+    ? packSessionStats(challengePack, koreanSet, store.getMissionWordCount())
+    : { imported: 0, total: 0 };
   const challengeProgress = challengeStats.total > 0 ? challengeStats.imported / challengeStats.total : 0;
   const learningLang = store.getLearningLanguage();
 

@@ -44,9 +44,8 @@ export interface Word {
   translation: string;
   exampleSentence: string | null;
   exampleTranslation: string | null;
-  categoryId: string | null;
+  categoryIds: string[];
   sourceId: string | null;
-  tags: string[];
   difficulty: Difficulty;
   createdAt: number;
   intervalDays: number;
@@ -110,6 +109,8 @@ export interface Pack {
   kind?: 'words' | 'phrases';
   releaseDate?: string | null;
   language?: LearningLanguage;
+  /** Hidden until user taps «Обновить подборку» or remote catalog sync. */
+  staged?: boolean;
 }
 
 export interface Phrase {
@@ -180,8 +181,7 @@ export interface ScannedWord {
 export interface ImportedWordDraft {
   korean: string;
   translation: string;
-  tags: string[];
-  categoryId?: string | null;
+  categoryIds: string[];
   pinyin?: string | null;
 }
 
@@ -210,7 +210,7 @@ export interface WordSaveParams {
   translation: string;
   exampleSentence: string;
   exampleTranslation: string;
-  categoryId: string | null;
+  categoryIds: string[];
   sourceId: string | null;
   difficulty: Difficulty;
   pinyin?: string;
@@ -222,7 +222,7 @@ export interface PendingDuplicate {
   incoming: {
     korean: string;
     translation: string;
-    categoryId: string | null;
+    categoryIds: string[];
     pinyin?: string | null;
   };
   existing: Word;
@@ -239,9 +239,8 @@ export interface DuplicateWordPayload {
   translation: string;
   exampleSentence?: string | null;
   exampleTranslation?: string | null;
-  categoryId?: string | null;
+  categoryIds?: string[];
   sourceId?: string | null;
-  tags?: string[];
   difficulty?: Difficulty;
   language?: LearningLanguage;
 }

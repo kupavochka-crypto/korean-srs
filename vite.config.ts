@@ -1,10 +1,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { contentCatalogPlugin } from './vite-plugin-content-catalog';
+import pkg from './package.json';
 
 export default defineConfig({
   base: '/korean-srs/',
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
+    contentCatalogPlugin(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -39,7 +45,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,gif,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,json,svg,png,jpg,gif,webmanifest}'],
+        globIgnores: ['**/content/catalog.json'],
         maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
         navigateFallback: '/korean-srs/index.html'
       }

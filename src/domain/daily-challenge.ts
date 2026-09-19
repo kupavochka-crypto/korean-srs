@@ -60,6 +60,49 @@ export function activeMissionPack(
   return dailyChallengePack(packs, date);
 }
 
+export function isMissionCompleted(
+  pack: Pack,
+  words: Word[],
+  completedPackIds: Set<string>
+): boolean {
+  return completedPackIds.has(pack.id) || isPackCompleted(pack, words);
+}
+
+/** Active missions only — incomplete first, then by least progress */
+export function availableMissionPacks(
+  packs: Pack[],
+  words: Word[],
+  completedPackIds: Set<string>,
+  date: Date = new Date()
+): Pack[] {
+  const open = packs.filter((p) => !isMissionCompleted(p, words, completedPackIds));
+  return suggestedMissionPacks(open, words, date);
+}
+
+export function completedMissionPacks(
+  packs: Pack[],
+  words: Word[],
+  completedPackIds: Set<string>
+): Pack[] {
+  return packs
+    .filter((p) => isMissionCompleted(p, words, completedPackIds))
+    .sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+}
+
+export function nextMissionPack(
+  packs: Pack[],
+  words: Word[],
+  completedPackIds: Set<string>,
+  currentPackId: string | null | undefined,
+  date: Date = new Date()
+): Pack | null {
+  const open = packs.filter((p) => !isMissionCompleted(p, words, completedPackIds));
+  const ordered = suggestedMissionPacks(open.length > 0 ? open : packs, words, date);
+  if (ordered.length === 0) return null;
+  const idx = currentPackId ? ordered.findIndex((p) => p.id === currentPackId) : -1;
+  return ordered[(idx + 1) % ordered.length];
+}
+
 /** Incomplete packs first, then by least progress — for mission picker */
 export function suggestedMissionPacks(
   packs: Pack[],

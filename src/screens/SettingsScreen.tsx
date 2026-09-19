@@ -462,7 +462,11 @@ export default function SettingsScreen() {
 
   return (
     <div className="settings-page">
-      <ScreenHeader title={t('settings.title')} subtitle={tabSubtitle('settings', learningLanguage)} />
+      <ScreenHeader
+        title={t('settings.title')}
+        subtitle={tabSubtitle('settings', learningLanguage)}
+        showVersion
+      />
 
       <SettingsGroup>
         <SettingsLinkRow

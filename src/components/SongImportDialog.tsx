@@ -49,17 +49,12 @@ export default function SongImportDialog() {
     };
   }, [recordPreviewUrl]);
 
-  function songTag(): string {
-    return soundName.trim();
-  }
-
   function applyScannedWords(scanned: { korean: string; translation: string }[]) {
-    const tag = songTag();
     setDrafts(
       scanned.map((s) => ({
         korean: s.korean,
         translation: s.translation,
-        tags: tag ? [tag] : [],
+        categoryIds: [],
       }))
     );
     setSelected(scanned.map(() => true));
@@ -176,8 +171,8 @@ export default function SongImportDialog() {
     setDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
   }
 
-  function updateTags(index: number, tags: string[]) {
-    setDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, tags } : d)));
+  function updateCategoryIds(index: number, categoryIds: string[]) {
+    setDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, categoryIds } : d)));
   }
 
   function toggleIndex(index: number) {
@@ -355,14 +350,7 @@ export default function SongImportDialog() {
             <input
               className="form-input"
               value={soundName}
-              onChange={(e) => {
-                const name = e.target.value;
-                setSoundName(name);
-                const tag = name.trim();
-                if (tag) {
-                  setDrafts((prev) => prev.map((d) => ({ ...d, tags: [tag] })));
-                }
-              }}
+              onChange={(e) => setSoundName(e.target.value)}
               placeholder={t('song.namePlaceholder')}
               style={{ marginBottom: 8 }}
             />
@@ -373,7 +361,7 @@ export default function SongImportDialog() {
               readyCount={readyCount}
               onToggle={toggleIndex}
               onUpdateField={updateField}
-              onUpdateTags={updateTags}
+              onUpdateCategoryIds={updateCategoryIds}
               onSave={() => void handleSave()}
               saveLabel={t('song.save', { count: readyCount })}
               knownInDictionaryCount={knownInDictionaryCount}

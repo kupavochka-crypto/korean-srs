@@ -67,6 +67,17 @@ export class KoreanDB extends Dexie {
       phrases: '&id, sourcePackId, createdAt, language',
       practiceEvents: '++id, wordId, mode, dateString, timestamp',
     });
+    this.version(6).stores({
+      words: '&id, korean, sourceId, nextReviewAt, createdAt, language',
+      categories: '&id, name, createdAt',
+      reviews: '++id, wordId, dateString, timestamp',
+      sources: '&id, type, artistId, title, createdAt',
+      packs: '&id, sourceId, difficulty, createdAt',
+      achievements: '&id, earnedAt',
+      progression: '&id',
+      phrases: '&id, sourcePackId, createdAt, language',
+      practiceEvents: '++id, wordId, mode, dateString, timestamp',
+    });
   }
 }
 

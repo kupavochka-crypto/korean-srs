@@ -47,7 +47,7 @@ export default function ScanOcrDialog() {
           scanned.map((s) => ({
             korean: s.korean,
             translation: s.translation,
-            tags: [],
+            categoryIds: [],
           }))
         );
         setSelected(scanned.map(() => true));
@@ -68,7 +68,7 @@ export default function ScanOcrDialog() {
       parsed.map((s) => ({
         korean: s.korean,
         translation: s.translation,
-        tags: [],
+        categoryIds: [],
       }))
     );
     setSelected(parsed.map(() => true));
@@ -81,8 +81,8 @@ export default function ScanOcrDialog() {
     );
   }
 
-  function updateTags(index: number, tags: string[]) {
-    setDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, tags } : d)));
+  function updateCategoryIds(index: number, categoryIds: string[]) {
+    setDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, categoryIds } : d)));
   }
 
   function toggleIndex(index: number) {
@@ -202,7 +202,7 @@ export default function ScanOcrDialog() {
             readyCount={readyCount}
             onToggle={toggleIndex}
             onUpdateField={updateField}
-            onUpdateTags={updateTags}
+            onUpdateCategoryIds={updateCategoryIds}
             onSave={handleSave}
             saveLabel={`Сохранить (${readyCount})`}
           />

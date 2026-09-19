@@ -305,7 +305,7 @@ const STRINGS: Dict = {
   'add.hanja': { ru: 'Ханча (необязательно)', en: 'Hanja (optional)' },
   'add.exampleSentence': { ru: 'Пример предложения', en: 'Example sentence' },
   'add.exampleTranslation': { ru: 'Перевод примера', en: 'Example translation' },
-  'add.category': { ru: 'Категория', en: 'Category' },
+  'add.category': { ru: 'Категории', en: 'Categories' },
   'add.source': { ru: 'Источник (откуда слово)', en: 'Source (where the word is from)' },
   'add.noSource': { ru: '✍️ Без источника', en: '✍️ No source' },
   'add.level': { ru: 'Уровень', en: 'Level' },
@@ -342,22 +342,47 @@ const STRINGS: Dict = {
   },
   'dict.selectOnAria': { ru: 'Выйти из выбора', en: 'Exit selection' },
   'dict.selectOffAria': { ru: 'Выбрать слова', en: 'Select words' },
+  'dict.selectionEmpty': {
+    ru: 'Нажмите на слова, чтобы выбрать их.',
+    en: 'Tap words to select them.',
+  },
   'dict.selectionHint': {
     ru: 'Выбрано: {count}. Нажмите на слово, чтобы выбрать или убрать.',
     en: 'Selected: {count}. Tap a word to toggle it.',
+  },
+  'dict.bulkActions': { ru: 'Действия с выбранными словами', en: 'Actions for selected words' },
+  'dict.assignCategory': { ru: 'Назначить категорию', en: 'Assign category' },
+  'dict.deleteSelected': { ru: 'Удалить', en: 'Delete' },
+  'dict.deleteConfirm': {
+    ru: 'Удалить {count} слов из словаря?',
+    en: 'Delete {count} words from the dictionary?',
   },
   'dict.all': { ru: 'Все', en: 'All' },
   'dict.addCategory': { ru: '+ Категория', en: '+ Category' },
   'dict.emptyFound': { ru: 'Ничего не найдено по вашему запросу.', en: 'Nothing found for your query.' },
   'dict.emptyEmpty': { ru: 'Словарь пуст. Добавьте слова!', en: 'The dictionary is empty. Add some words!' },
-  'dict.tags': { ru: '✏️ Теги', en: '✏️ Tags' },
+  'dict.categories': { ru: '✏️ Категории', en: '✏️ Categories' },
   'dict.delete': { ru: '🗑 Удалить', en: '🗑 Delete' },
-  'dict.tagsDialog': { ru: 'Назначить теги ({count} слов)', en: 'Assign tags ({count} words)' },
-  'dict.tagsHint': {
-    ru: 'Теги будут добавлены ко всем выбранным словам (существующие сохранятся).',
-    en: 'Tags will be added to all selected words (existing ones stay).',
+  'dict.categoriesDialog': {
+    ru: 'Назначить категории ({count} слов)',
+    en: 'Assign categories ({count} words)',
+  },
+  'dict.categoriesHint': {
+    ru: 'Выбранные категории добавятся к уже назначенным.',
+    en: 'Selected categories will be added to existing ones.',
+  },
+  'dict.pickCategories': { ru: 'Выберите категории', en: 'Pick categories' },
+  'dict.noCategoriesYet': {
+    ru: 'Категорий пока нет — создайте первую.',
+    en: 'No categories yet — create one.',
   },
   'dict.assign': { ru: 'Назначить', en: 'Assign' },
+  'category.pickOrCreate': {
+    ru: 'Выберите категорию или создайте новую',
+    en: 'Pick a category or create a new one',
+  },
+  'category.addMore': { ru: 'ещё категория…', en: 'another category…' },
+  'category.create': { ru: '+ «{name}»', en: '+ «{name}»' },
   'dict.addWordAria': { ru: 'Добавить слово', en: 'Add word' },
 
   'progress.stat': { ru: 'Статистика', en: 'Statistics' },
@@ -509,8 +534,8 @@ const STRINGS: Dict = {
   },
   'guide.practice.dict.title': { ru: 'Словарь 📖 и уроки', en: 'Dictionary 📖 and packs' },
   'guide.practice.dict.text': {
-    ru: 'Добавляйте слова вручную, сканируйте из учебника или выбирайте их пачкой, чтобы развесить по тегам. Прогресс 📊 показывает, сколько слов вы уже запомнили.',
-    en: 'Add words manually, scan from a textbook or import packs, and organize them with tags. Progress 📊 shows how many words you have memorized.',
+    ru: 'Добавляйте слова вручную, сканируйте из учебника или выбирайте их пачкой, чтобы разложить по категориям. Прогресс 📊 показывает, сколько слов вы уже запомнили.',
+    en: 'Add words manually, scan from a textbook or import packs, and organize them with categories. Progress 📊 shows how many words you have memorized.',
   },
   'guide.faq.title': { ru: 'Частые вопросы', en: 'FAQ' },
   'guide.faq.data.title': { ru: 'Что делать, если пропали слова?', en: 'What if my words disappeared?' },
@@ -537,13 +562,64 @@ const STRINGS: Dict = {
   'home.challengeStart': { ru: 'Добавить слова', en: 'Add words' },
   'home.challengeDone': { ru: 'Подборка добавлена ✓', en: 'Collection added ✓' },
   'missionPick.title': { ru: 'Выберите миссию', en: 'Choose a mission' },
-  'missionPick.hint': {
-    ru: 'Миссия — подборка слов по песне или теме. Незавершённые показаны первыми.',
-    en: 'A mission is a word collection by song or theme. Incomplete ones are listed first.',
+  'missionPick.tabAvailable': { ru: 'Доступные', en: 'Available' },
+  'missionPick.tabCompleted': { ru: 'Пройденные', en: 'Completed' },
+  'missionPick.refresh': { ru: 'Обновить подборку', en: 'Refresh collection' },
+  'missionPick.refreshing': { ru: 'Загружаем миссии…', en: 'Loading missions…' },
+  'missionPick.refreshHint': {
+    ru: 'Заменит текущие 7 миссий на новые из каталога',
+    en: 'Replaces the current 7 missions with new ones from the catalog',
   },
-  'missionPick.progress': { ru: '{pct}% · осталось {count} слов', en: '{pct}% · {count} words left' },
+  'missionPick.completedBadge': { ru: 'Пройдена', en: 'Completed' },
+  'missionPick.completedProgress': {
+    ru: '{total} слов · {pct}% · пройдена',
+    en: '{total} words · {pct}% · completed',
+  },
+  'missionPick.dailySub': {
+    ru: '{title} · {total} слов · осталось {left}',
+    en: '{title} · {total} words · {left} left',
+  },
+  'missionPick.completedEmpty': {
+    ru: 'Пока нет пройденных миссий — начни с доступных',
+    en: 'No completed missions yet — start with available ones',
+  },
+  'missionPick.availableEmpty': {
+    ru: 'Нет доступных миссий — нажми «Обновить подборку» или загляни в «Пройденные»',
+    en: 'No missions available — tap Refresh or check Completed',
+  },
+  'missionPick.hint': {
+    ru: 'Сейчас доступно 7 миссий. Пройденные сохраняются во вкладке «Пройденные».',
+    en: '7 missions are available now. Completed ones stay in the Completed tab.',
+  },
+  'missionPick.progress': {
+    ru: '{total} слов · {pct}% · осталось {count}',
+    en: '{total} words · {pct}% · {count} left',
+  },
   'missionPick.noDaily': { ru: 'Ротация по календарю', en: 'Calendar rotation' },
   'missionStart.title': { ru: 'Готов начать?', en: 'Ready to start?' },
+  'missionStart.wordCountLabel': { ru: 'Сколько слов учить', en: 'How many words to study' },
+  'missionStart.wordCountAll': { ru: 'Все', en: 'All' },
+  'missionStart.wordCountCapped': {
+    ru: 'Выбрано больше, чем есть — возьмём {total}',
+    en: 'You chose more than available — we will use {total}',
+  },
+  'missionStart.wordCountUnavailable': {
+    ru: 'В подборках максимум {max} слов',
+    en: 'Collections have at most {max} words',
+  },
+  'missionStart.wordCountMaxHint': {
+    ru: 'Сейчас в подборках до {max} слов — 50 и 100 появятся, когда добавим больше песен',
+    en: 'Collections currently hold up to {max} words — 50 and 100 unlock with more songs',
+  },
+  'missionStart.wordsChosen': { ru: 'Выбрано: {count}', en: 'Selected: {count}' },
+  'missionStart.wordsInCollection': {
+    ru: 'Всего в подборке: {count}',
+    en: 'In collection: {count}',
+  },
+  'missionStart.wordsSession': {
+    ru: '{count} слов в этой тренировке',
+    en: '{count} words in this session',
+  },
   'missionStart.desc': {
     ru: 'Тренировка: карточки и повторение слов из этой подборки.',
     en: 'Training: flashcards and review for words in this collection.',
@@ -570,7 +646,7 @@ const STRINGS: Dict = {
   'dup.keepBoth': { ru: 'Сохранить оба', en: 'Keep both' },
 
   'progress.boards': { ru: 'Доски прогресса', en: 'Progress boards' },
-  'progress.planFact': { ru: 'План vs факт', en: 'Plan vs actual' },
+  'progress.planFact': { ru: 'Как идёт неделя', en: 'Your week' },
   'progress.plan': { ru: 'План', en: 'Plan' },
   'progress.fact': { ru: 'Факт', en: 'Actual' },
   'progress.forecast': { ru: 'При текущем темпе: ~{count}', en: 'At current pace: ~{count}' },

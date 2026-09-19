@@ -107,7 +107,10 @@ export default function ProgressScreen() {
 
   const topCategories = useMemo(() => {
     return categories
-      .map((c) => ({ category: c, count: words.filter((w) => w.categoryId === c.id).length }))
+      .map((c) => ({
+        category: c,
+        count: words.filter((w) => w.categoryIds?.includes(c.id)).length,
+      }))
       .filter((x) => x.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);

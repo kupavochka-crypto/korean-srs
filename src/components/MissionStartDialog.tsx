@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { store, useStore } from '../store/AppStore';
-import { packImportedCount } from '../domain/daily-challenge';
+import { packSessionStats } from '../domain/mission-word-count';
+import MissionWordCountPicker from './MissionWordCountPicker';
 import { colorFromHex } from '../theme/colors';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
@@ -10,11 +11,12 @@ export default function MissionStartDialog() {
   const packId = store.getPendingMissionStartPackId();
   const pack = packId ? store.getPacks().find((p) => p.id === packId) : null;
   const words = store.getWords();
+  const wordCount = store.getMissionWordCount();
   const koreanSet = useMemo(() => new Set(words.map((w) => w.korean)), [words]);
 
   if (!pack) return null;
 
-  const { imported, total } = packImportedCount(pack, koreanSet);
+  const { imported, total, packTotal, chosen } = packSessionStats(pack, koreanSet, wordCount);
   const missing = total - imported;
 
   return (
@@ -44,8 +46,13 @@ export default function MissionStartDialog() {
         </div>
 
         <p className="mission-start-desc">{t('missionStart.desc')}</p>
+
+        <MissionWordCountPicker maxWords={packTotal} />
+
         <ul className="mission-start-stats">
-          <li>{t('missionStart.wordsTotal', { count: total })}</li>
+          <li>{t('missionStart.wordsChosen', { count: chosen })}</li>
+          <li>{t('missionStart.wordsSession', { count: total })}</li>
+          <li>{t('missionStart.wordsInCollection', { count: packTotal })}</li>
           <li>{t('missionStart.wordsReady', { count: imported })}</li>
           {missing > 0 && <li>{t('missionStart.wordsNew', { count: missing })}</li>}
         </ul>

@@ -1,4 +1,9 @@
 import type { LearningLanguage } from '../types';
+import {
+  DEFAULT_MISSION_WORD_COUNT,
+  isMissionWordCount,
+  type MissionWordCount,
+} from './mission-word-count';
 
 const REWARD_THRESHOLD_KEY = 'reward_threshold';
 const GEMINI_PROXY_KEY = 'gemini_proxy_url';
@@ -21,6 +26,15 @@ const SELECTED_MISSION_PACK_KEY = 'selected_mission_pack_id';
 const SELECTED_MISSION_KO_KEY = 'selected_mission_ko';
 const SELECTED_MISSION_ZH_KEY = 'selected_mission_zh';
 const PROFILE_SETTINGS_MIGRATED_KEY = 'profile_settings_migrated_v1';
+const TAGS_TO_CATEGORIES_MIGRATED_KEY = 'tags_to_categories_migrated_v1';
+const CONTENT_CATALOG_VERSION_KEY = 'content_catalog_version';
+const CONTENT_CATALOG_SYNCED_AT_KEY = 'content_catalog_synced_at';
+const MISSION_WORD_COUNT_KO_KEY = 'mission_word_count_ko';
+const MISSION_WORD_COUNT_ZH_KEY = 'mission_word_count_zh';
+const VISIBLE_MISSIONS_KO_KEY = 'visible_mission_ids_ko';
+const VISIBLE_MISSIONS_ZH_KEY = 'visible_mission_ids_zh';
+
+export const CONTENT_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 export type ColorTheme = 'system' | 'light' | 'dark';
 
@@ -356,6 +370,49 @@ export function saveSelectedMissionPackId(packId: string | null) {
   saveSelectedMissionPackIdFor(storedLearningLanguage(), packId);
 }
 
+export function storedMissionWordCountFor(lang: LearningLanguage): MissionWordCount {
+  try {
+    const key = lang === 'zh' ? MISSION_WORD_COUNT_ZH_KEY : MISSION_WORD_COUNT_KO_KEY;
+    const raw = localStorage.getItem(key);
+    if (raw && isMissionWordCount(raw === 'all' ? 'all' : Number(raw))) {
+      return raw === 'all' ? 'all' : (Number(raw) as MissionWordCount);
+    }
+  } catch {
+    // storage unavailable
+  }
+  return DEFAULT_MISSION_WORD_COUNT;
+}
+
+export function saveMissionWordCountFor(lang: LearningLanguage, count: MissionWordCount) {
+  try {
+    const key = lang === 'zh' ? MISSION_WORD_COUNT_ZH_KEY : MISSION_WORD_COUNT_KO_KEY;
+    localStorage.setItem(key, String(count));
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedVisibleMissionIdsFor(lang: LearningLanguage): string[] {
+  try {
+    const key = lang === 'zh' ? VISIBLE_MISSIONS_ZH_KEY : VISIBLE_MISSIONS_KO_KEY;
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveVisibleMissionIdsFor(lang: LearningLanguage, ids: string[]) {
+  try {
+    const key = lang === 'zh' ? VISIBLE_MISSIONS_ZH_KEY : VISIBLE_MISSIONS_KO_KEY;
+    localStorage.setItem(key, JSON.stringify(ids));
+  } catch {
+    // storage unavailable
+  }
+}
+
 /** One-time migration: legacy single-profile keys → per-lang keys */
 export function migrateProfileSettings(): void {
   try {
@@ -380,6 +437,60 @@ export function migrateProfileSettings(): void {
     }
 
     localStorage.setItem(PROFILE_SETTINGS_MIGRATED_KEY, '1');
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function tagsToCategoriesMigrated(): boolean {
+  try {
+    return localStorage.getItem(TAGS_TO_CATEGORIES_MIGRATED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markTagsToCategoriesMigrated(): void {
+  try {
+    localStorage.setItem(TAGS_TO_CATEGORIES_MIGRATED_KEY, '1');
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedContentCatalogVersion(): number {
+  try {
+    const raw = localStorage.getItem(CONTENT_CATALOG_VERSION_KEY);
+    if (!raw) return 0;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function saveContentCatalogVersion(version: number): void {
+  try {
+    localStorage.setItem(CONTENT_CATALOG_VERSION_KEY, String(version));
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedContentCatalogSyncedAt(): number | null {
+  try {
+    const raw = localStorage.getItem(CONTENT_CATALOG_SYNCED_AT_KEY);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveContentCatalogSyncedAt(timestamp: number): void {
+  try {
+    localStorage.setItem(CONTENT_CATALOG_SYNCED_AT_KEY, String(timestamp));
   } catch {
     // storage unavailable
   }

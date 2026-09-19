@@ -26,9 +26,11 @@ import {
 import { DEFAULT_CATEGORIES, NOTEBOOK_WORDS } from '../domain/seed-data';
 import { toRomaja } from '../domain/romaja';
 import { allSeedSources } from '../domain/sources';
-import { allSeedPacks } from '../domain/packs';
+import { bootstrapPacks } from '../domain/packs';
 import { achievementDefs } from '../domain/gamification';
 import { calculateNextReview, type SrsRatingValue } from '../domain/srs-engine';
+import { pickCategoryStyle } from '../domain/categories';
+import { markTagsToCategoriesMigrated, tagsToCategoriesMigrated } from '../domain/settings';
 
 export const MASTERED_INTERVAL_DAYS = 21;
 
@@ -84,9 +86,8 @@ export async function ensureNotebookWords(): Promise<void> {
       translation: item.translation,
       exampleSentence: null,
       exampleTranslation: null,
-      categoryId: category?.id ?? null,
+      categoryIds: category?.id ? [category.id] : [],
       sourceId: null,
-      tags: [],
       difficulty: 'Начальный',
       createdAt: now + i,
       intervalDays: 0,
@@ -135,6 +136,72 @@ export async function initialize(): Promise<void> {
   await backfillZhReadings();
   await migrateProgressionProfiles();
   await migrateCategoryLanguage();
+  await migrateTagsToCategories();
+}
+
+type LegacyWord = Word & {
+  categoryId?: string | null;
+  tags?: string[];
+};
+
+export async function migrateTagsToCategories(): Promise<void> {
+  if (tagsToCategoriesMigrated()) return;
+
+  const rawWords = (await db.words.toArray()) as LegacyWord[];
+  let categories = await db.categories.toArray();
+
+  function categoryKey(name: string, lang: LearningLanguage): string {
+    return `${lang}:${name.trim().toLowerCase()}`;
+  }
+
+  const byName = new Map<string, Category>();
+  for (const c of categories) {
+    byName.set(categoryKey(c.name, c.language ?? 'ko'), c);
+  }
+
+  async function resolveTagName(tag: string, lang: LearningLanguage): Promise<string | null> {
+    const trimmed = tag.trim();
+    if (!trimmed) return null;
+    const key = categoryKey(trimmed, lang);
+    let cat = byName.get(key);
+    if (!cat) {
+      const style = pickCategoryStyle(trimmed);
+      cat = {
+        id: newId(),
+        name: trimmed,
+        colorHex: style.colorHex,
+        emoji: style.emoji,
+        createdAt: Date.now(),
+        isDefault: false,
+        language: lang,
+      };
+      await db.categories.add(cat);
+      categories = [...categories, cat];
+      byName.set(key, cat);
+    }
+    return cat.id;
+  }
+
+  for (const word of rawWords) {
+    const lang = (word.language ?? 'ko') as LearningLanguage;
+    const ids = new Set<string>();
+
+    if (word.categoryId) ids.add(word.categoryId);
+    if (word.categoryIds?.length) {
+      for (const id of word.categoryIds) ids.add(id);
+    }
+
+    for (const tag of word.tags ?? []) {
+      const id = await resolveTagName(tag, lang);
+      if (id) ids.add(id);
+    }
+
+    const categoryIds = [...ids];
+    const { categoryId: _c, tags: _t, ...rest } = word;
+    await db.words.put({ ...rest, categoryIds } as Word);
+  }
+
+  markTagsToCategoriesMigrated();
 }
 
 export async function backfillZhReadings(): Promise<void> {
@@ -188,40 +255,7 @@ export async function ensureSeedPhrases(): Promise<void> {
   }
   if (dups.length > 0) await db.phrases.bulkDelete(dups);
 
-  const existingKoreans = new Set(all.map((p) => p.korean));
-  const missingDefs = ALL_PHRASE_DEFS.filter((def) => !existingKoreans.has(def.korean));
-  if (missingDefs.length > 0) {
-    await db.phrases.bulkAdd(seedPhrasesFromDefs(missingDefs, Date.now()));
-    all = await db.phrases.toArray();
-  }
-
-  const sourceByKorean = new Map(
-    ALL_PHRASE_DEFS.map((def) => [
-      def.korean,
-      def.sourcePackId ?? (def.themeId === 'stray-kids' ? SKZ_PHRASE_PACK_ID : BTS_PHRASE_PACK_ID),
-    ])
-  );
-  const defByKorean = new Map(ALL_PHRASE_DEFS.map((def) => [def.korean, def]));
-  for (const phrase of all) {
-    const def = defByKorean.get(phrase.korean);
-    const nextPackId = sourceByKorean.get(phrase.korean);
-    const lang = def?.sourcePackId?.startsWith('seed-zh-') ? 'zh' : 'ko';
-    const patch: Partial<Phrase> = {};
-    if ((phrase.language ?? 'ko') !== lang) patch.language = lang;
-    if (def?.pinyin && phrase.pinyin !== def.pinyin) patch.pinyin = def.pinyin;
-    if (
-      nextPackId &&
-      phrase.sourcePackId !== nextPackId &&
-      (!phrase.sourcePackId ||
-        phrase.sourcePackId === BTS_PHRASE_PACK_ID ||
-        phrase.sourcePackId === SKZ_PHRASE_PACK_ID)
-    ) {
-      patch.sourcePackId = nextPackId;
-    }
-    if (Object.keys(patch).length > 0) {
-      await db.phrases.update(phrase.id, patch);
-    }
-  }
+  await mergePhraseDefs(ALL_PHRASE_DEFS);
 
   all = await db.phrases.toArray();
   const hasZh = all.some((p) => (p.language ?? 'ko') === 'zh');
@@ -238,10 +272,62 @@ export async function allPhrases(): Promise<Phrase[]> {
   return db.phrases.orderBy('createdAt').toArray();
 }
 
+export async function getPackById(id: string): Promise<Pack | undefined> {
+  return db.packs.get(id);
+}
+
+export async function insertPack(pack: Pack): Promise<void> {
+  await db.packs.add(pack);
+}
+
+export async function updatePack(pack: Pack): Promise<void> {
+  await db.packs.put(pack);
+}
+
+export async function mergePhraseDefs(defs: typeof ALL_PHRASE_DEFS): Promise<number> {
+  let changed = 0;
+  let all = await db.phrases.toArray();
+  const existingKoreans = new Set(all.map((p) => p.korean));
+  const missingDefs = defs.filter((def) => !existingKoreans.has(def.korean));
+  if (missingDefs.length > 0) {
+    await db.phrases.bulkAdd(seedPhrasesFromDefs(missingDefs, Date.now()));
+    changed += missingDefs.length;
+    all = await db.phrases.toArray();
+  }
+
+  const defByKorean = new Map(defs.map((def) => [def.korean, def]));
+  for (const phrase of all) {
+    const def = defByKorean.get(phrase.korean);
+    if (!def) continue;
+    const lang = def.sourcePackId?.startsWith('seed-zh-') ? 'zh' : 'ko';
+    const nextPackId =
+      def.sourcePackId ??
+      (def.themeId === 'stray-kids' ? SKZ_PHRASE_PACK_ID : BTS_PHRASE_PACK_ID);
+    const patch: Partial<Phrase> = {};
+    if (phrase.translation !== def.translation) patch.translation = def.translation;
+    if ((phrase.language ?? 'ko') !== lang) patch.language = lang;
+    if (def.pinyin && phrase.pinyin !== def.pinyin) patch.pinyin = def.pinyin;
+    if (
+      nextPackId &&
+      phrase.sourcePackId !== nextPackId &&
+      (!phrase.sourcePackId ||
+        phrase.sourcePackId === BTS_PHRASE_PACK_ID ||
+        phrase.sourcePackId === SKZ_PHRASE_PACK_ID)
+    ) {
+      patch.sourcePackId = nextPackId;
+    }
+    if (Object.keys(patch).length > 0) {
+      await db.phrases.update(phrase.id, patch);
+      changed += 1;
+    }
+  }
+  return changed;
+}
+
 export async function ensureSeedPacks(): Promise<void> {
   const existing = await db.packs.toArray();
   const ids = new Set(existing.map((p) => p.id));
-  const missing = allSeedPacks().filter((p) => !ids.has(p.id));
+  const missing = bootstrapPacks().filter((p) => !ids.has(p.id));
   if (missing.length > 0) await db.packs.bulkAdd(missing);
 }
 
@@ -269,6 +355,12 @@ export async function addPackWords(pack: Pack): Promise<number> {
           ? { pinyin: def.pinyin, tones: hanziToReading(def.korean).tones }
           : hanziToReading(def.korean)
         : { pinyin: null as string | null, tones: null as string | null };
+    const extraCategoryIds: string[] = [];
+    for (const tagName of def.tags ?? []) {
+      const extra = await findOrCreateCategory(tagName, '📌', '#1E88E5', packLang);
+      extraCategoryIds.push(extra.id);
+    }
+    const categoryIds = [...new Set([category.id, ...extraCategoryIds])];
     const word: Word = {
       id: newId(),
       korean: def.korean,
@@ -277,9 +369,8 @@ export async function addPackWords(pack: Pack): Promise<number> {
       translation: def.translation,
       exampleSentence: def.exampleSentence ?? null,
       exampleTranslation: def.exampleTranslation ?? null,
-      categoryId: category.id,
+      categoryIds,
       sourceId: pack.sourceId,
-      tags: def.tags ?? [],
       difficulty: def.difficulty ?? pack.difficulty,
       createdAt: now + added,
       intervalDays: 0,
@@ -463,7 +554,6 @@ export async function importSongWords(params: {
   drafts: ImportedWordDraft[];
   categoryId: string;
   sourceId: string;
-  soundName: string;
 }): Promise<number> {
   const existing = await db.words.toArray();
   const koreanSet = new Set(existing.map((w) => w.korean));
@@ -475,12 +565,7 @@ export async function importSongWords(params: {
     const translation = draft.translation.trim();
     if (!korean || !translation || koreanSet.has(korean)) continue;
 
-    const tagSet = new Set<string>();
-    for (const tag of draft.tags ?? []) {
-      const t = tag.trim();
-      if (t) tagSet.add(t);
-    }
-    tagSet.add(params.soundName);
+    const categoryIds = [...new Set([params.categoryId, ...(draft.categoryIds ?? [])])];
 
     const word: Word = {
       id: newId(),
@@ -490,9 +575,8 @@ export async function importSongWords(params: {
       translation,
       exampleSentence: null,
       exampleTranslation: null,
-      categoryId: params.categoryId,
+      categoryIds,
       sourceId: params.sourceId,
-      tags: [...tagSet],
       difficulty: 'Начальный',
       createdAt: now + added,
       intervalDays: 0,

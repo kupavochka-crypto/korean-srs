@@ -1,0 +1,21 @@
+---
+description: Bump app version in package.json on releases using SemVer
+alwaysApply: true
+---
+
+# Release versioning (SemVer)
+
+Source of truth: `package.json` → `version`. Shown in Settings header via `__APP_VERSION__` / `src/app-version.ts`.
+
+When preparing a **release** (deploy, tagged build, or user asks to release):
+
+1. Bump `package.json` `version` per [Semantic Versioning](https://semver.org/):
+   - **MAJOR** (`x.0.0`): breaking changes for users/data
+   - **MINOR** (`1.x.0`): new features, missions, backward-compatible
+   - **PATCH** (`1.0.x`): bug fixes, copy, styles, small fixes
+2. If remote content catalog changed, also bump `CONTENT_CATALOG_VERSION` in `src/domain/content-catalog.ts` (separate integer, not SemVer).
+3. Rebuild so `catalog.json` and bundled version stay in sync.
+
+Do **not** bump version for ordinary in-progress commits unless the user asks for a release.
+
+Current version at conversation start: **1.0.0**.

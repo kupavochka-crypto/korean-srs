@@ -1,4 +1,6 @@
 import { store, useStore } from '../store/AppStore';
+import CategoryMultiPicker from './CategoryMultiPicker';
+import { wordCategoryIds } from '../domain/categories';
 import { showReadingEnabled, wordLanguage } from '../domain/language';
 import ChineseReading from './ChineseReading';
 import { formatSource } from '../domain/sources';
@@ -30,28 +32,14 @@ export default function WordDetailDialog() {
 
         <div className="word-meta" style={{ marginBottom: 16 }}>
           <label className="form-label">{t('add.category')}</label>
-          <select
-            className="form-input"
-            value={word.categoryId ?? ''}
-            onChange={(e) => {
-              const next = e.target.value || null;
-              void store.updateWordCategory(word.id, next);
+          <CategoryMultiPicker
+            categoryIds={wordCategoryIds(word)}
+            onChange={(categoryIds) => {
+              void store.updateWordCategories(word.id, categoryIds);
             }}
-          >
-            <option value="">{t('progress.noCategory')}</option>
-            {store.getCategories().map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.emoji} {c.name}
-              </option>
-            ))}
-          </select>
+          />
           <span className="badge mt8">{t('word.level')} {word.difficulty}</span>
           {source && <span className="badge">{formatSource(source)}</span>}
-          {word.tags.map((t) => (
-            <span className="badge" key={t}>
-              #{t}
-            </span>
-          ))}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>

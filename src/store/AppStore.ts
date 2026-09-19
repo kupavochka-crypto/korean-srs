@@ -31,6 +31,8 @@ import {
 import { packFullyImported, packReviewed } from '../domain/daily-challenge';
 import type { SrsRatingValue } from '../domain/srs-engine';
 import { newId } from '../db/schema';
+import { mergeCategoryIds, wordCategoryIds, wordHasCategory } from '../domain/categories';
+import { syncContentCatalog } from '../domain/content-sync';
 import {
   storedRewardThreshold,
   storedThemeId,
@@ -54,10 +56,25 @@ import {
   pushRecentCategoryIdFor,
   storedSelectedMissionPackIdFor,
   saveSelectedMissionPackIdFor,
+  storedMissionWordCountFor,
+  saveMissionWordCountFor,
+  storedVisibleMissionIdsFor,
+  saveVisibleMissionIdsFor,
   migrateProfileSettings,
   type ColorTheme,
 } from '../domain/settings';
-import { activeMissionPack, suggestedMissionPacks } from '../domain/daily-challenge';
+import {
+  activeMissionPack,
+  completedMissionPacks,
+  suggestedMissionPacks,
+} from '../domain/daily-challenge';
+import {
+  ensureVisibleMissionIds,
+  missionCandidatePool,
+  resolveVisibleMissions,
+  rotateVisibleMissionIds,
+} from '../domain/mission-slots';
+import { pickPackWordDefs, type MissionWordCount } from '../domain/mission-word-count';
 import { wordLanguage } from '../domain/language';
 import { hanziToReading } from '../domain/pinyin';
 import { voiceCharacter } from '../domain/voice-chars';
@@ -179,7 +196,10 @@ function createStore() {
   let writeInput = '';
   let completedPackIds = new Set<string>();
   let selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
+  let missionWordCount: MissionWordCount = storedMissionWordCountFor(learningLanguage);
+  let visibleMissionPackIds: string[] = storedVisibleMissionIdsFor(learningLanguage);
   let isMissionPickOpen = false;
+  let missionPickRefreshing = false;
   let isMissionStartOpen = false;
   let pendingMissionStartPackId: string | null = null;
 
@@ -197,6 +217,18 @@ function createStore() {
 
   function packsForProfile(): Pack[] {
     return packs.filter((p) => (p.language ?? 'ko') === learningLanguage);
+  }
+
+  function missionPool() {
+    return missionCandidatePool(packsForProfile(), wordsForProfile(), completedPackIds);
+  }
+
+  function syncVisibleMissionSlots(): Pack[] {
+    const profilePacks = packsForProfile();
+    const pool = missionPool();
+    visibleMissionPackIds = ensureVisibleMissionIds(pool, visibleMissionPackIds);
+    saveVisibleMissionIdsFor(learningLanguage, visibleMissionPackIds);
+    return resolveVisibleMissions(profilePacks, visibleMissionPackIds);
   }
 
   async function refresh() {
@@ -226,9 +258,8 @@ function createStore() {
       translation: payload.translation.trim(),
       exampleSentence: payload.exampleSentence?.trim() || null,
       exampleTranslation: payload.exampleTranslation?.trim() || null,
-      categoryId: payload.categoryId ?? null,
+      categoryIds: payload.categoryIds ?? [],
       sourceId: payload.sourceId ?? null,
-      tags: payload.tags ?? [],
       difficulty: payload.difficulty ?? 'Начальный',
       createdAt: now,
       intervalDays: 0,
@@ -241,7 +272,9 @@ function createStore() {
       masteredAt: null,
     };
     await repo.insertWord(word);
-    if (word.categoryId) pushRecentCategoryIdFor(wordLanguage(word), word.categoryId);
+    for (const id of wordCategoryIds(word)) {
+      pushRecentCategoryIdFor(wordLanguage(word), id);
+    }
   }
 
   async function processDuplicateQueue(): Promise<number> {
@@ -369,16 +402,25 @@ function createStore() {
     async init() {
       migrateProfileSettings();
       await repo.initialize();
+      await syncContentCatalog();
       learningLanguage = storedLearningLanguage();
       dailyWordGoal = storedDailyWordGoalFor(learningLanguage);
       selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
+      missionWordCount = storedMissionWordCountFor(learningLanguage);
+      visibleMissionPackIds = storedVisibleMissionIdsFor(learningLanguage);
       await refresh();
+      syncVisibleMissionSlots();
       await loadGamification();
       if (!storedOnboardingCompleted()) {
         isOnboardingOpen = true;
         onboardingSkipWelcome = false;
         emit();
       }
+    },
+
+    async syncContent() {
+      const changed = await syncContentCatalog();
+      if (changed) await refresh();
     },
 
     getTab: () => currentTab,
@@ -414,8 +456,49 @@ function createStore() {
     getIsSongImportOpen: () => isSongImportOpen,
     getPacks: () => packsForProfile(),
     getSelectedMissionPackId: () => selectedMissionPackId,
-    getActiveMissionPack: () => activeMissionPack(packsForProfile(), selectedMissionPackId),
+    getMissionWordCount: () => missionWordCount,
+    setMissionWordCount(count: MissionWordCount) {
+      missionWordCount = count;
+      saveMissionWordCountFor(learningLanguage, count);
+      emit();
+    },
+    getActiveMissionPack: () => {
+      const profilePacks = packsForProfile();
+      const trimmed = selectedMissionPackId?.trim();
+      if (trimmed) {
+        const picked = profilePacks.find((p) => p.id === trimmed);
+        if (picked) return picked;
+      }
+      const visible = resolveVisibleMissions(profilePacks, visibleMissionPackIds);
+      return visible[0] ?? activeMissionPack(profilePacks, selectedMissionPackId);
+    },
     getSuggestedMissionPacks: () => suggestedMissionPacks(packsForProfile(), wordsForProfile()),
+    getVisibleMissionPacks: () => syncVisibleMissionSlots(),
+    getCompletedMissionPacks: () =>
+      completedMissionPacks(packsForProfile(), wordsForProfile(), completedPackIds),
+    getMissionPickRefreshing: () => missionPickRefreshing,
+
+    async refreshMissionCollection() {
+      missionPickRefreshing = true;
+      emit();
+      try {
+        await syncContentCatalog({ force: true, discoverStaged: true });
+        await refresh();
+        const pool = missionPool();
+        visibleMissionPackIds = rotateVisibleMissionIds(pool, visibleMissionPackIds);
+        saveVisibleMissionIdsFor(learningLanguage, visibleMissionPackIds);
+        if (
+          selectedMissionPackId &&
+          !visibleMissionPackIds.includes(selectedMissionPackId)
+        ) {
+          selectedMissionPackId = visibleMissionPackIds[0] ?? '';
+          saveSelectedMissionPackIdFor(learningLanguage, selectedMissionPackId || null);
+        }
+      } finally {
+        missionPickRefreshing = false;
+        emit();
+      }
+    },
     getZhProfileHint: () => zhProfileHint,
     dismissZhProfileHint() {
       zhProfileHint = false;
@@ -456,6 +539,8 @@ function createStore() {
 
       saveDailyWordGoalFor(learningLanguage, dailyWordGoal);
       saveSelectedMissionPackIdFor(learningLanguage, selectedMissionPackId || null);
+      saveMissionWordCountFor(learningLanguage, missionWordCount);
+      saveVisibleMissionIdsFor(learningLanguage, visibleMissionPackIds);
       progression = {
         ...progression,
         completedPackIds: [...completedPackIds],
@@ -466,8 +551,11 @@ function createStore() {
       saveLearningLanguage(lang);
       dailyWordGoal = storedDailyWordGoalFor(lang);
       selectedMissionPackId = storedSelectedMissionPackIdFor(lang);
+      missionWordCount = storedMissionWordCountFor(lang);
+      visibleMissionPackIds = storedVisibleMissionIdsFor(lang);
       progression = await repo.getProgression(lang);
       completedPackIds = new Set(progression.completedPackIds ?? []);
+      syncVisibleMissionSlots();
 
       cardsQueue = cardsQueue.filter((w) => wordLanguage(w) === lang);
       if (currentCardIndex >= cardsQueue.length) currentCardIndex = 0;
@@ -549,7 +637,7 @@ function createStore() {
 
     async startCategoryReview(categoryId: string, mode: 'due' | 'all' = 'due') {
       const now = Date.now();
-      let pool = wordsForProfile().filter((w) => w.categoryId === categoryId);
+      let pool = wordsForProfile().filter((w) => wordHasCategory(w, categoryId));
       if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
       cardsQueue = pool.sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
@@ -573,7 +661,7 @@ function createStore() {
     },
 
     async startCategoryQuiz(categoryId: string, kind: 'listen' | 'reverse' | 'write' = 'reverse') {
-      quizWordPool = wordsForProfile().filter((w) => w.categoryId === categoryId);
+      quizWordPool = wordsForProfile().filter((w) => wordHasCategory(w, categoryId));
       quizSource = 'category';
       quizCategoryId = categoryId;
       currentTab = 'quiz';
@@ -882,6 +970,7 @@ function createStore() {
     },
 
     openMissionPick() {
+      syncVisibleMissionSlots();
       isMissionPickOpen = true;
       emit();
     },
@@ -931,11 +1020,12 @@ function createStore() {
       isMissionStartOpen = false;
       pendingMissionStartPackId = null;
 
-      const packKoreans = new Set(pack.wordDefs.map((d) => d.korean));
+      const sessionDefs = pickPackWordDefs(pack, missionWordCount);
+      const packKoreans = new Set(sessionDefs.map((d) => d.korean));
       let pool = wordsForProfile().filter((w) => packKoreans.has(w.korean));
 
-      if (pool.length < pack.wordDefs.length) {
-        await this.addPack(packId);
+      if (pool.length < sessionDefs.length) {
+        await this.addPack(packId, missionWordCount);
         await refresh();
         if (duplicatePending) {
           emit();
@@ -949,33 +1039,15 @@ function createStore() {
         return;
       }
 
-      const packLang = pack.language ?? 'ko';
-      const category =
-        categories.find(
-          (c) => c.name === pack.title && (c.language ?? 'ko') === packLang
-        ) ?? (await repo.findCategoryByName(pack.title, packLang));
-
       const now = Date.now();
-      const categoryPool = category
-        ? wordsForProfile().filter((w) => w.categoryId === category.id)
-        : pool;
-
-      const trainPool = categoryPool.length > 0 ? categoryPool : pool;
-      const hasDue = trainPool.some((w) => w.nextReviewAt <= now);
-
-      if (category && hasDue) {
-        await this.startCategoryReview(category.id, 'due');
-      } else if (category && trainPool.length > 0) {
-        await this.startCategoryReview(category.id, 'all');
-      } else {
-        await this.startFilteredReview(
-          trainPool.map((w) => w.id),
-          hasDue ? 'due' : 'all'
-        );
-      }
+      const hasDue = pool.some((w) => w.nextReviewAt <= now);
+      await this.startFilteredReview(
+        pool.map((w) => w.id),
+        hasDue ? 'due' : 'all'
+      );
     },
 
-    async addPack(packId: string) {
+    async addPack(packId: string, wordCount?: MissionWordCount) {
       const pack = packs.find((p) => p.id === packId);
       if (!pack) return;
       const packLang = pack.language ?? 'ko';
@@ -985,14 +1057,21 @@ function createStore() {
         pack.colorHex,
         packLang
       );
-      const payloads: DuplicateWordPayload[] = pack.wordDefs.map((def) => {
+      const defs = wordCount !== undefined ? pickPackWordDefs(pack, wordCount) : pack.wordDefs;
+      const payloads: DuplicateWordPayload[] = [];
+      for (const def of defs) {
         const reading =
           packLang === 'zh'
             ? def.pinyin
               ? { pinyin: def.pinyin, tones: hanziToReading(def.korean).tones }
               : hanziToReading(def.korean)
             : { pinyin: null as string | null, tones: null as string | null };
-        return {
+        const extraIds: string[] = [];
+        for (const tagName of def.tags ?? []) {
+          const extra = await repo.findOrCreateCategory(tagName, '📌', '#1E88E5', packLang);
+          extraIds.push(extra.id);
+        }
+        payloads.push({
           korean: def.korean,
           translation: def.translation,
           hanja: def.hanja ?? null,
@@ -1001,13 +1080,12 @@ function createStore() {
           romaja: packLang === 'zh' ? (reading.pinyin ?? '') : undefined,
           exampleSentence: def.exampleSentence ?? null,
           exampleTranslation: def.exampleTranslation ?? null,
-          categoryId: category.id,
+          categoryIds: mergeCategoryIds([category.id], extraIds),
           sourceId: pack.sourceId,
-          tags: def.tags ?? [],
           difficulty: def.difficulty ?? pack.difficulty,
           language: packLang,
-        };
-      });
+        });
+      }
       await this.enqueueWordsForImport(payloads);
       await this.checkPackCompletion(packId);
       if (!duplicatePending) await evaluateDailyGamification();
@@ -1097,7 +1175,7 @@ function createStore() {
       translation: string;
       exampleSentence: string;
       exampleTranslation: string;
-      categoryId: string | null;
+      categoryIds: string[];
       sourceId: string | null;
       difficulty: Difficulty;
     }) {
@@ -1116,13 +1194,15 @@ function createStore() {
           translation: params.translation.trim(),
           exampleSentence: params.exampleSentence.trim() || null,
           exampleTranslation: params.exampleTranslation.trim() || null,
-          categoryId: params.categoryId,
+          categoryIds: params.categoryIds,
           sourceId,
           difficulty: params.difficulty,
         };
         await repo.updateWord(updated);
         cardsQueue = cardsQueue.map((w) => (w.id === updated.id ? updated : w));
-        if (params.categoryId) pushRecentCategoryIdFor(learningLanguage, params.categoryId);
+        for (const id of params.categoryIds) {
+          pushRecentCategoryIdFor(learningLanguage, id);
+        }
         isAddWordOpen = false;
         editingWord = null;
         prefilledKorean = '';
@@ -1142,7 +1222,7 @@ function createStore() {
         translation: params.translation.trim(),
         exampleSentence: params.exampleSentence.trim() || null,
         exampleTranslation: params.exampleTranslation.trim() || null,
-        categoryId: params.categoryId,
+        categoryIds: params.categoryIds,
         sourceId,
         difficulty: params.difficulty,
         language: learningLanguage,
@@ -1185,7 +1265,10 @@ function createStore() {
           romaja: pending.incoming.romaja ?? pending.existing.romaja,
           exampleSentence: pending.incoming.exampleSentence ?? pending.existing.exampleSentence,
           exampleTranslation: pending.incoming.exampleTranslation ?? pending.existing.exampleTranslation,
-          categoryId: pending.incoming.categoryId ?? pending.existing.categoryId,
+          categoryIds: mergeCategoryIds(
+            pending.existing.categoryIds,
+            pending.incoming.categoryIds
+          ),
           sourceId: pending.incoming.sourceId ?? pending.existing.sourceId,
         };
         await repo.updateWord(updated);
@@ -1223,15 +1306,14 @@ function createStore() {
         const korean = draft.korean.trim();
         const translation = draft.translation.trim();
         if (!korean || !translation) continue;
-        const tags = draft.tags.map((t) => t.trim()).filter((t) => t.length > 0);
-        const category = categories.find((c) =>
-          tags.some((t) => t.toLowerCase() === c.name.toLowerCase())
-        );
+        let categoryIds = [...(draft.categoryIds ?? [])];
+        if (selectedCategoryId && !categoryIds.includes(selectedCategoryId)) {
+          categoryIds.push(selectedCategoryId);
+        }
         payloads.push({
           korean,
           translation,
-          categoryId: category?.id ?? selectedCategoryId,
-          tags,
+          categoryIds,
           difficulty: 'Начальный',
           language: learningLanguage,
         });
@@ -1252,9 +1334,8 @@ function createStore() {
         .map((d) => ({
           korean: d.korean.trim(),
           translation: d.translation.trim(),
-          categoryId: category.id,
+          categoryIds: mergeCategoryIds([category.id], d.categoryIds),
           sourceId: source.id,
-          tags: [...(d.tags ?? []), trimmed],
           difficulty: 'Начальный' as Difficulty,
           language: learningLanguage,
         }));
@@ -1306,16 +1387,20 @@ function createStore() {
       emit();
     },
 
-    async assignTagsToSelected(tags: string[]) {
-      const clean = Array.from(new Set(tags.map((t) => t.trim()).filter(Boolean)));
-      if (selectedIds.size === 0) return;
+    async assignCategoriesToSelected(categoryIds: string[]) {
+      const clean = Array.from(new Set(categoryIds.filter(Boolean)));
+      if (selectedIds.size === 0 || clean.length === 0) return;
       for (const w of allWords) {
         if (!selectedIds.has(w.id)) continue;
-        const merged = Array.from(new Set([...w.tags, ...clean]));
+        const merged = mergeCategoryIds(w.categoryIds, clean);
+        const prev = wordCategoryIds(w);
         const changed =
-          merged.length !== w.tags.length || merged.some((t, i) => t !== w.tags[i]);
+          merged.length !== prev.length || merged.some((id, i) => id !== prev[i]);
         if (changed) {
-          await repo.updateWord({ ...w, tags: merged });
+          await repo.updateWord({ ...w, categoryIds: merged });
+          for (const id of clean) {
+            pushRecentCategoryIdFor(learningLanguage, id);
+          }
         }
       }
       this.clearSelection();
@@ -1369,7 +1454,8 @@ function createStore() {
     filteredWords(): Word[] {
       const query = searchQuery.trim().toLowerCase();
       return wordsForProfile().filter((w) => {
-        const matchesCategory = selectedCategoryId === null || w.categoryId === selectedCategoryId;
+        const matchesCategory =
+          selectedCategoryId === null || wordHasCategory(w, selectedCategoryId);
         if (!matchesCategory) return false;
         if (!query) return true;
         return (
@@ -1422,8 +1508,15 @@ function createStore() {
       const names = new Map<string, number>();
       for (const w of wordsForProfile()) {
         if (!w.masteredAt) continue;
-        const name = w.categoryId ? this.categoryName(w.categoryId) : 'Без категории';
-        names.set(name, (names.get(name) ?? 0) + 1);
+        const ids = wordCategoryIds(w);
+        if (ids.length === 0) {
+          names.set('Без категории', (names.get('Без категории') ?? 0) + 1);
+          continue;
+        }
+        for (const id of ids) {
+          const name = this.categoryName(id) || 'Без категории';
+          names.set(name, (names.get(name) ?? 0) + 1);
+        }
       }
       return Array.from(names.entries()).map(([categoryName, count]) => ({ categoryName, count }));
     },
@@ -1449,16 +1542,27 @@ function createStore() {
       return repo.modeCountsForDate(`${y}-${m}-${d}`, learningLanguage);
     },
 
-    async updateWordCategory(wordId: string, categoryId: string | null) {
+    async updateWordCategories(wordId: string, categoryIds: string[]) {
       const word = allWords.find((w) => w.id === wordId);
       if (!word) return;
-      await repo.updateWord({ ...word, categoryId });
-      if (categoryId) pushRecentCategoryIdFor(learningLanguage, categoryId);
+      const clean = Array.from(new Set(categoryIds.filter(Boolean)));
+      await repo.updateWord({ ...word, categoryIds: clean });
+      for (const id of clean) {
+        pushRecentCategoryIdFor(learningLanguage, id);
+      }
       if (selectedWordForDetail?.id === wordId) {
-        selectedWordForDetail = { ...word, categoryId };
+        selectedWordForDetail = { ...word, categoryIds: clean };
       }
       await refresh();
       emit();
+    },
+
+    async ensureCategory(name: string, emoji = '📌', colorHex = '#E53935'): Promise<Category> {
+      const cat = await repo.findOrCreateCategory(name.trim(), emoji, colorHex, learningLanguage);
+      if (!categories.some((c) => c.id === cat.id)) {
+        await refresh();
+      }
+      return cat;
     },
 
     async streakCount(): Promise<number> {
@@ -1480,6 +1584,12 @@ function createStore() {
     categoryFor(id: string | null): Category | undefined {
       if (!id) return undefined;
       return categories.find((c) => c.id === id);
+    },
+
+    categoriesForWord(word: Word): Category[] {
+      return wordCategoryIds(word)
+        .map((id) => categories.find((c) => c.id === id))
+        .filter((c): c is Category => !!c);
     },
   };
 }

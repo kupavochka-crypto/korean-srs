@@ -1,4 +1,5 @@
 import type { ImportedWordDraft, Word } from '../types';
+import { wordHasCategory } from './categories';
 
 export type WordImportStatus = 'new' | 'known' | 'inSongCategory';
 
@@ -17,7 +18,7 @@ export function dedupeDrafts(drafts: ImportedWordDraft[]): ImportedWordDraft[] {
     result.push({
       korean,
       translation: draft.translation.trim(),
-      tags: draft.tags ?? [],
+      categoryIds: draft.categoryIds ?? [],
     });
   }
   return result;
@@ -38,7 +39,7 @@ export function classifyDrafts(
     if (!existing) {
       return { ...draft, status: 'new' as const };
     }
-    if (categoryIdForSong && existing.categoryId === categoryIdForSong) {
+    if (categoryIdForSong && wordHasCategory(existing, categoryIdForSong)) {
       return { ...draft, status: 'inSongCategory' as const, existingWord: existing };
     }
     return { ...draft, status: 'known' as const, existingWord: existing };

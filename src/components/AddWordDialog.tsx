@@ -29,7 +29,8 @@ export default function AddWordDialog() {
   const [translation, setTranslation] = useState(store.getPrefilledTranslation());
   const [exampleSentence, setExampleSentence] = useState('');
   const [exampleTranslation, setExampleTranslation] = useState('');
-  const [categoryId, setCategoryId] = useState<string | null>(store.getPrefilledCategoryId());
+  const prefilled = store.getPrefilledCategoryId();
+  const [categoryIds, setCategoryIds] = useState<string[]>(prefilled ? [prefilled] : []);
   const [sourceId, setSourceId] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('Начальный');
   const [error, setError] = useState('');
@@ -60,7 +61,7 @@ export default function AddWordDialog() {
       setTranslation(w.translation);
       setExampleSentence(w.exampleSentence ?? '');
       setExampleTranslation(w.exampleTranslation ?? '');
-      setCategoryId(w.categoryId);
+      setCategoryIds(w.categoryIds ?? []);
       setSourceId(w.sourceId);
       setDifficulty(w.difficulty);
     }
@@ -112,7 +113,7 @@ export default function AddWordDialog() {
       translation,
       exampleSentence,
       exampleTranslation,
-      categoryId,
+      categoryIds,
       sourceId,
       difficulty,
     });
@@ -231,11 +232,16 @@ export default function AddWordDialog() {
                   className="select-chip"
                   onClick={async () => {
                     if (s.reason === 'create') {
-                      await store.createCategory(s.name, s.emoji ?? '🎵', '#E53935');
-                      const cat = store.getCategories().find((c) => c.name === s.name);
-                      if (cat) setCategoryId(cat.id);
+                      const cat = await store.ensureCategory(s.name, s.emoji ?? '🎵', '#E53935');
+                      setCategoryIds((prev) =>
+                        prev.includes(cat.id) ? prev.filter((id) => id !== cat.id) : [...prev, cat.id]
+                      );
                     } else if (s.categoryId) {
-                      setCategoryId(s.categoryId);
+                      setCategoryIds((prev) =>
+                        prev.includes(s.categoryId!)
+                          ? prev.filter((id) => id !== s.categoryId)
+                          : [...prev, s.categoryId!]
+                      );
                     }
                   }}
                 >
@@ -248,8 +254,12 @@ export default function AddWordDialog() {
             {categories.map((c) => (
               <button
                 key={c.id}
-                className={`select-chip ${categoryId === c.id ? 'active' : ''}`}
-                onClick={() => setCategoryId(categoryId === c.id ? null : c.id)}
+                className={`select-chip ${categoryIds.includes(c.id) ? 'active' : ''}`}
+                onClick={() =>
+                  setCategoryIds((prev) =>
+                    prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                  )
+                }
               >
                 <span style={{ color: colorFromHex(c.colorHex) }}>{c.emoji}</span> {c.name}
               </button>

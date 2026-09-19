@@ -80,6 +80,16 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void store.syncContent();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
   if (!ready) {
     return (
       <div className="app">

@@ -1,4 +1,5 @@
 import type { Category, CategorySuggestion, Word } from '../types';
+import { wordCategoryIds } from './categories';
 import { normalizeLemma, normalizeTranslation } from './duplicates';
 
 export interface SuggestContext {
@@ -84,13 +85,18 @@ export function suggestCategories(
   const inChar = firstChar(input.korean);
   const neighborCounts = new Map<string, number>();
   for (const w of ctx.words) {
-    if (!w.categoryId) continue;
+    const wordCats = wordCategoryIds(w);
+    if (wordCats.length === 0) continue;
     let hit = 0;
     if (inChar && firstChar(w.korean) === inChar) hit += 1;
     for (const tok of tokens(w.translation)) {
       if (inTokens.has(tok)) hit += 2;
     }
-    if (hit > 0) neighborCounts.set(w.categoryId, (neighborCounts.get(w.categoryId) ?? 0) + hit);
+    if (hit > 0) {
+      for (const catId of wordCats) {
+        neighborCounts.set(catId, (neighborCounts.get(catId) ?? 0) + hit);
+      }
+    }
   }
   for (const [id, score] of neighborCounts) {
     const cat = ctx.categories.find((c) => c.id === id);
@@ -107,8 +113,9 @@ export function suggestCategories(
 
   const freq = new Map<string, number>();
   for (const w of ctx.words) {
-    if (!w.categoryId) continue;
-    freq.set(w.categoryId, (freq.get(w.categoryId) ?? 0) + 1);
+    for (const catId of wordCategoryIds(w)) {
+      freq.set(catId, (freq.get(catId) ?? 0) + 1);
+    }
   }
   const top = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
   for (const [id, count] of top) {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import WordCard from '../components/WordCard';
-import TagInput from '../components/TagInput';
+import CategoryCheckboxDropdown from '../components/CategoryCheckboxDropdown';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import { tabSubtitle } from '../domain/learning-ui';
@@ -15,9 +15,19 @@ export default function DictionaryScreen() {
   const search = store.getSearchQuery();
   const selectionActive = store.isSelectionActive();
   const selectedIds = store.getSelectedIds();
-  const [tagDialog, setTagDialog] = useState(false);
-  const [pendingTags, setPendingTags] = useState<string[]>([]);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [pendingCategoryIds, setPendingCategoryIds] = useState<string[]>([]);
   const lang = store.getLearningLanguage();
+
+  function closeCategoryMenu() {
+    setCategoryMenuOpen(false);
+    setPendingCategoryIds([]);
+  }
+
+  function applyCategories() {
+    void store.assignCategoriesToSelected(pendingCategoryIds);
+    closeCategoryMenu();
+  }
 
   return (
     <div>
@@ -39,8 +49,51 @@ export default function DictionaryScreen() {
         </button>
       </div>
 
-      {selectionActive && (
-        <p className="selection-hint">{t('dict.selectionHint', { count: selectedIds.size })}</p>
+      {selectionActive && selectedIds.size === 0 && (
+        <p className="selection-hint">{t('dict.selectionEmpty')}</p>
+      )}
+
+      {selectionActive && selectedIds.size > 0 && (
+        <div className="dict-bulk-bar" role="toolbar" aria-label={t('dict.bulkActions')}>
+          <p className="dict-bulk-summary">{t('dict.selectionHint', { count: selectedIds.size })}</p>
+          <div className="dict-bulk-actions">
+            <button
+              type="button"
+              className={`dict-bulk-btn${categoryMenuOpen ? ' dict-bulk-btn--active' : ''}`}
+              aria-expanded={categoryMenuOpen}
+              onClick={() => {
+                if (categoryMenuOpen) {
+                  closeCategoryMenu();
+                } else {
+                  setPendingCategoryIds([]);
+                  setCategoryMenuOpen(true);
+                }
+              }}
+            >
+              <WIcon name="collection" size={16} />
+              {t('dict.assignCategory')}
+            </button>
+            <button
+              type="button"
+              className="dict-bulk-btn dict-bulk-btn--danger"
+              onClick={() => {
+                if (confirm(t('dict.deleteConfirm', { count: selectedIds.size }))) {
+                  void store.deleteSelection();
+                }
+              }}
+            >
+              <WIcon name="trash" size={16} />
+              {t('dict.deleteSelected')}
+            </button>
+          </div>
+          <CategoryCheckboxDropdown
+            open={categoryMenuOpen}
+            categoryIds={pendingCategoryIds}
+            onChange={setPendingCategoryIds}
+            onApply={applyCategories}
+            onClose={closeCategoryMenu}
+          />
+        </div>
       )}
 
       {words.length > 0 && !selectionActive && (
@@ -112,51 +165,6 @@ export default function DictionaryScreen() {
               selected={selectedIds.has(w.id)}
             />
           ))}
-        </div>
-      )}
-
-      {selectionActive && (
-        <div className="bulk-toolbar">
-          <span className="bulk-count">{selectedIds.size}</span>
-          <button
-            className="secondary-btn"
-            onClick={() => {
-              setPendingTags([]);
-              setTagDialog(true);
-            }}
-          >
-            {t('dict.tags')}
-          </button>
-          <button className="danger-btn" onClick={() => store.deleteSelection()}>
-            {t('dict.delete')}
-          </button>
-          <button className="secondary-btn" onClick={() => store.clearSelection()}>
-            {t('common.cancel')}
-          </button>
-        </div>
-      )}
-
-      {tagDialog && (
-        <div className="overlay" onClick={() => setTagDialog(false)}>
-          <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-header">
-              <h3 className="sheet-title">{t('dict.tagsDialog', { count: selectedIds.size })}</h3>
-              <button className="sheet-close" onClick={() => setTagDialog(false)}>
-                <WIcon name="x-lg" />
-              </button>
-            </div>
-            <TagInput tags={pendingTags} onChange={setPendingTags} />
-            <p className="field-hint">{t('dict.tagsHint')}</p>
-            <button
-              className="primary-btn"
-              onClick={() => {
-                store.assignTagsToSelected(pendingTags);
-                setTagDialog(false);
-              }}
-            >
-              {t('dict.assign')}
-            </button>
-          </div>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { store, useStore } from '../store/AppStore';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 import type { DuplicateAction } from '../types';
+import { wordCategoryIds } from '../domain/categories';
 
 export default function DuplicateResolveDialog() {
   useStore();
@@ -35,8 +36,13 @@ export default function DuplicateResolveDialog() {
             <p className="dup-label">{t('dup.existing')}</p>
             <p className="dup-korean">{existing.korean}</p>
             <p className="dup-translation">{existing.translation}</p>
-            {existing.categoryId && (
-              <p className="field-hint">{store.categoryName(existing.categoryId)}</p>
+            {wordCategoryIds(existing).length > 0 && (
+              <p className="field-hint">
+                {wordCategoryIds(existing)
+                  .map((id) => store.categoryName(id))
+                  .filter(Boolean)
+                  .join(', ')}
+              </p>
             )}
           </div>
         </div>

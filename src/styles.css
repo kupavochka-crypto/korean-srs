@@ -350,6 +350,15 @@ textarea {
   min-width: 0;
 }
 
+.header-version {
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+}
+
 .header-back {
   width: 40px;
   height: 40px;
@@ -1317,38 +1326,145 @@ textarea {
   border-color: var(--red);
 }
 
-.bulk-toolbar {
-  position: fixed;
-  bottom: calc(62px + env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 520px;
+.dict-bulk-bar {
+  position: relative;
+  margin: 10px 0 12px;
+  z-index: 20;
+}
+
+.dict-bulk-summary {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dict-bulk-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.dict-bulk-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  height: 100%;
+  padding: 8px 10px;
+  text-align: center;
+  white-space: normal;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+  transition: transform var(--t-base) var(--ease-out), border-color var(--t-base) ease;
+}
+
+.dict-bulk-btn:active {
+  transform: scale(0.98);
+}
+
+.dict-bulk-btn--danger {
+  background: var(--red-soft);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.dict-bulk-btn--active {
+  border-color: var(--red);
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.dict-category-dropdown {
+  margin-top: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 10px 12px;
-  margin: 0 12px;
-  width: calc(100% - 24px);
-  z-index: 41;
+  overflow: hidden;
 }
 
-.bulk-count {
-  min-width: 28px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--red);
-}
-
-.bulk-toolbar .secondary-btn,
-.bulk-toolbar .danger-btn {
-  flex: 1;
-  height: 44px;
+.dict-category-dropdown-title {
+  margin: 0;
+  padding: 12px 14px 8px;
   font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dict-category-dropdown-list {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.dict-category-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.dict-category-option:active {
+  background: var(--surface-soft);
+}
+
+.dict-category-option input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--red);
+  flex-shrink: 0;
+}
+
+.dict-category-option-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dict-category-option-name {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.dict-category-dropdown-hint {
+  margin: 0;
+  padding: 4px 14px 0;
+}
+
+.dict-category-dropdown-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.dict-category-apply-btn {
+  width: auto;
+  min-width: 120px;
+  height: 40px;
+  margin: 0;
+  padding: 0 16px;
 }
 
 .danger-btn {
@@ -2030,6 +2146,20 @@ textarea {
   border-color: var(--red);
   background: var(--red-soft);
   color: var(--red);
+}
+
+.select-chip.disabled,
+.select-chip:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-tertiary);
+}
+
+.select-chip.disabled.active,
+.select-chip:disabled.active {
+  opacity: 0.45;
 }
 
 .save-btn {
@@ -3058,6 +3188,19 @@ select:focus-visible,
   color: var(--text-secondary);
 }
 
+.mission-word-count {
+  margin-bottom: 16px;
+}
+
+.mission-word-count .field-label {
+  margin-bottom: 8px;
+}
+
+.mission-word-count-hint {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .mission-start-desc {
   margin: 0 0 12px;
   font-size: 14px;
@@ -3085,6 +3228,69 @@ select:focus-visible,
 
 .home-primary-cta {
   width: 100%;
+}
+
+.mission-pick-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mission-pick-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: border-color var(--t-fast) ease, background var(--t-fast) ease, color var(--t-fast) ease;
+}
+
+.mission-pick-tab.active {
+  border-color: var(--red);
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.mission-pick-tab-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.mission-pick-refresh {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mission-pick-refresh:disabled {
+  opacity: 0.65;
+}
+
+.mission-pick-refresh-hint {
+  margin-top: -4px;
+  margin-bottom: 12px;
+}
+
+.mission-pick-badge-done {
+  background: var(--green-soft, rgba(76, 175, 80, 0.12));
+  color: var(--green, #43a047);
 }
 
 .mission-pick-list {
@@ -3537,6 +3743,44 @@ select:focus-visible,
 
 .onboard-speech .onboard-ratings {
   margin-bottom: 0;
+}
+
+.category-picker-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 160px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.category-picker-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.category-picker-option:last-child {
+  border-bottom: none;
+}
+
+.category-picker-create {
+  font-weight: 600;
+}
+
+.scanned-word-row .category-multi-picker {
+  flex: 1 1 100%;
+  min-width: 200px;
 }
 
 .translate-overlay {

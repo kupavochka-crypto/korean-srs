@@ -1,4 +1,5 @@
 import { store } from '../store/AppStore';
+import { appVersionLabel } from '../app-version';
 import { t } from '../domain/i18n';
 import WIcon from '../ui/WIcon';
 import WooriLogo from './WooriLogo';
@@ -8,11 +9,13 @@ export default function ScreenHeader({
   subtitle,
   showLogo = true,
   showBack,
+  showVersion = false,
 }: {
   title: string;
   subtitle?: string;
   showLogo?: boolean;
   showBack?: boolean;
+  showVersion?: boolean;
 }) {
   const back = showBack ?? store.canGoBack();
 
@@ -37,6 +40,7 @@ export default function ScreenHeader({
           </div>
         </div>
       </div>
+      {showVersion ? <span className="header-version">{appVersionLabel()}</span> : null}
     </header>
   );
 }
