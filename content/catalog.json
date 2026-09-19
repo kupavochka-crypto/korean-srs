@@ -1,0 +1,5307 @@
+{
+  "version": 4,
+  "updatedAt": "2026-09-19",
+  "packs": [
+    {
+      "id": "seed-bts-springday",
+      "title": "BTS — Spring Day",
+      "subtitle": "Мы встретимся снова · 다시 만날 거야",
+      "emoji": "🌸",
+      "colorHex": "#FF8A65",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "wordDefs": [
+        {
+          "korean": "봄",
+          "translation": "весна"
+        },
+        {
+          "korean": "하루",
+          "translation": "одни сутки, день"
+        },
+        {
+          "korean": "여행",
+          "translation": "путешествие"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание, память"
+        },
+        {
+          "korean": "지나가다",
+          "translation": "проходить, проходить мимо"
+        },
+        {
+          "korean": "기다리다",
+          "translation": "ждать"
+        },
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "겨울",
+          "translation": "зима"
+        },
+        {
+          "korean": "눈",
+          "translation": "снег"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "그립다",
+          "translation": "скучать, томиться"
+        },
+        {
+          "korean": "꽃",
+          "translation": "цветок"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "길",
+          "translation": "дорога, путь"
+        },
+        {
+          "korean": "약속",
+          "translation": "обещание, встреча"
+        },
+        {
+          "korean": "다시",
+          "translation": "снова"
+        },
+        {
+          "korean": "만나다",
+          "translation": "встречать(ся)"
+        },
+        {
+          "korean": "보고 싶다",
+          "translation": "скучать, хотеть увидеть"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "눈물",
+          "translation": "слёзы"
+        },
+        {
+          "korean": "추억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "멀다",
+          "translation": "быть далеко"
+        },
+        {
+          "korean": "가다",
+          "translation": "идти, ехать"
+        },
+        {
+          "korean": "오다",
+          "translation": "приходить"
+        },
+        {
+          "korean": "영원",
+          "translation": "вечность"
+        },
+        {
+          "korean": "따뜻하다",
+          "translation": "быть тёплым"
+        },
+        {
+          "korean": "바람",
+          "translation": "ветер"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-bts-butter",
+      "title": "BTS — Butter",
+      "subtitle": "Мягко, как масло · 버터처럼",
+      "emoji": "🧈",
+      "colorHex": "#FFD54F",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "wordDefs": [
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤추다",
+          "translation": "танцевать",
+          "exampleSentence": "춤을 춰요",
+          "exampleTranslation": "Танцую"
+        },
+        {
+          "korean": "좋다",
+          "translation": "быть хорошим, нравиться"
+        },
+        {
+          "korean": "자신감",
+          "translation": "уверенность"
+        },
+        {
+          "korean": "말",
+          "translation": "слово, конь (разный ханжа)"
+        },
+        {
+          "korean": "서로",
+          "translation": "друг друга, взаимно"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "부드럽다",
+          "translation": "быть мягким, плавным"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "달",
+          "translation": "луна"
+        },
+        {
+          "korean": "멋있다",
+          "translation": "быть крутым, стильным"
+        },
+        {
+          "korean": "매끄럽다",
+          "translation": "быть гладким"
+        },
+        {
+          "korean": "화려하다",
+          "translation": "быть ярким, эффектным"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "팬",
+          "translation": "фанат"
+        },
+        {
+          "korean": "눈빛",
+          "translation": "взгляд"
+        },
+        {
+          "korean": "분위기",
+          "translation": "атмосфера"
+        },
+        {
+          "korean": "신나다",
+          "translation": "быть весёлым, зажигательным"
+        },
+        {
+          "korean": "멜로디",
+          "translation": "мелодия"
+        },
+        {
+          "korean": "리듬",
+          "translation": "ритм"
+        },
+        {
+          "korean": "놀다",
+          "translation": "играть, тусоваться"
+        },
+        {
+          "korean": "반짝이다",
+          "translation": "блестеть, мерцать"
+        },
+        {
+          "korean": "매력",
+          "translation": "очарование"
+        },
+        {
+          "korean": "스타일",
+          "translation": "стиль"
+        },
+        {
+          "korean": "기분",
+          "translation": "настроение"
+        },
+        {
+          "korean": "웃음",
+          "translation": "смех"
+        },
+        {
+          "korean": "특별하다",
+          "translation": "быть особенным"
+        },
+        {
+          "korean": "설레다",
+          "translation": "волноваться, трепетать"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-bts-dynamite",
+      "title": "BTS — Dynamite",
+      "subtitle": "Вспышка энергии · 다이너마이트",
+      "emoji": "🕺",
+      "colorHex": "#E040FB",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "wordDefs": [
+        {
+          "korean": "자유",
+          "translation": "свобода"
+        },
+        {
+          "korean": "기분",
+          "translation": "настроение, самочувствие"
+        },
+        {
+          "korean": "비트",
+          "translation": "бит (ритм)"
+        },
+        {
+          "korean": "앵콜",
+          "translation": "бис (encore)"
+        },
+        {
+          "korean": "빛나다",
+          "translation": "сиять, сверкать"
+        },
+        {
+          "korean": "halo",
+          "translation": "ореол"
+        },
+        {
+          "korean": "halo가 빛나요",
+          "translation": "Ореол сияет"
+        },
+        {
+          "korean": "터지다",
+          "translation": "взрываться, вспыхивать"
+        },
+        {
+          "korean": "밝다",
+          "translation": "быть ярким, светлым"
+        },
+        {
+          "korean": "즐기다",
+          "translation": "наслаждаться"
+        },
+        {
+          "korean": "파티",
+          "translation": "вечеринка"
+        },
+        {
+          "korean": "밤하늘",
+          "translation": "ночное небо"
+        },
+        {
+          "korean": "반짝이다",
+          "translation": "мерцать, блестеть"
+        },
+        {
+          "korean": "축하",
+          "translation": "поздравление"
+        },
+        {
+          "korean": "에너지",
+          "translation": "энергия"
+        },
+        {
+          "korean": "웃음",
+          "translation": "смех"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "흥분",
+          "translation": "волнение, азарт"
+        },
+        {
+          "korean": "특별하다",
+          "translation": "быть особенным"
+        },
+        {
+          "korean": "불꽃",
+          "translation": "искра, фейерверк"
+        },
+        {
+          "korean": "타오르다",
+          "translation": "пылать, разгораться"
+        },
+        {
+          "korean": "소리",
+          "translation": "звук"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "신나다",
+          "translation": "быть зажигательным"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "기억",
+          "translation": "память, воспоминание"
+        },
+        {
+          "korean": "설레다",
+          "translation": "трепетать, волноваться"
+        },
+        {
+          "korean": "온통",
+          "translation": "повсюду, целиком"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-skz-maniac",
+      "title": "Stray Kids — MANIAC",
+      "subtitle": "Не будь обычным · 일반적이지 마",
+      "emoji": "🪲",
+      "colorHex": "#7C4DFF",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "wordDefs": [
+        {
+          "korean": "이상",
+          "translation": "ненормальный, странный"
+        },
+        {
+          "korean": "다르다",
+          "translation": "быть другим, отличаться"
+        },
+        {
+          "korean": "미치다",
+          "translation": "сойти с ума, безумный"
+        },
+        {
+          "korean": "자기",
+          "translation": "себя, ты (ласково)"
+        },
+        {
+          "korean": "느끼다",
+          "translation": "ощущать, чувствовать"
+        },
+        {
+          "korean": "rules",
+          "translation": "правила"
+        },
+        {
+          "korean": "camouflage",
+          "translation": "маскировка"
+        },
+        {
+          "korean": "정상",
+          "translation": "норма, нормальный"
+        },
+        {
+          "korean": "비정상",
+          "translation": "ненормальность"
+        },
+        {
+          "korean": "숨다",
+          "translation": "прятаться"
+        },
+        {
+          "korean": "틀리다",
+          "translation": "быть неправильным"
+        },
+        {
+          "korean": "특이하다",
+          "translation": "быть необычным"
+        },
+        {
+          "korean": "반항",
+          "translation": "протест, бунт"
+        },
+        {
+          "korean": "벗어나다",
+          "translation": "вырываться, освобождаться"
+        },
+        {
+          "korean": "가면",
+          "translation": "маска"
+        },
+        {
+          "korean": "거짓",
+          "translation": "ложь"
+        },
+        {
+          "korean": "진짜",
+          "translation": "настоящий"
+        },
+        {
+          "korean": "솔직하다",
+          "translation": "быть честным"
+        },
+        {
+          "korean": "감추다",
+          "translation": "прятать, скрывать"
+        },
+        {
+          "korean": "드러내다",
+          "translation": "раскрывать, показывать"
+        },
+        {
+          "korean": "긴장",
+          "translation": "напряжение"
+        },
+        {
+          "korean": "도전",
+          "translation": "вызов"
+        },
+        {
+          "korean": "한계",
+          "translation": "предел"
+        },
+        {
+          "korean": "돌아버리다",
+          "translation": "сойти с ума"
+        },
+        {
+          "korean": "스트레스",
+          "translation": "стресс"
+        },
+        {
+          "korean": "패턴",
+          "translation": "шаблон, паттерн"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "성격",
+          "translation": "характер"
+        },
+        {
+          "korean": "자유",
+          "translation": "свобода"
+        },
+        {
+          "korean": "세상",
+          "translation": "мир, общество"
+        },
+        {
+          "korean": "눈치",
+          "translation": "сообразительность, tact"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-skz-sclass",
+      "title": "Stray Kids — S-Class",
+      "subtitle": "Сияй по-своему · S클래스",
+      "emoji": "💎",
+      "colorHex": "#00BCD4",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "wordDefs": [
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "빛나다",
+          "translation": "сиять, сверкать"
+        },
+        {
+          "korean": "매력",
+          "translation": "очарование, привлекательность"
+        },
+        {
+          "korean": "개성",
+          "translation": "индивидуальность"
+        },
+        {
+          "korean": "자신감",
+          "translation": "уверенность"
+        },
+        {
+          "korean": "Style",
+          "translation": "стиль"
+        },
+        {
+          "korean": "S클래스",
+          "translation": "S-класс (уровень)"
+        },
+        {
+          "korean": "등급",
+          "translation": "уровень, класс"
+        },
+        {
+          "korean": "최고",
+          "translation": "лучший, высший"
+        },
+        {
+          "korean": "존재감",
+          "translation": "charisma, присутствие"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "주목",
+          "translation": "внимание"
+        },
+        {
+          "korean": "눈부시다",
+          "translation": "ослепительный, яркий"
+        },
+        {
+          "korean": "화려하다",
+          "translation": "блестящий, эффектный"
+        },
+        {
+          "korean": "독특하다",
+          "translation": "уникальный"
+        },
+        {
+          "korean": "자랑",
+          "translation": "гордость"
+        },
+        {
+          "korean": "승리",
+          "translation": "победа"
+        },
+        {
+          "korean": "완벽",
+          "translation": "совершенство"
+        },
+        {
+          "korean": "뛰어나다",
+          "translation": "выдающийся"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "멋지다",
+          "translation": "классный, крутой"
+        },
+        {
+          "korean": "우리",
+          "translation": "мы"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "세계",
+          "translation": "мир"
+        },
+        {
+          "korean": "무대력",
+          "translation": "сценическое мастерство"
+        },
+        {
+          "korean": "리더",
+          "translation": "лидер"
+        },
+        {
+          "korean": "팀",
+          "translation": "команда"
+        },
+        {
+          "korean": "열정",
+          "translation": "страсть"
+        },
+        {
+          "korean": "도전",
+          "translation": "вызов"
+        },
+        {
+          "korean": "성공",
+          "translation": "успех"
+        },
+        {
+          "korean": "반짝이다",
+          "translation": "мерцать, блестеть"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-bts-boywithluv",
+      "title": "BTS — Boy With Luv",
+      "subtitle": "Лёгкость и улыбка · 작은 것에 감사",
+      "emoji": "💜",
+      "colorHex": "#F48FB1",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "미소",
+          "translation": "улыбка"
+        },
+        {
+          "korean": "웃다",
+          "translation": "смеяться, улыбаться"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "설레다",
+          "translation": "волноваться, трепетать"
+        },
+        {
+          "korean": "고마워",
+          "translation": "спасибо (неформально)"
+        },
+        {
+          "korean": "예쁘다",
+          "translation": "быть красивым"
+        },
+        {
+          "korean": "빛나다",
+          "translation": "сиять"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "세상",
+          "translation": "мир, свет"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "매일",
+          "translation": "каждый день"
+        },
+        {
+          "korean": "좋아하다",
+          "translation": "нравиться, любить"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-ptd",
+      "title": "BTS — Permission to Dance",
+      "subtitle": "Танцуй свободно · 춤추자",
+      "emoji": "🕺",
+      "colorHex": "#42A5F5",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "wordDefs": [
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "춤추다",
+          "translation": "танцевать"
+        },
+        {
+          "korean": "음악",
+          "translation": "музыка"
+        },
+        {
+          "korean": "자유",
+          "translation": "свобода"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "웃음",
+          "translation": "смех"
+        },
+        {
+          "korean": "기분",
+          "translation": "настроение"
+        },
+        {
+          "korean": "신나다",
+          "translation": "быть весёлым"
+        },
+        {
+          "korean": "파티",
+          "translation": "вечеринка"
+        },
+        {
+          "korean": "세상",
+          "translation": "мир"
+        },
+        {
+          "korean": "희망",
+          "translation": "надежда"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "손",
+          "translation": "рука"
+        },
+        {
+          "korean": "들다",
+          "translation": "поднимать"
+        },
+        {
+          "korean": "모두",
+          "translation": "все"
+        },
+        {
+          "korean": "즐기다",
+          "translation": "наслаждаться"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        }
+      ]
+    },
+    {
+      "id": "seed-skz-godsmenu",
+      "title": "Stray Kids — God's Menu",
+      "subtitle": "Острый рецепт · 신메뉴",
+      "emoji": "🌶️",
+      "colorHex": "#EF5350",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "wordDefs": [
+        {
+          "korean": "메뉴",
+          "translation": "меню"
+        },
+        {
+          "korean": "맛",
+          "translation": "вкус"
+        },
+        {
+          "korean": "요리",
+          "translation": "блюдо, готовка"
+        },
+        {
+          "korean": "불",
+          "translation": "огонь"
+        },
+        {
+          "korean": "매운맛",
+          "translation": "острый вкус"
+        },
+        {
+          "korean": "재료",
+          "translation": "ингредиент"
+        },
+        {
+          "korean": "레시피",
+          "translation": "рецепт"
+        },
+        {
+          "korean": "섞다",
+          "translation": "смешивать"
+        },
+        {
+          "korean": "특별하다",
+          "translation": "быть особенным"
+        },
+        {
+          "korean": "완벽",
+          "translation": "совершенство"
+        },
+        {
+          "korean": "도전",
+          "translation": "вызов"
+        },
+        {
+          "korean": "열정",
+          "translation": "страсть"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "비트",
+          "translation": "бит"
+        },
+        {
+          "korean": "강하다",
+          "translation": "быть сильным"
+        },
+        {
+          "korean": "중독",
+          "translation": "зависимость, «подсаживание»"
+        },
+        {
+          "korean": "반하다",
+          "translation": "влюбиться, «подсесть»"
+        },
+        {
+          "korean": "신메뉴",
+          "translation": "новое меню"
+        },
+        {
+          "korean": "맛있다",
+          "translation": "быть вкусным"
+        },
+        {
+          "korean": "끝내주다",
+          "translation": "быть потрясающим"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-bst",
+      "title": "BTS — Blood Sweat & Tears",
+      "subtitle": "Путь через боль · 피 땀 눈물",
+      "emoji": "🩸",
+      "colorHex": "#B71C1C",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "피",
+          "translation": "кровь"
+        },
+        {
+          "korean": "땀",
+          "translation": "пот"
+        },
+        {
+          "korean": "눈물",
+          "translation": "слёзы"
+        },
+        {
+          "korean": "운명",
+          "translation": "судьба"
+        },
+        {
+          "korean": "깨닫다",
+          "translation": "осознавать"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-fire",
+      "title": "BTS — FIRE",
+      "subtitle": "Зажигай · 불타올라",
+      "emoji": "🔥",
+      "colorHex": "#FF5722",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "불",
+          "translation": "огонь"
+        },
+        {
+          "korean": "타오르다",
+          "translation": "пылать"
+        },
+        {
+          "korean": "열정",
+          "translation": "страсть"
+        },
+        {
+          "korean": "후회",
+          "translation": "сожаление"
+        },
+        {
+          "korean": "젊음",
+          "translation": "молодость"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-dna",
+      "title": "BTS — DNA",
+      "subtitle": "Связь навсегда · DNA",
+      "emoji": "🧬",
+      "colorHex": "#E91E63",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "운명",
+          "translation": "судьба"
+        },
+        {
+          "korean": "연결",
+          "translation": "связь"
+        },
+        {
+          "korean": "영원",
+          "translation": "вечность"
+        },
+        {
+          "korean": "설레다",
+          "translation": "трепетать"
+        },
+        {
+          "korean": "너",
+          "translation": "ты"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-idol",
+      "title": "BTS — IDOL",
+      "subtitle": "Любовь фанатов · 아이돌",
+      "emoji": "👑",
+      "colorHex": "#9C27B0",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "아이돌",
+          "translation": "айдол"
+        },
+        {
+          "korean": "팬",
+          "translation": "фанат"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "자신",
+          "translation": "уверенность"
+        },
+        {
+          "korean": "빛나다",
+          "translation": "сиять"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-lgo",
+      "title": "BTS — Life Goes On",
+      "subtitle": "Жизнь продолжается",
+      "emoji": "🍂",
+      "colorHex": "#795548",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "겨울",
+          "translation": "зима"
+        },
+        {
+          "korean": "봄",
+          "translation": "весна"
+        },
+        {
+          "korean": "위로",
+          "translation": "утешение"
+        },
+        {
+          "korean": "일상",
+          "translation": "повседневность"
+        },
+        {
+          "korean": "다시",
+          "translation": "снова"
+        }
+      ]
+    },
+    {
+      "id": "seed-bts-micdrop",
+      "title": "BTS — MIC Drop",
+      "subtitle": "Мощный финал · 마이크 드롭",
+      "emoji": "🎤",
+      "colorHex": "#212121",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "마이크",
+          "translation": "микрофон"
+        },
+        {
+          "korean": "성공",
+          "translation": "успех"
+        },
+        {
+          "korean": "증명",
+          "translation": "доказательство"
+        },
+        {
+          "korean": "반전",
+          "translation": "переворот"
+        },
+        {
+          "korean": "자랑",
+          "translation": "гордость"
+        }
+      ]
+    },
+    {
+      "id": "seed-skz-thunderous",
+      "title": "Stray Kids — Thunderous",
+      "subtitle": "Громовой удар · 소리꾼",
+      "emoji": "⚡",
+      "colorHex": "#FFC107",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "천둥",
+          "translation": "гром"
+        },
+        {
+          "korean": "소리",
+          "translation": "звук"
+        },
+        {
+          "korean": "울리다",
+          "translation": "реverb/звучать"
+        },
+        {
+          "korean": "전통",
+          "translation": "традиция"
+        },
+        {
+          "korean": "비트",
+          "translation": "бит"
+        }
+      ]
+    },
+    {
+      "id": "seed-skz-case143",
+      "title": "Stray Kids — CASE 143",
+      "subtitle": "Код любви · CASE 143",
+      "emoji": "💘",
+      "colorHex": "#F06292",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "사건",
+          "translation": "случай"
+        },
+        {
+          "korean": "코드",
+          "translation": "код"
+        },
+        {
+          "korean": "고백",
+          "translation": "признание"
+        },
+        {
+          "korean": "설레다",
+          "translation": "волноваться"
+        },
+        {
+          "korean": "너",
+          "translation": "ты"
+        }
+      ]
+    },
+    {
+      "id": "seed-skz-backdoor",
+      "title": "Stray Kids — Back Door",
+      "subtitle": "Секретный вход · Back Door",
+      "emoji": "🚪",
+      "colorHex": "#00897B",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "문",
+          "translation": "дверь"
+        },
+        {
+          "korean": "비밀",
+          "translation": "секрет"
+        },
+        {
+          "korean": "파티",
+          "translation": "вечеринка"
+        },
+        {
+          "korean": "분위기",
+          "translation": "атмосфера"
+        },
+        {
+          "korean": "신나다",
+          "translation": "зажигать"
+        }
+      ]
+    },
+    {
+      "id": "seed-skz-rockstar",
+      "title": "Stray Kids — ROCK-STAR",
+      "subtitle": "Рок-звезда · ROCK-STAR",
+      "emoji": "🎸",
+      "colorHex": "#546E7A",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "록",
+          "translation": "рок"
+        },
+        {
+          "korean": "스타",
+          "translation": "звезда"
+        },
+        {
+          "korean": "카리스마",
+          "translation": "charisma"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "열정",
+          "translation": "страсть"
+        }
+      ]
+    },
+    {
+      "id": "seed-bp-hylt",
+      "title": "BLACKPINK — How You Like That",
+      "subtitle": "Как тебе это · How You Like That",
+      "emoji": "💗",
+      "colorHex": "#AD1457",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "어둠",
+          "translation": "тьма"
+        },
+        {
+          "korean": "역습",
+          "translation": "контрудар"
+        },
+        {
+          "korean": "자신감",
+          "translation": "уверенность"
+        },
+        {
+          "korean": "멋지다",
+          "translation": "круто"
+        }
+      ]
+    },
+    {
+      "id": "seed-bp-pinkvenom",
+      "title": "BLACKPINK — Pink Venom",
+      "subtitle": "Розовый яд · Pink Venom",
+      "emoji": "🐍",
+      "colorHex": "#D81B60",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "독",
+          "translation": "яд"
+        },
+        {
+          "korean": "분홍",
+          "translation": "розовый"
+        },
+        {
+          "korean": "매혹",
+          "translation": "очарование"
+        },
+        {
+          "korean": "위험",
+          "translation": "опасность"
+        },
+        {
+          "korean": "강렬",
+          "translation": "интенсивный"
+        }
+      ]
+    },
+    {
+      "id": "seed-bp-killthislove",
+      "title": "BLACKPINK — Kill This Love",
+      "subtitle": "Разрушь любовь · Kill This Love",
+      "emoji": "💔",
+      "colorHex": "#880E4F",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "깨다",
+          "translation": "разбить"
+        },
+        {
+          "korean": "용기",
+          "translation": "смелость"
+        },
+        {
+          "korean": "이별",
+          "translation": "расставание"
+        },
+        {
+          "korean": "새로",
+          "translation": "заново"
+        }
+      ]
+    },
+    {
+      "id": "seed-nj-ditto",
+      "title": "NewJeans — Ditto",
+      "subtitle": "Эхо чувств · Ditto",
+      "emoji": "🐰",
+      "colorHex": "#5C6BC0",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "그리움",
+          "translation": "тоска"
+        },
+        {
+          "korean": "겨울",
+          "translation": "зима"
+        },
+        {
+          "korean": "운동장",
+          "translation": "спортплощадка"
+        },
+        {
+          "korean": "너",
+          "translation": "ты"
+        }
+      ]
+    },
+    {
+      "id": "seed-nj-hypeboy",
+      "title": "NewJeans — Hype Boy",
+      "subtitle": "Тот самый парень · Hype Boy",
+      "emoji": "💫",
+      "colorHex": "#3949AB",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "소년",
+          "translation": "парень"
+        },
+        {
+          "korean": "두근",
+          "translation": "тук-тук"
+        },
+        {
+          "korean": "설렘",
+          "translation": "волнение"
+        },
+        {
+          "korean": "귀엽다",
+          "translation": "милый"
+        },
+        {
+          "korean": "좋아",
+          "translation": "нравится"
+        }
+      ]
+    },
+    {
+      "id": "seed-nj-supershy",
+      "title": "NewJeans — Super Shy",
+      "subtitle": "Супер стеснительная · Super Shy",
+      "emoji": "😳",
+      "colorHex": "#7986CB",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "수줍",
+          "translation": "стеснительный"
+        },
+        {
+          "korean": "전화",
+          "translation": "телефон"
+        },
+        {
+          "korean": "기다리다",
+          "translation": "ждать"
+        },
+        {
+          "korean": "용기",
+          "translation": "смелость"
+        },
+        {
+          "korean": "고백",
+          "translation": "признание"
+        }
+      ]
+    },
+    {
+      "id": "seed-aespa-nextlevel",
+      "title": "aespa — Next Level",
+      "subtitle": "Новый уровень · Next Level",
+      "emoji": "🦾",
+      "colorHex": "#7B1FA2",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "다음",
+          "translation": "следующий"
+        },
+        {
+          "korean": "레벨",
+          "translation": "уровень"
+        },
+        {
+          "korean": "세계",
+          "translation": "мир"
+        },
+        {
+          "korean": "모험",
+          "translation": "приключение"
+        },
+        {
+          "korean": "도전",
+          "translation": "вызов"
+        }
+      ]
+    },
+    {
+      "id": "seed-aespa-spicy",
+      "title": "aespa — Spicy",
+      "subtitle": "Остро и ярко · Spicy",
+      "emoji": "🌶️",
+      "colorHex": "#C2185B",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "매운맛",
+          "translation": "острый вкус"
+        },
+        {
+          "korean": "열기",
+          "translation": "жар"
+        },
+        {
+          "korean": "당당",
+          "translation": "уверенно"
+        },
+        {
+          "korean": "스타일",
+          "translation": "стиль"
+        },
+        {
+          "korean": "빛나다",
+          "translation": "сиять"
+        }
+      ]
+    },
+    {
+      "id": "seed-iu-blueming",
+      "title": "IU — Blueming",
+      "subtitle": "Цветёт синим · Blueming",
+      "emoji": "🌼",
+      "colorHex": "#0288D1",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "꽃",
+          "translation": "цветок"
+        },
+        {
+          "korean": "피다",
+          "translation": "цвести"
+        },
+        {
+          "korean": "봄",
+          "translation": "весна"
+        },
+        {
+          "korean": "설레다",
+          "translation": "трепетать"
+        },
+        {
+          "korean": "연락",
+          "translation": "сообщение"
+        }
+      ]
+    },
+    {
+      "id": "seed-iu-celebrity",
+      "title": "IU — Celebrity",
+      "subtitle": "Ты — знаменитость · Celebrity",
+      "emoji": "✨",
+      "colorHex": "#0277BD",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "유명",
+          "translation": "знаменитый"
+        },
+        {
+          "korean": "특별",
+          "translation": "особенный"
+        },
+        {
+          "korean": "존재",
+          "translation": "существование"
+        },
+        {
+          "korean": "응원",
+          "translation": "поддержка"
+        }
+      ]
+    },
+    {
+      "id": "seed-svt-super",
+      "title": "SEVENTEEN — SUPER",
+      "subtitle": "Супер-я · SUPER",
+      "emoji": "🌟",
+      "colorHex": "#F57C00",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "슈퍼",
+          "translation": "супер"
+        },
+        {
+          "korean": "팀",
+          "translation": "команда"
+        },
+        {
+          "korean": "무대",
+          "translation": "сцена"
+        },
+        {
+          "korean": "완벽",
+          "translation": "идеально"
+        },
+        {
+          "korean": "에너지",
+          "translation": "энергия"
+        }
+      ]
+    },
+    {
+      "id": "seed-twice-cheerup",
+      "title": "TWICE — Cheer Up",
+      "subtitle": "Не грусти · Cheer Up",
+      "emoji": "🍊",
+      "colorHex": "#FF7043",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "응원",
+          "translation": "поддержка"
+        },
+        {
+          "korean": "미소",
+          "translation": "улыбка"
+        },
+        {
+          "korean": "힘",
+          "translation": "сила"
+        },
+        {
+          "korean": "걱정",
+          "translation": "беспокойство"
+        },
+        {
+          "korean": "기쁨",
+          "translation": "радость"
+        }
+      ]
+    },
+    {
+      "id": "seed-idle-tomboy",
+      "title": "(G)I-DLE — Tomboy",
+      "subtitle": "Свободный дух · Tomboy",
+      "emoji": "🎩",
+      "colorHex": "#455A64",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "자유",
+          "translation": "свобода"
+        },
+        {
+          "korean": "당당",
+          "translation": "уверенно"
+        },
+        {
+          "korean": "개성",
+          "translation": "индивидуальность"
+        },
+        {
+          "korean": "멋",
+          "translation": "стиль"
+        },
+        {
+          "korean": "나",
+          "translation": "я"
+        }
+      ]
+    },
+    {
+      "id": "seed-lsf-unforgiven",
+      "title": "LE SSERAFIM — UNFORGIVEN",
+      "subtitle": "Без извинений · UNFORGIVEN",
+      "emoji": "🔥",
+      "colorHex": "#BF360C",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "ko",
+      "wordDefs": [
+        {
+          "korean": "사랑",
+          "translation": "любовь"
+        },
+        {
+          "korean": "밤",
+          "translation": "ночь"
+        },
+        {
+          "korean": "별",
+          "translation": "звезда"
+        },
+        {
+          "korean": "꿈",
+          "translation": "мечта"
+        },
+        {
+          "korean": "마음",
+          "translation": "сердце, душа"
+        },
+        {
+          "korean": "함께",
+          "translation": "вместе"
+        },
+        {
+          "korean": "행복",
+          "translation": "счастье"
+        },
+        {
+          "korean": "노래",
+          "translation": "песня"
+        },
+        {
+          "korean": "춤",
+          "translation": "танец"
+        },
+        {
+          "korean": "빛",
+          "translation": "свет"
+        },
+        {
+          "korean": "시간",
+          "translation": "время"
+        },
+        {
+          "korean": "기억",
+          "translation": "воспоминание"
+        },
+        {
+          "korean": "오늘",
+          "translation": "сегодня"
+        },
+        {
+          "korean": "하늘",
+          "translation": "небо"
+        },
+        {
+          "korean": "친구",
+          "translation": "друг"
+        },
+        {
+          "korean": "용서",
+          "translation": "прощение"
+        },
+        {
+          "korean": "도전",
+          "translation": "вызов"
+        },
+        {
+          "korean": "두려움",
+          "translation": "страх"
+        },
+        {
+          "korean": "깨다",
+          "translation": "сломать"
+        },
+        {
+          "korean": "앞으로",
+          "translation": "вперёд"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-qilixiang",
+      "title": "周杰伦 — 七里香",
+      "subtitle": "Аромат сирени · 七里香",
+      "emoji": "🌸",
+      "colorHex": "#8E24AA",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "七里香",
+          "translation": "сирень",
+          "pinyin": "qī lǐ xiāng"
+        },
+        {
+          "korean": "夏天",
+          "translation": "лето",
+          "pinyin": "xià tiān"
+        },
+        {
+          "korean": "风",
+          "translation": "ветер",
+          "pinyin": "fēng"
+        },
+        {
+          "korean": "雨",
+          "translation": "дождь",
+          "pinyin": "yǔ"
+        },
+        {
+          "korean": "思念",
+          "translation": "тоска",
+          "pinyin": "sī niàn"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-yequ",
+      "title": "周杰伦 — 夜曲",
+      "subtitle": "Ночная мелодия · 夜曲",
+      "emoji": "🌙",
+      "colorHex": "#4527A0",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "夜曲",
+          "translation": "ноктюрн",
+          "pinyin": "yè qǔ"
+        },
+        {
+          "korean": "钢琴",
+          "translation": "фортепiano",
+          "pinyin": "gāng qín"
+        },
+        {
+          "korean": "孤独",
+          "translation": "одиночество",
+          "pinyin": "gū dú"
+        },
+        {
+          "korean": "沉默",
+          "translation": "молчание",
+          "pinyin": "chén mò"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-jiandanai",
+      "title": "周杰伦 — 简单爱",
+      "subtitle": "Простая любовь · 简单爱",
+      "emoji": "💕",
+      "colorHex": "#EC407A",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "简单",
+          "translation": "простой",
+          "pinyin": "jiǎn dān"
+        },
+        {
+          "korean": "爱情",
+          "translation": "любовь",
+          "pinyin": "ài qíng"
+        },
+        {
+          "korean": "牵手",
+          "translation": "держаться за руки",
+          "pinyin": "qiān shǒu"
+        },
+        {
+          "korean": "温柔",
+          "translation": "нежный",
+          "pinyin": "wēn róu"
+        },
+        {
+          "korean": "微笑",
+          "translation": "улыбка",
+          "pinyin": "wēi xiào"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-guangnian",
+      "title": "邓紫棋 — 光年之外",
+      "subtitle": "За световыми годами",
+      "emoji": "🚀",
+      "colorHex": "#6A1B9A",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "光年",
+          "translation": "световой год",
+          "pinyin": "guāng nián"
+        },
+        {
+          "korean": "宇宙",
+          "translation": "вселенная",
+          "pinyin": "yǔ zhòu"
+        },
+        {
+          "korean": "离开",
+          "translation": "уходить",
+          "pinyin": "lí kāi"
+        },
+        {
+          "korean": "等待",
+          "translation": "ждать",
+          "pinyin": "děng dài"
+        },
+        {
+          "korean": "命运",
+          "translation": "судьба",
+          "pinyin": "mìng yùn"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-xiulian",
+      "title": "林俊杰 — 修炼爱情",
+      "subtitle": "Учиться любви · 修炼爱情",
+      "emoji": "💞",
+      "colorHex": "#D32F2F",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "修炼",
+          "translation": "тренироваться",
+          "pinyin": "xiū liàn"
+        },
+        {
+          "korean": "爱情",
+          "translation": "любовь",
+          "pinyin": "ài qíng"
+        },
+        {
+          "korean": "成长",
+          "translation": "расти",
+          "pinyin": "chéng zhǎng"
+        },
+        {
+          "korean": "遗憾",
+          "translation": "сожаление",
+          "pinyin": "yí hàn"
+        },
+        {
+          "korean": "学会",
+          "translation": "научиться",
+          "pinyin": "xué huì"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-xiaochou",
+      "title": "毛不易 — 消愁",
+      "subtitle": "Заглушить печаль · 消愁",
+      "emoji": "🍺",
+      "colorHex": "#5D4037",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "消愁",
+          "translation": "заглушить грусть",
+          "pinyin": "xiāo chóu"
+        },
+        {
+          "korean": "酒",
+          "translation": "алкоголь",
+          "pinyin": "jiǔ"
+        },
+        {
+          "korean": "故乡",
+          "translation": "родина",
+          "pinyin": "gù xiāng"
+        },
+        {
+          "korean": "理想",
+          "translation": "мечта",
+          "pinyin": "lǐ xiǎng"
+        },
+        {
+          "korean": "生活",
+          "translation": "жизнь",
+          "pinyin": "shēng huó"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-yanyuan",
+      "title": "薛之谦 — 演员",
+      "subtitle": "Актёр · 演员",
+      "emoji": "🎭",
+      "colorHex": "#37474F",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "演员",
+          "translation": "актёр",
+          "pinyin": "yǎn yuán"
+        },
+        {
+          "korean": "表演",
+          "translation": "играть роль",
+          "pinyin": "biǎo yǎn"
+        },
+        {
+          "korean": "假装",
+          "translation": "притворяться",
+          "pinyin": "jiǎ zhuāng"
+        },
+        {
+          "korean": "配合",
+          "translation": "подыграть",
+          "pinyin": "pèi hé"
+        },
+        {
+          "korean": "心碎",
+          "translation": "разбитое сердце",
+          "pinyin": "xīn suì"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-laojie",
+      "title": "李荣浩 — 老街",
+      "subtitle": "Старая улица · 老街",
+      "emoji": "🏮",
+      "colorHex": "#FF8F00",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "老街",
+          "translation": "старая улица",
+          "pinyin": "lǎo jiē"
+        },
+        {
+          "korean": "童年",
+          "translation": "детство",
+          "pinyin": "tóng nián"
+        },
+        {
+          "korean": "记忆",
+          "translation": "память",
+          "pinyin": "jì yì"
+        },
+        {
+          "korean": "温暖",
+          "translation": "тёплый",
+          "pinyin": "wēn nuǎn"
+        },
+        {
+          "korean": "怀念",
+          "translation": "скучать",
+          "pinyin": "huái niàn"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-hongdou",
+      "title": "王菲 — 红豆",
+      "subtitle": "Красная фасоль · 红豆",
+      "emoji": "🫘",
+      "colorHex": "#C62828",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "红豆",
+          "translation": "красная фасоль",
+          "pinyin": "hóng dòu"
+        },
+        {
+          "korean": "相思",
+          "translation": "тоска по любимому",
+          "pinyin": "xiāng sī"
+        },
+        {
+          "korean": "等待",
+          "translation": "ждать",
+          "pinyin": "děng dài"
+        },
+        {
+          "korean": "季节",
+          "translation": "сезон",
+          "pinyin": "jì jié"
+        },
+        {
+          "korean": "温柔",
+          "translation": "нежный",
+          "pinyin": "wēn róu"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-jueqiang",
+      "title": "五月天 — 倔强",
+      "subtitle": "Упрямство · 倔强",
+      "emoji": "✊",
+      "colorHex": "#1565C0",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "倔强",
+          "translation": "упрямство",
+          "pinyin": "jué jiàng"
+        },
+        {
+          "korean": "梦想",
+          "translation": "мечта",
+          "pinyin": "mèng xiǎng"
+        },
+        {
+          "korean": "坚持",
+          "translation": "настойчивость",
+          "pinyin": "jiān chí"
+        },
+        {
+          "korean": "青春",
+          "translation": "молодость",
+          "pinyin": "qīng chūn"
+        },
+        {
+          "korean": "希望",
+          "translation": "надежда",
+          "pinyin": "xī wàng"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-gongting",
+      "title": "C-drama — 宫廷词汇",
+      "subtitle": "Дворцовая лексика",
+      "emoji": "🏯",
+      "colorHex": "#6D4C41",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "皇帝",
+          "translation": "император",
+          "pinyin": "huáng dì"
+        },
+        {
+          "korean": "娘娘",
+          "translation": "императрица",
+          "pinyin": "niáng niang"
+        },
+        {
+          "korean": "殿下",
+          "translation": "ваше высочество",
+          "pinyin": "diàn xià"
+        },
+        {
+          "korean": "奴才",
+          "translation": "слуга",
+          "pinyin": "nú cai"
+        },
+        {
+          "korean": "圣旨",
+          "translation": "указ императора",
+          "pinyin": "shèng zhǐ"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-lianai",
+      "title": "C-drama — 恋爱用语",
+      "subtitle": "Слова о любви",
+      "emoji": "💌",
+      "colorHex": "#F06292",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "表白",
+          "translation": "признание",
+          "pinyin": "biǎo bái"
+        },
+        {
+          "korean": "约会",
+          "translation": "свидание",
+          "pinyin": "yuē huì"
+        },
+        {
+          "korean": "心动",
+          "translation": "сердце ёкает",
+          "pinyin": "xīn dòng"
+        },
+        {
+          "korean": "吃醋",
+          "translation": "ревновать",
+          "pinyin": "chī cù"
+        },
+        {
+          "korean": "拥抱",
+          "translation": "обнимать",
+          "pinyin": "yōng bào"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-shangwu",
+      "title": "C-drama — 商务口语",
+      "subtitle": "Деловой китайский",
+      "emoji": "💼",
+      "colorHex": "#455A64",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "合作",
+          "translation": "сотрудничество",
+          "pinyin": "hé zuò"
+        },
+        {
+          "korean": "合同",
+          "translation": "контракт",
+          "pinyin": "hé tong"
+        },
+        {
+          "korean": "会议",
+          "translation": "совещание",
+          "pinyin": "huì yì"
+        },
+        {
+          "korean": "项目",
+          "translation": "проект",
+          "pinyin": "xiàng mù"
+        },
+        {
+          "korean": "成功",
+          "translation": "успех",
+          "pinyin": "chéng gōng"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-luxing",
+      "title": "C-drama — 旅行词汇",
+      "subtitle": "Путешествия",
+      "emoji": "✈️",
+      "colorHex": "#00838F",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "staged": true,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "心",
+          "translation": "сердце",
+          "pinyin": "xīn"
+        },
+        {
+          "korean": "爱",
+          "translation": "любовь",
+          "pinyin": "ài"
+        },
+        {
+          "korean": "梦",
+          "translation": "мечта",
+          "pinyin": "mèng"
+        },
+        {
+          "korean": "星",
+          "translation": "звезда",
+          "pinyin": "xīng"
+        },
+        {
+          "korean": "时间",
+          "translation": "время",
+          "pinyin": "shí jiān"
+        },
+        {
+          "korean": "回忆",
+          "translation": "воспоминание",
+          "pinyin": "huí yì"
+        },
+        {
+          "korean": "一起",
+          "translation": "вместе",
+          "pinyin": "yì qǐ"
+        },
+        {
+          "korean": "快乐",
+          "translation": "радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "旅行",
+          "translation": "путешествие",
+          "pinyin": "lǚ xíng"
+        },
+        {
+          "korean": "机场",
+          "translation": "аэропорт",
+          "pinyin": "jī chǎng"
+        },
+        {
+          "korean": "酒店",
+          "translation": "отель",
+          "pinyin": "jiǔ diàn"
+        },
+        {
+          "korean": "地图",
+          "translation": "карта",
+          "pinyin": "dì tú"
+        },
+        {
+          "korean": "风景",
+          "translation": "пейзаж",
+          "pinyin": "fēng jǐng"
+        }
+      ]
+    },
+    {
+      "id": "seed-zh-qingtian",
+      "title": "周杰伦 — 晴天",
+      "subtitle": "Солнечный день · 晴天",
+      "emoji": "☀️",
+      "colorHex": "#FFB300",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "晴天",
+          "translation": "солнечный день",
+          "pinyin": "qíng tiān"
+        },
+        {
+          "korean": "故事",
+          "translation": "история",
+          "pinyin": "gù shi"
+        },
+        {
+          "korean": "开始",
+          "translation": "начинать",
+          "pinyin": "kāi shǐ"
+        },
+        {
+          "korean": "下雨",
+          "translation": "идёт дождь",
+          "pinyin": "xià yǔ"
+        },
+        {
+          "korean": "微笑",
+          "translation": "улыбка",
+          "pinyin": "wēi xiào"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться, любить",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "从前",
+          "translation": "раньше, когда-то",
+          "pinyin": "cóng qián"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-zh-daoxiang",
+      "title": "周杰伦 — 稻香",
+      "subtitle": "Аромат риса · 稻香",
+      "emoji": "🌾",
+      "colorHex": "#8BC34A",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "家乡",
+          "translation": "родина, родной край",
+          "pinyin": "jiā xiāng"
+        },
+        {
+          "korean": "梦想",
+          "translation": "мечта",
+          "pinyin": "mèng xiǎng"
+        },
+        {
+          "korean": "努力",
+          "translation": "стараться, усердие",
+          "pinyin": "nǔ lì"
+        },
+        {
+          "korean": "快乐",
+          "translation": "счастливый, радость",
+          "pinyin": "kuài lè"
+        },
+        {
+          "korean": "童年",
+          "translation": "детство",
+          "pinyin": "tóng nián"
+        },
+        {
+          "korean": "河流",
+          "translation": "река",
+          "pinyin": "hé liú"
+        },
+        {
+          "korean": "阳光",
+          "translation": "солнечный свет",
+          "pinyin": "yáng guāng"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-zh-chuanqi",
+      "title": "王菲 — 传奇",
+      "subtitle": "Легенда · 传奇",
+      "emoji": "✨",
+      "colorHex": "#AB47BC",
+      "difficulty": "Средний",
+      "sourceId": null,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "传奇",
+          "translation": "легенда",
+          "pinyin": "chuán qí"
+        },
+        {
+          "korean": "眼睛",
+          "translation": "глаза",
+          "pinyin": "yǎn jing"
+        },
+        {
+          "korean": "月亮",
+          "translation": "луна",
+          "pinyin": "yuè liang"
+        },
+        {
+          "korean": "天空",
+          "translation": "небо",
+          "pinyin": "tiān kōng"
+        },
+        {
+          "korean": "相信",
+          "translation": "верить",
+          "pinyin": "xiāng xìn"
+        },
+        {
+          "korean": "永远",
+          "translation": "навсегда",
+          "pinyin": "yǒng yuǎn"
+        }
+      ],
+      "staged": false
+    },
+    {
+      "id": "seed-zh-basics",
+      "title": "C-drama — базовая лексика",
+      "subtitle": "Повседневные фразы",
+      "emoji": "🎬",
+      "colorHex": "#26A69A",
+      "difficulty": "Начальный",
+      "sourceId": null,
+      "language": "zh",
+      "wordDefs": [
+        {
+          "korean": "你好",
+          "translation": "привет",
+          "pinyin": "nǐ hǎo"
+        },
+        {
+          "korean": "谢谢",
+          "translation": "спасибо",
+          "pinyin": "xiè xie"
+        },
+        {
+          "korean": "对不起",
+          "translation": "извините",
+          "pinyin": "duì bu qǐ"
+        },
+        {
+          "korean": "没关系",
+          "translation": "ничего страшного",
+          "pinyin": "méi guān xi"
+        },
+        {
+          "korean": "喜欢",
+          "translation": "нравиться",
+          "pinyin": "xǐ huan"
+        },
+        {
+          "korean": "朋友",
+          "translation": "друг",
+          "pinyin": "péng you"
+        },
+        {
+          "korean": "今天",
+          "translation": "сегодня",
+          "pinyin": "jīn tiān"
+        },
+        {
+          "korean": "明天",
+          "translation": "завтра",
+          "pinyin": "míng tiān"
+        }
+      ],
+      "staged": false
+    }
+  ],
+  "phrases": [
+    {
+      "korean": "보고 싶다",
+      "translation": "Я скучаю по тебе",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "다시 만나자",
+      "translation": "Давай встретимся снова",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "얼마나 기다렸어",
+      "translation": "Как долго я ждал",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "눈이 내린다",
+      "translation": "Идёт снег",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "봄이 오면",
+      "translation": "Когда придёт весна",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "조금만 더",
+      "translation": "Ещё чуть-чуть",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "손을 잡아",
+      "translation": "Возьми меня за руку",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "마음이 따뜻해",
+      "translation": "На душе тепло",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "잊지 마",
+      "translation": "Не забывай",
+      "sourcePackId": "seed-bts-springday",
+      "themeId": "bts"
+    },
+    {
+      "korean": "괜찮아",
+      "translation": "Всё в порядке",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "춤을 춰요",
+      "translation": "Танцую",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "노래를 불러요",
+      "translation": "Пою песню",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "기분이 좋아요",
+      "translation": "Настроение хорошее",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "자유롭게",
+      "translation": "Свободно",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "우리 함께",
+      "translation": "Мы вместе",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "같이 가자",
+      "translation": "Пойдём вместе",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "내일도 보자",
+      "translation": "Увидимся и завтра",
+      "sourcePackId": "seed-bts-butter",
+      "themeId": "bts"
+    },
+    {
+      "korean": "사랑해",
+      "translation": "Я люблю тебя",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "오늘 하루",
+      "translation": "Сегодняшний день",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "너를 생각해",
+      "translation": "Я думаю о тебе",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "빛이 나다",
+      "translation": "Сиять",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "꿈꿔 왔어",
+      "translation": "Я мечтал об этом",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "끝까지",
+      "translation": "До конца",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "지금 이 순간",
+      "translation": "В этот момент",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "함께 빛나자",
+      "translation": "Давай сиять вместе",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "하루하루",
+      "translation": "День за днём",
+      "sourcePackId": "seed-bts-dynamite",
+      "themeId": "bts"
+    },
+    {
+      "korean": "미치고 싶어",
+      "translation": "Хочу сойти с ума (от энергии)",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "다르게 살아",
+      "translation": "Живи иначе",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "이상해도 괜찮아",
+      "translation": "Странным быть — нормально",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "느껴봐",
+      "translation": "Почувствуй",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "자기야",
+      "translation": "Эй, ты (ласково)",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "평범하지 않아",
+      "translation": "Я не обычный",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "날 따라와",
+      "translation": "Иди за мной",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "틀려도 괜찮아",
+      "translation": "Не страшно ошибаться",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "숨겨왔던",
+      "translation": "То, что скрывал",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "터져 나와",
+      "translation": "Вырывается наружу",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "우리는 다르다",
+      "translation": "Мы другие",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "정신 차려",
+      "translation": "Соберись",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "완전 미쳤어",
+      "translation": "Это полное безумие",
+      "sourcePackId": "seed-skz-maniac",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "특별해",
+      "translation": "Ты особенный",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "별처럼 빛나",
+      "translation": "Сияй как звезда",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "자신 있게",
+      "translation": "Уверенно",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "매력 넘쳐",
+      "translation": "Переполнен очарованием",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "스타일이 달라",
+      "translation": "Другой стиль",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "최고야",
+      "translation": "Это лучшее",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "넌 S클래스",
+      "translation": "Ты — S-класс",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "빛나는 너",
+      "translation": "Сияющий ты",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "개성 있어",
+      "translation": "У тебя есть индивидуальность",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "무대 위에서",
+      "translation": "На сцене",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "우리 빛나자",
+      "translation": "Давай сиять вместе",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "더 높이",
+      "translation": "Ещё выше",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "자신감 넘쳐",
+      "translation": "Уверенность переполняет",
+      "sourcePackId": "seed-skz-sclass",
+      "themeId": "stray-kids"
+    },
+    {
+      "korean": "从前从前",
+      "translation": "Когда-то, давным-давно",
+      "sourcePackId": "seed-zh-qingtian",
+      "pinyin": "cóng qián cóng qián"
+    },
+    {
+      "korean": "故事的开始",
+      "translation": "Начало истории",
+      "sourcePackId": "seed-zh-qingtian",
+      "pinyin": "gù shi de kāi shǐ"
+    },
+    {
+      "korean": "童年的纸飞机",
+      "translation": "Бумажный самолётик детства",
+      "sourcePackId": "seed-zh-daoxiang",
+      "pinyin": "tóng nián de zhǐ fēi jī"
+    },
+    {
+      "korean": "回家吧",
+      "translation": "Вернись домой",
+      "sourcePackId": "seed-zh-daoxiang",
+      "pinyin": "huí jiā ba"
+    },
+    {
+      "korean": "只是因为在人群中多看了你一眼",
+      "translation": "Просто потому что я лишний раз взглянул на тебя в толпе",
+      "sourcePackId": "seed-zh-chuanqi",
+      "pinyin": "zhǐ shì yīn wèi zài rén qún zhōng duō kàn le nǐ yī yǎn"
+    },
+    {
+      "korean": "你好，很高兴认识你",
+      "translation": "Привет, рад познакомиться",
+      "sourcePackId": "seed-zh-basics",
+      "pinyin": "nǐ hǎo, hěn gāo xìng rèn shi nǐ"
+    },
+    {
+      "korean": "没关系，慢慢来",
+      "translation": "Ничего страшного, не торопись",
+      "sourcePackId": "seed-zh-basics",
+      "pinyin": "méi guān xi, màn màn lái"
+    },
+    {
+      "korean": "明天见",
+      "translation": "До завтра",
+      "sourcePackId": "seed-zh-basics",
+      "pinyin": "míng tiān jiàn"
+    }
+  ]
+}
