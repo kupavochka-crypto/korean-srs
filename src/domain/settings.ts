@@ -22,6 +22,10 @@ const LEARNING_LANG_KEY = 'learning_language';
 const RECENT_CATEGORIES_KEY = 'recent_category_ids';
 const RECENT_CATEGORIES_KO_KEY = 'recent_categories_ko';
 const RECENT_CATEGORIES_ZH_KEY = 'recent_categories_zh';
+const LAST_REVIEW_CATEGORY_KO_KEY = 'last_review_category_id_ko';
+const LAST_REVIEW_CATEGORY_ZH_KEY = 'last_review_category_id_zh';
+const LAST_REVIEW_CATEGORY_WORDS_KO_KEY = 'last_review_category_words_ko';
+const LAST_REVIEW_CATEGORY_WORDS_ZH_KEY = 'last_review_category_words_zh';
 const SELECTED_MISSION_PACK_KEY = 'selected_mission_pack_id';
 const SELECTED_MISSION_KO_KEY = 'selected_mission_ko';
 const SELECTED_MISSION_ZH_KEY = 'selected_mission_zh';
@@ -335,6 +339,48 @@ export function storedRecentCategoryIds(): string[] {
 /** @deprecated use pushRecentCategoryIdFor(activeLang, id) */
 export function pushRecentCategoryId(id: string | null) {
   pushRecentCategoryIdFor(storedLearningLanguage(), id);
+}
+
+export function storedLastReviewCategoryIdFor(lang: LearningLanguage): string | null {
+  try {
+    const key = lang === 'zh' ? LAST_REVIEW_CATEGORY_ZH_KEY : LAST_REVIEW_CATEGORY_KO_KEY;
+    const raw = localStorage.getItem(key)?.trim();
+    return raw || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLastReviewCategoryIdFor(lang: LearningLanguage, id: string | null) {
+  try {
+    const key = lang === 'zh' ? LAST_REVIEW_CATEGORY_ZH_KEY : LAST_REVIEW_CATEGORY_KO_KEY;
+    if (id) localStorage.setItem(key, id);
+    else localStorage.removeItem(key);
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedLastReviewCategoryWordCountFor(lang: LearningLanguage): number {
+  try {
+    const key = lang === 'zh' ? LAST_REVIEW_CATEGORY_WORDS_ZH_KEY : LAST_REVIEW_CATEGORY_WORDS_KO_KEY;
+    const raw = localStorage.getItem(key);
+    if (!raw) return 0;
+    const n = Number.parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function saveLastReviewCategoryWordCountFor(lang: LearningLanguage, count: number) {
+  try {
+    const key = lang === 'zh' ? LAST_REVIEW_CATEGORY_WORDS_ZH_KEY : LAST_REVIEW_CATEGORY_WORDS_KO_KEY;
+    if (count > 0) localStorage.setItem(key, String(count));
+    else localStorage.removeItem(key);
+  } catch {
+    // storage unavailable
+  }
 }
 
 /** Empty string = auto daily mission rotation */

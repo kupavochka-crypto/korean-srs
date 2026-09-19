@@ -672,12 +672,21 @@ export interface ModeDayCounts {
   listen: number;
 }
 
-export async function modeCountsForDate(
-  dateStr: string,
-  lang?: LearningLanguage
-): Promise<ModeDayCounts> {
-  const srs = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr).length;
-  const events = (await practiceEventsForLang(lang)).filter((e) => e.dateString === dateStr);
+export interface CategoryRatingCounts {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
+}
+
+export const EMPTY_CATEGORY_RATING_COUNTS: CategoryRatingCounts = {
+  again: 0,
+  hard: 0,
+  good: 0,
+  easy: 0,
+};
+
+function countPracticeModes(events: PracticeEvent[]): { quiz: number; listen: number } {
   let quiz = 0;
   let listen = 0;
   for (const e of events) {
@@ -687,7 +696,64 @@ export async function modeCountsForDate(
       if (e.correct) quiz += 1;
     }
   }
+  return { quiz, listen };
+}
+
+export async function modeCountsForDate(
+  dateStr: string,
+  lang?: LearningLanguage
+): Promise<ModeDayCounts> {
+  const srs = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr).length;
+  const events = (await practiceEventsForLang(lang)).filter((e) => e.dateString === dateStr);
+  const { quiz, listen } = countPracticeModes(events);
   return { srs, quiz, listen };
+}
+
+export async function modeCountsForWordIds(
+  dateStr: string,
+  wordIds: Set<string>,
+  lang?: LearningLanguage
+): Promise<ModeDayCounts> {
+  if (wordIds.size === 0) return { srs: 0, quiz: 0, listen: 0 };
+  const srs = (await reviewsForLang(lang)).filter(
+    (r) => r.dateString === dateStr && wordIds.has(r.wordId)
+  ).length;
+  const events = (await practiceEventsForLang(lang)).filter(
+    (e) => e.dateString === dateStr && wordIds.has(e.wordId)
+  );
+  const { quiz, listen } = countPracticeModes(events);
+  return { srs, quiz, listen };
+}
+
+function countRatingsFromReviews(reviews: ReviewRecord[]): CategoryRatingCounts {
+  const counts = { ...EMPTY_CATEGORY_RATING_COUNTS };
+  for (const r of reviews) {
+    if (r.rating === 1) counts.again += 1;
+    else if (r.rating === 2) counts.hard += 1;
+    else if (r.rating === 3) counts.good += 1;
+    else if (r.rating === 4) counts.easy += 1;
+  }
+  return counts;
+}
+
+export async function ratingCountsForDate(
+  dateStr: string,
+  lang?: LearningLanguage
+): Promise<CategoryRatingCounts> {
+  const reviews = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr);
+  return countRatingsFromReviews(reviews);
+}
+
+export async function categoryRatingCountsForWordIds(
+  dateStr: string,
+  wordIds: Set<string>,
+  lang?: LearningLanguage
+): Promise<CategoryRatingCounts> {
+  if (wordIds.size === 0) return { ...EMPTY_CATEGORY_RATING_COUNTS };
+  const reviews = (await reviewsForLang(lang)).filter(
+    (r) => r.dateString === dateStr && wordIds.has(r.wordId)
+  );
+  return countRatingsFromReviews(reviews);
 }
 
 async function wordLanguageById(): Promise<Map<string, LearningLanguage>> {

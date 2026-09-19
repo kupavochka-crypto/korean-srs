@@ -54,6 +54,10 @@ import {
   storedLearningLanguage,
   saveLearningLanguage,
   pushRecentCategoryIdFor,
+  saveLastReviewCategoryIdFor,
+  saveLastReviewCategoryWordCountFor,
+  storedLastReviewCategoryIdFor,
+  storedLastReviewCategoryWordCountFor,
   storedSelectedMissionPackIdFor,
   saveSelectedMissionPackIdFor,
   storedMissionWordCountFor,
@@ -193,6 +197,9 @@ function createStore() {
   let quizWordPool: Word[] | null = null;
   let quizSource: 'global' | 'category' | 'filtered' = 'global';
   let quizCategoryId: string | null = null;
+  let cardsSource: 'global' | 'dictionary' = 'global';
+  let cardsCategoryId: string | null = null;
+  let cardsViewMode: 'practice' | 'stats' = 'practice';
   let writeInput = '';
   let completedPackIds = new Set<string>();
   let selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
@@ -221,6 +228,31 @@ function createStore() {
 
   function missionPool() {
     return missionCandidatePool(packsForProfile(), wordsForProfile(), completedPackIds);
+  }
+
+  function clearCardsDictionarySession() {
+    cardsSource = 'global';
+    cardsCategoryId = null;
+    cardsViewMode = 'practice';
+  }
+
+  function markDictionaryCardsSession(categoryId: string | null, wordCount?: number) {
+    cardsSource = 'dictionary';
+    cardsCategoryId = categoryId;
+    cardsViewMode = 'practice';
+    if (categoryId) {
+      saveLastReviewCategoryIdFor(learningLanguage, categoryId);
+      pushRecentCategoryIdFor(learningLanguage, categoryId);
+      if (wordCount != null && wordCount > 0) {
+        saveLastReviewCategoryWordCountFor(learningLanguage, wordCount);
+      }
+    }
+  }
+
+  function rememberCategorySession(categoryId: string, wordCount: number) {
+    saveLastReviewCategoryIdFor(learningLanguage, categoryId);
+    pushRecentCategoryIdFor(learningLanguage, categoryId);
+    if (wordCount > 0) saveLastReviewCategoryWordCountFor(learningLanguage, wordCount);
   }
 
   function syncVisibleMissionSlots(): Pack[] {
@@ -442,6 +474,12 @@ function createStore() {
     getCardsQueue: () => cardsQueue,
     getCardIndex: () => currentCardIndex,
     getIsCardFlipped: () => isCardFlipped,
+    getCardsSessionFromDictionary: () => cardsSource === 'dictionary',
+    getCardsViewMode: () => cardsViewMode,
+    getCardsStatsCategoryId: () =>
+      cardsCategoryId ?? storedLastReviewCategoryIdFor(learningLanguage),
+    getLastReviewCategoryId: () => storedLastReviewCategoryIdFor(learningLanguage),
+    getLastReviewCategoryWordCount: () => storedLastReviewCategoryWordCountFor(learningLanguage),
     getQuizQuestion: () => quizQuestion,
     getSelectedOptionIndex: () => selectedOptionIndex,
     getIsAnswerChecked: () => isAnswerChecked,
@@ -606,6 +644,7 @@ function createStore() {
     },
 
     async startDueReview() {
+      clearCardsDictionarySession();
       const now = Date.now();
       cardsQueue = wordsForProfile()
         .filter((w) => w.nextReviewAt <= now)
@@ -618,6 +657,7 @@ function createStore() {
     },
 
     async startReviewAll() {
+      clearCardsDictionarySession();
       cardsQueue = [...wordsForProfile()].sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
@@ -627,6 +667,7 @@ function createStore() {
     },
 
     async startDifficultReview() {
+      clearCardsDictionarySession();
       cardsQueue = this.difficultWords().sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
@@ -635,10 +676,27 @@ function createStore() {
       this.speakCurrentCard();
     },
 
-    async startCategoryReview(categoryId: string, mode: 'due' | 'all' = 'due') {
+    async startCategoryDifficultReview(categoryId: string) {
+      cardsQueue = this.difficultWordsInCategory(categoryId).sort(() => Math.random() - 0.5);
+      currentCardIndex = 0;
+      isCardFlipped = false;
+      cardsViewMode = 'practice';
+      currentTab = 'cards';
+      emit();
+      this.speakCurrentCard();
+    },
+
+    async startCategoryReview(
+      categoryId: string,
+      mode: 'due' | 'all' = 'due',
+      options?: { fromDictionary?: boolean }
+    ) {
       const now = Date.now();
       let pool = wordsForProfile().filter((w) => wordHasCategory(w, categoryId));
       if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
+      if (options?.fromDictionary) markDictionaryCardsSession(categoryId, pool.length);
+      else clearCardsDictionarySession();
+      rememberCategorySession(categoryId, pool.length);
       cardsQueue = pool.sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
@@ -647,11 +705,18 @@ function createStore() {
       this.speakCurrentCard();
     },
 
-    async startFilteredReview(wordIds: string[], mode: 'due' | 'all' = 'due') {
+    async startFilteredReview(
+      wordIds: string[],
+      mode: 'due' | 'all' = 'due',
+      options?: { fromDictionary?: boolean }
+    ) {
       const idSet = new Set(wordIds);
       const now = Date.now();
       let pool = wordsForProfile().filter((w) => idSet.has(w.id));
       if (mode === 'due') pool = pool.filter((w) => w.nextReviewAt <= now);
+      if (options?.fromDictionary) markDictionaryCardsSession(selectedCategoryId, pool.length);
+      else clearCardsDictionarySession();
+      if (selectedCategoryId) rememberCategorySession(selectedCategoryId, pool.length);
       cardsQueue = pool.sort(() => Math.random() - 0.5);
       currentCardIndex = 0;
       isCardFlipped = false;
@@ -660,7 +725,14 @@ function createStore() {
       this.speakCurrentCard();
     },
 
+    setCardsViewMode(mode: 'practice' | 'stats') {
+      cardsViewMode = mode;
+      emit();
+    },
+
     async startCategoryQuiz(categoryId: string, kind: 'listen' | 'reverse' | 'write' = 'reverse') {
+      saveLastReviewCategoryIdFor(learningLanguage, categoryId);
+      pushRecentCategoryIdFor(learningLanguage, categoryId);
       quizWordPool = wordsForProfile().filter((w) => wordHasCategory(w, categoryId));
       quizSource = 'category';
       quizCategoryId = categoryId;
@@ -1451,6 +1523,17 @@ function createStore() {
       );
     },
 
+    difficultWordsInCategory(categoryId: string): Word[] {
+      return this.difficultWords().filter((w) => wordHasCategory(w, categoryId));
+    },
+
+    dueWordsInCategory(categoryId: string): Word[] {
+      const now = Date.now();
+      return wordsForProfile()
+        .filter((w) => wordHasCategory(w, categoryId) && w.nextReviewAt <= now)
+        .sort((a, b) => a.nextReviewAt - b.nextReviewAt);
+    },
+
     filteredWords(): Word[] {
       const query = searchQuery.trim().toLowerCase();
       return wordsForProfile().filter((w) => {
@@ -1531,6 +1614,46 @@ function createStore() {
       const m = String(today.getMonth() + 1).padStart(2, '0');
       const d = String(today.getDate()).padStart(2, '0');
       return repo.modeCountsForDate(`${y}-${m}-${d}`, learningLanguage);
+    },
+
+    async todayRatingCounts(): Promise<repo.CategoryRatingCounts> {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return repo.ratingCountsForDate(`${y}-${m}-${d}`, learningLanguage);
+    },
+
+    categoryWordIds(categoryId: string): Set<string> {
+      return new Set(
+        wordsForProfile()
+          .filter((w) => wordHasCategory(w, categoryId))
+          .map((w) => w.id)
+      );
+    },
+
+    async categoryModeCountsToday(categoryId: string): Promise<repo.ModeDayCounts> {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return repo.modeCountsForWordIds(
+        `${y}-${m}-${d}`,
+        this.categoryWordIds(categoryId),
+        learningLanguage
+      );
+    },
+
+    async categoryRatingCountsToday(categoryId: string): Promise<repo.CategoryRatingCounts> {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return repo.categoryRatingCountsForWordIds(
+        `${y}-${m}-${d}`,
+        this.categoryWordIds(categoryId),
+        learningLanguage
+      );
     },
 
     async yesterdayModeCounts(): Promise<repo.ModeDayCounts> {

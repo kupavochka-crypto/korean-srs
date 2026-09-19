@@ -102,8 +102,8 @@ export default function DictionaryScreen() {
             className="secondary-btn"
             onClick={() =>
               selectedCategoryId
-                ? store.startCategoryReview(selectedCategoryId, 'all')
-                : store.startFilteredReview(words.map((w) => w.id), 'all')
+                ? store.startCategoryReview(selectedCategoryId, 'all', { fromDictionary: true })
+                : store.startFilteredReview(words.map((w) => w.id), 'all', { fromDictionary: true })
             }
           >
             <WIcon name="stack" size={16} /> {t('dict.reviewCards')}

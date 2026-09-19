@@ -1,6 +1,7 @@
 import { store, useStore } from '../store/AppStore';
 import SrsRatingBar from '../components/SrsRatingBar';
 import ScreenHeader from '../components/ScreenHeader';
+import CardsSessionStatsPanel from '../components/CardsSessionStatsPanel';
 import { t } from '../domain/i18n';
 import { tabSubtitle, tL } from '../domain/learning-ui';
 import { showReadingEnabled, wordLanguage } from '../domain/language';
@@ -13,32 +14,71 @@ function formatNextReview(word: Word): string {
   return t('cards.nextReview', { count: days });
 }
 
+function CardsSessionTabs() {
+  const viewMode = store.getCardsViewMode();
+
+  return (
+    <div className="cards-session-tabs">
+      <button
+        type="button"
+        className={`cards-session-tab ${viewMode === 'practice' ? 'active' : ''}`}
+        onClick={() => store.setCardsViewMode('practice')}
+      >
+        {t('cards.session.tabPractice')}
+      </button>
+      <button
+        type="button"
+        className={`cards-session-tab ${viewMode === 'stats' ? 'active' : ''}`}
+        onClick={() => store.setCardsViewMode('stats')}
+      >
+        {t('cards.session.tabStats')}
+      </button>
+    </div>
+  );
+}
+
 function CardsEmptyState({
   title,
   desc,
+  totalWords,
   difficultCount,
   lang,
+  showHeader,
+  showReviewAll,
 }: {
   title: string;
   desc: string;
+  totalWords: number;
   difficultCount: number;
   lang: ReturnType<typeof store.getLearningLanguage>;
+  showHeader: boolean;
+  showReviewAll: boolean;
 }) {
   return (
     <div>
-      <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
+      {showHeader && (
+        <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
+      )}
       <div className="cards-done center">
         <div className="empty-state-icon">
           <WIcon name="stars" size={48} style={{ color: 'var(--warning)' }} />
         </div>
         <h2>{title}</h2>
         <p className="muted">{desc}</p>
-        <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
-          <span>
-            {t('cards.reviewAll')}
-            <span className="btn-kor">{tL('cards.reviewAllNative', lang)}</span>
-          </span>
-        </button>
+        {showReviewAll ? (
+          <button className="primary-btn mt20" onClick={() => store.startReviewAll()}>
+            <span>
+              {totalWords > 0
+                ? t('cards.reviewAllCount', { count: totalWords })
+                : t('cards.reviewAll')}
+              <span className="btn-kor">{tL('cards.reviewAllNative', lang)}</span>
+            </span>
+          </button>
+        ) : (
+          <button className="primary-btn mt20" onClick={() => store.selectTab('dictionary')}>
+            {t('home.stats.categoryOpenDictionary')}
+          </button>
+        )}
         {difficultCount > 0 && (
           <button className="secondary-btn mt12" onClick={() => store.startDifficultReview()}>
             <span>
@@ -52,21 +92,34 @@ function CardsEmptyState({
   );
 }
 
-export default function CardsScreen() {
-  useStore();
+function CardsPracticeBody({
+  showHeader,
+  lang,
+}: {
+  showHeader: boolean;
+  lang: ReturnType<typeof store.getLearningLanguage>;
+}) {
   const queue = store.getCardsQueue();
   const index = store.getCardIndex();
   const flipped = store.getIsCardFlipped();
   const difficultCount = store.difficultWords().length;
-  const lang = store.getLearningLanguage();
+  const totalWords = store.totalWordsCount();
 
   if (queue.length === 0) {
+    const hasWords = totalWords > 0;
     return (
       <CardsEmptyState
-        title={t('cards.nothing')}
-        desc={t('cards.nothingDesc')}
+        title={hasWords ? t('cards.nothingDueTitle') : t('cards.noWordsTitle')}
+        desc={
+          hasWords
+            ? t('cards.nothingDueDesc', { count: totalWords })
+            : t('cards.noWordsDesc')
+        }
+        totalWords={totalWords}
         difficultCount={difficultCount}
         lang={lang}
+        showHeader={showHeader}
+        showReviewAll={hasWords}
       />
     );
   }
@@ -76,8 +129,11 @@ export default function CardsScreen() {
       <CardsEmptyState
         title={t('cards.doneTitle')}
         desc={t('cards.doneDesc')}
+        totalWords={totalWords}
         difficultCount={difficultCount}
         lang={lang}
+        showHeader={showHeader}
+        showReviewAll
       />
     );
   }
@@ -87,7 +143,9 @@ export default function CardsScreen() {
 
   return (
     <div>
-      <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
+      {showHeader && (
+        <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
+      )}
       <div className="cards-toolbar-row">
         <span className="muted" style={{ fontSize: 13 }}>
           {t('cards.progress', { i: index + 1, total: queue.length })}
@@ -168,4 +226,28 @@ export default function CardsScreen() {
       )}
     </div>
   );
+}
+
+export default function CardsScreen() {
+  useStore();
+  const fromDictionary = store.getCardsSessionFromDictionary();
+  const viewMode = store.getCardsViewMode();
+  const statsCategoryId = store.getCardsStatsCategoryId();
+  const lang = store.getLearningLanguage();
+
+  if (fromDictionary) {
+    return (
+      <div>
+        <ScreenHeader title={t('tab.cards')} subtitle={tabSubtitle('cards', lang)} />
+        <CardsSessionTabs />
+        {viewMode === 'stats' ? (
+          <CardsSessionStatsPanel categoryId={statsCategoryId} />
+        ) : (
+          <CardsPracticeBody showHeader={false} lang={lang} />
+        )}
+      </div>
+    );
+  }
+
+  return <CardsPracticeBody showHeader lang={lang} />;
 }
