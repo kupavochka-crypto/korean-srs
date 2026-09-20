@@ -18,6 +18,7 @@ export default function DictionaryScreen() {
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [pendingCategoryIds, setPendingCategoryIds] = useState<string[]>([]);
   const lang = store.getLearningLanguage();
+  const manageMode = store.isCategoryManageMode();
 
   function closeCategoryMenu() {
     setCategoryMenuOpen(false);
@@ -39,6 +40,13 @@ export default function DictionaryScreen() {
           value={search}
           onChange={(e) => store.setSearchQuery(e.target.value)}
         />
+        <button
+          className="icon-btn"
+          onClick={() => store.openFileImport()}
+          aria-label={t('dict.importFileAria')}
+        >
+          <WIcon name="file-text" />
+        </button>
         <button
           className="icon-btn"
           onClick={() => store.toggleSelectionMode()}
@@ -122,25 +130,63 @@ export default function DictionaryScreen() {
       )}
 
       <div className="chips-row">
-        <button
-          className={`chip ${selectedCategoryId === null ? 'active' : ''}`}
-          onClick={() => store.setSelectedCategory(null)}
-        >
-          {t('dict.all')}
-        </button>
-        {categories.map((c) => (
+        {!manageMode && (
           <button
-            key={c.id}
-            className={`chip ${selectedCategoryId === c.id ? 'active' : ''}`}
-            onClick={() =>
-              store.setSelectedCategory(selectedCategoryId === c.id ? null : c.id)
-            }
+            className={`chip ${selectedCategoryId === null ? 'active' : ''}`}
+            onClick={() => store.setSelectedCategory(null)}
           >
-            {c.emoji} {c.name}
+            {t('dict.all')}
           </button>
-        ))}
+        )}
+        {categories.map((c) =>
+          manageMode ? (
+            <div key={c.id} className="chip-manage">
+              <span className="chip chip-manage-label">
+                {c.emoji} {c.name}
+              </span>
+              <span className="chip-manage-actions">
+                <button
+                  type="button"
+                  className="chip-manage-btn"
+                  aria-label={t('category.editAria')}
+                  onClick={() => store.openEditCategory(c)}
+                >
+                  <WIcon name="pencil" size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="chip-manage-btn chip-manage-btn--danger"
+                  aria-label={t('category.deleteAria')}
+                  onClick={() => void store.deleteCategory(c.id)}
+                >
+                  <WIcon name="trash" size={14} />
+                </button>
+              </span>
+            </div>
+          ) : (
+            <button
+              key={c.id}
+              className={`chip ${selectedCategoryId === c.id ? 'active' : ''}`}
+              onClick={() =>
+                store.setSelectedCategory(selectedCategoryId === c.id ? null : c.id)
+              }
+            >
+              {c.emoji} {c.name}
+            </button>
+          )
+        )}
         <button className="chip" onClick={() => store.openCreateCategory()}>
           {t('dict.addCategory')}
+        </button>
+        <button
+          type="button"
+          className={`chip chip-gear ${manageMode ? 'active' : ''}`}
+          aria-label={manageMode ? t('category.manageDone') : t('category.manage')}
+          title={manageMode ? t('category.manageDone') : t('category.manage')}
+          onClick={() => store.toggleCategoryManageMode()}
+        >
+          <WIcon name="gear" size={16} />
+          {manageMode ? t('category.manageDone') : null}
         </button>
       </div>
 

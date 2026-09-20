@@ -140,6 +140,8 @@ export interface QuizRewardState {
   rewardGifName: string | null;
 }
 
+let initPromise: Promise<void> | null = null;
+
 function createStore() {
   let currentTab: Tab = 'home';
   let tabStack: Tab[] = [];
@@ -169,7 +171,10 @@ function createStore() {
 
   let isAddWordOpen = false;
   let isScanOcrOpen = false;
-  let isCreateCategoryOpen = false;
+  let isFileImportOpen = false;
+  let isCategoryFormOpen = false;
+  let editingCategory: Category | null = null;
+  let isCategoryManageMode = false;
   let isGuideOpen = false;
   let isPacksOpen = false;
   let isSongImportOpen = false;
@@ -432,21 +437,30 @@ function createStore() {
     },
 
     async init() {
-      migrateProfileSettings();
-      await repo.initialize();
-      await syncContentCatalog();
-      learningLanguage = storedLearningLanguage();
-      dailyWordGoal = storedDailyWordGoalFor(learningLanguage);
-      selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
-      missionWordCount = storedMissionWordCountFor(learningLanguage);
-      visibleMissionPackIds = storedVisibleMissionIdsFor(learningLanguage);
-      await refresh();
-      syncVisibleMissionSlots();
-      await loadGamification();
-      if (!storedOnboardingCompleted()) {
-        isOnboardingOpen = true;
-        onboardingSkipWelcome = false;
-        emit();
+      if (initPromise) return initPromise;
+      initPromise = (async () => {
+        migrateProfileSettings();
+        await repo.initialize();
+        await syncContentCatalog();
+        learningLanguage = storedLearningLanguage();
+        dailyWordGoal = storedDailyWordGoalFor(learningLanguage);
+        selectedMissionPackId = storedSelectedMissionPackIdFor(learningLanguage);
+        missionWordCount = storedMissionWordCountFor(learningLanguage);
+        visibleMissionPackIds = storedVisibleMissionIdsFor(learningLanguage);
+        await refresh();
+        syncVisibleMissionSlots();
+        await loadGamification();
+        if (!storedOnboardingCompleted()) {
+          isOnboardingOpen = true;
+          onboardingSkipWelcome = false;
+          emit();
+        }
+      })();
+      try {
+        await initPromise;
+      } catch (err) {
+        initPromise = null;
+        throw err;
       }
     },
 
@@ -458,7 +472,9 @@ function createStore() {
     getTab: () => currentTab,
     getWords: () => wordsForProfile(),
     getCategories: () =>
-      categories.filter((c) => (c.language ?? 'ko') === learningLanguage),
+      categories
+        .filter((c) => (c.language ?? 'ko') === learningLanguage)
+        .sort((a, b) => b.createdAt - a.createdAt),
     getSources: () => sources,
     getXp: () => progression.xp,
     getAchievements: () => achievements,
@@ -488,7 +504,10 @@ function createStore() {
     getQuizReward: () => quizReward,
     getIsAddWordOpen: () => isAddWordOpen,
     getIsScanOcrOpen: () => isScanOcrOpen,
-    getIsCreateCategoryOpen: () => isCreateCategoryOpen,
+    getIsFileImportOpen: () => isFileImportOpen,
+    getIsCategoryFormOpen: () => isCategoryFormOpen,
+    getEditingCategory: () => editingCategory,
+    isCategoryManageMode: () => isCategoryManageMode,
     getIsGuideOpen: () => isGuideOpen,
     getIsPacksOpen: () => isPacksOpen,
     getIsSongImportOpen: () => isSongImportOpen,
@@ -963,6 +982,16 @@ function createStore() {
       emit();
     },
 
+    openFileImport() {
+      isFileImportOpen = true;
+      emit();
+    },
+
+    closeFileImport() {
+      isFileImportOpen = false;
+      emit();
+    },
+
     openSongImport() {
       isSongImportOpen = true;
       emit();
@@ -975,6 +1004,7 @@ function createStore() {
 
     openSettings() {
       isScanOcrOpen = false;
+      isFileImportOpen = false;
       isSongImportOpen = false;
       isPacksOpen = false;
       currentTab = 'settings';
@@ -982,12 +1012,30 @@ function createStore() {
     },
 
     openCreateCategory() {
-      isCreateCategoryOpen = true;
+      editingCategory = null;
+      isCategoryFormOpen = true;
       emit();
     },
 
-    closeCreateCategory() {
-      isCreateCategoryOpen = false;
+    openEditCategory(category: Category) {
+      editingCategory = category;
+      isCategoryFormOpen = true;
+      emit();
+    },
+
+    closeCategoryForm() {
+      isCategoryFormOpen = false;
+      editingCategory = null;
+      emit();
+    },
+
+    toggleCategoryManageMode() {
+      isCategoryManageMode = !isCategoryManageMode;
+      emit();
+    },
+
+    setCategoryManageMode(active: boolean) {
+      isCategoryManageMode = active;
       emit();
     },
 
@@ -1353,6 +1401,7 @@ function createStore() {
       if (duplicateQueue.length === 0 && !duplicatePending) {
         isAddWordOpen = false;
         isScanOcrOpen = false;
+        isFileImportOpen = false;
         isSongImportOpen = false;
         duplicateResolveCallback?.(1);
         duplicateResolveCallback = null;
@@ -1391,7 +1440,10 @@ function createStore() {
         });
       }
       await this.enqueueWordsForImport(payloads);
-      if (!duplicatePending) isScanOcrOpen = false;
+      if (!duplicatePending) {
+        isScanOcrOpen = false;
+        isFileImportOpen = false;
+      }
       emit();
     },
 
@@ -1503,7 +1555,34 @@ function createStore() {
         isDefault: false,
         language: learningLanguage,
       });
-      isCreateCategoryOpen = false;
+      isCategoryFormOpen = false;
+      editingCategory = null;
+      await refresh();
+    },
+
+    async updateCategory(id: string, name: string, emoji: string, colorHex: string) {
+      const existing = categories.find((c) => c.id === id);
+      if (!existing) return;
+      await repo.updateCategory({
+        ...existing,
+        name: name.trim(),
+        colorHex: colorHex.trim(),
+        emoji: emoji.trim(),
+      });
+      isCategoryFormOpen = false;
+      editingCategory = null;
+      await refresh();
+    },
+
+    async deleteCategory(id: string) {
+      await repo.deleteCategory(id);
+      if (selectedCategoryId === id) {
+        selectedCategoryId = null;
+      }
+      if (storedLastReviewCategoryIdFor(learningLanguage) === id) {
+        saveLastReviewCategoryIdFor(learningLanguage, null);
+        saveLastReviewCategoryWordCountFor(learningLanguage, 0);
+      }
       await refresh();
     },
 
@@ -1622,6 +1701,14 @@ function createStore() {
       const m = String(today.getMonth() + 1).padStart(2, '0');
       const d = String(today.getDate()).padStart(2, '0');
       return repo.ratingCountsForDate(`${y}-${m}-${d}`, learningLanguage);
+    },
+
+    async todayTrueRetentionRatingCounts(): Promise<repo.CategoryRatingCounts> {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      return repo.trueRetentionRatingCountsForDate(`${y}-${m}-${d}`, learningLanguage);
     },
 
     categoryWordIds(categoryId: string): Set<string> {

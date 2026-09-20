@@ -8,6 +8,7 @@ import WIcon from '../ui/WIcon';
 import type { DailyActivity } from '../types';
 import { artistsOfActiveTheme } from '../domain/sources';
 import { currentLevelIndex } from '../domain/gamification';
+import { MASTERED_INTERVAL_DAYS } from '../db/repository';
 
 function ProgressGroup({
   title,
@@ -138,6 +139,7 @@ export default function ProgressScreen() {
           <div className="leaderboard-card card-flat">
             <span className="leaderboard-num">{mastered}</span>
             <span className="leaderboard-label">{t('progress.mastered')}</span>
+            <span className="leaderboard-sub">{t('progress.masteredHint', { days: MASTERED_INTERVAL_DAYS })}</span>
           </div>
           <div className="leaderboard-card card-flat">
             <span className="leaderboard-num">{due}</span>
@@ -146,6 +148,7 @@ export default function ProgressScreen() {
           <div className="leaderboard-card card-flat">
             <span className="leaderboard-num">{streak}</span>
             <span className="leaderboard-label">{t('progress.streakDays')}</span>
+            <span className="leaderboard-sub">{t('progress.streakHint')}</span>
           </div>
           <div className="leaderboard-card card-flat">
             <span className="leaderboard-num">{xp}</span>

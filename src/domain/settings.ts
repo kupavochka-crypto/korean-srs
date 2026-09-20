@@ -37,6 +37,7 @@ const MISSION_WORD_COUNT_KO_KEY = 'mission_word_count_ko';
 const MISSION_WORD_COUNT_ZH_KEY = 'mission_word_count_zh';
 const VISIBLE_MISSIONS_KO_KEY = 'visible_mission_ids_ko';
 const VISIBLE_MISSIONS_ZH_KEY = 'visible_mission_ids_zh';
+const TRUE_RETENTION_MODE_KEY = 'stats_true_retention';
 
 export const CONTENT_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -537,6 +538,22 @@ export function storedContentCatalogSyncedAt(): number | null {
 export function saveContentCatalogSyncedAt(timestamp: number): void {
   try {
     localStorage.setItem(CONTENT_CATALOG_SYNCED_AT_KEY, String(timestamp));
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedTrueRetentionMode(): boolean {
+  try {
+    return localStorage.getItem(TRUE_RETENTION_MODE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function saveTrueRetentionMode(enabled: boolean): void {
+  try {
+    localStorage.setItem(TRUE_RETENTION_MODE_KEY, enabled ? '1' : '0');
   } catch {
     // storage unavailable
   }

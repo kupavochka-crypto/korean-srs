@@ -111,6 +111,12 @@ const STRINGS: Dict = {
     ru: 'Сегодня карточки ещё не отрабатывались',
     en: 'No card reviews today yet',
   },
+  'home.stats.ratingsModeAll': { ru: 'Все ответы', en: 'All reviews' },
+  'home.stats.ratingsModeRetention': { ru: 'True Retention', en: 'True Retention' },
+  'home.stats.ratingsRetentionHint': {
+    ru: 'Только первый ответ на слово за день — как в Anki',
+    en: 'First answer per word per day — like Anki true retention',
+  },
   'home.stats.ratingsInsight': {
     ru: '{hard} сложных из {total}',
     en: '{hard} difficult out of {total}',
@@ -453,10 +459,88 @@ const STRINGS: Dict = {
   },
   'category.addMore': { ru: 'ещё категория…', en: 'another category…' },
   'category.create': { ru: '+ «{name}»', en: '+ «{name}»' },
+  'category.createTitle': { ru: 'Новая категория', en: 'New category' },
+  'category.editTitle': { ru: 'Редактировать категорию', en: 'Edit category' },
+  'category.nameLabel': { ru: 'Название', en: 'Name' },
+  'category.namePlaceholder': { ru: 'Хобби', en: 'Hobbies' },
+  'category.emojiLabel': { ru: 'Эмодзи', en: 'Emoji' },
+  'category.colorLabel': { ru: 'Цвет', en: 'Color' },
+  'category.saveCreate': { ru: 'Создать', en: 'Create' },
+  'category.saveEdit': { ru: 'Сохранить', en: 'Save' },
+  'category.errNameRequired': {
+    ru: 'Введите название категории.',
+    en: 'Enter a category name.',
+  },
+  'category.manage': { ru: 'Управление категориями', en: 'Manage categories' },
+  'category.manageDone': { ru: 'Готово', en: 'Done' },
+  'category.editAria': { ru: 'Изменить категорию', en: 'Edit category' },
+  'category.deleteAria': { ru: 'Удалить категорию', en: 'Delete category' },
   'dict.addWordAria': { ru: 'Добавить слово', en: 'Add word' },
+  'dict.importFile': { ru: 'Импорт из файла', en: 'Import from file' },
+  'dict.importFileAria': { ru: 'Импорт слов из файла', en: 'Import words from file' },
+
+  'add.importFile': { ru: 'Импорт из файла', en: 'Import from file' },
+
+  'import.recognizedTitle': {
+    ru: 'Распознанные слова ({count} готовых{known})',
+    en: 'Recognized words ({count} ready{known})',
+  },
+  'import.recognizedKnown': { ru: ' · {count} уже в словаре', en: ' · {count} already in dictionary' },
+
+  'fileImport.title': { ru: 'Импорт из файла', en: 'Import from file' },
+  'fileImport.intro': {
+    ru: 'Загрузите список слов — формат совместим с Anki, Excel и Quizlet.',
+    en: 'Upload a word list — compatible with Anki, Excel, and Quizlet.',
+  },
+  'fileImport.formatsTitle': { ru: 'Поддерживаемые форматы', en: 'Supported formats' },
+  'fileImport.formatTsv': {
+    ru: 'TSV / TXT — слово и перевод через Tab (рекомендуется, экспорт Anki)',
+    en: 'TSV / TXT — word and translation separated by Tab (recommended, Anki export)',
+  },
+  'fileImport.formatCsv': {
+    ru: 'CSV — через запятую; кавычки для значений с запятыми',
+    en: 'CSV — comma-separated; use quotes for values containing commas',
+  },
+  'fileImport.formatJson': {
+    ru: 'JSON — массив [{ "korean": "…", "translation": "…" }]',
+    en: 'JSON — array [{ "korean": "…", "translation": "…" }]',
+  },
+  'fileImport.formatAnki': {
+    ru: 'Anki — строки #separator:tab или #separator:comma в начале файла',
+    en: 'Anki — #separator:tab or #separator:comma header lines at file start',
+  },
+  'fileImport.exampleTsv': {
+    ru: 'Пример TSV: 안녕하세요[TAB]здравствуйте',
+    en: 'TSV example: 안녕하세요[TAB]здравствуйте',
+  },
+  'fileImport.exampleCsv': {
+    ru: 'Пример CSV: Word,Translation',
+    en: 'CSV example: Word,Translation',
+  },
+  'fileImport.pickFile': { ru: 'Выбрать файл', en: 'Choose file' },
+  'fileImport.parsing': { ru: 'Разбор файла…', en: 'Parsing file…' },
+  'fileImport.empty': {
+    ru: 'В файле не найдено пар «слово — перевод».',
+    en: 'No word–translation pairs found in the file.',
+  },
+  'fileImport.error': { ru: 'Не удалось прочитать файл.', en: 'Could not read the file.' },
+  'fileImport.tooLarge': {
+    ru: 'Файл слишком большой (макс. 512 КБ).',
+    en: 'File is too large (max 512 KB).',
+  },
+  'fileImport.save': { ru: 'Сохранить ({count})', en: 'Save ({count})' },
+  'fileImport.badgeFree': { ru: 'Free', en: 'Free' },
 
   'progress.stat': { ru: 'Статистика', en: 'Statistics' },
   'progress.mastered': { ru: 'Выучено', en: 'Mastered' },
+  'progress.masteredHint': {
+    ru: 'Слово с интервалом {days}+ дней — достижение, не сбрасывается',
+    en: 'Word reached {days}+ day interval — a milestone that never resets',
+  },
+  'progress.streakHint': {
+    ru: 'Карточки, «Напиши» или «Слушай»',
+    en: 'Cards, Write, or Listen practice',
+  },
   'progress.daysToMaster': { ru: 'Дней до выуч.', en: 'Days to master' },
   'progress.dueToday': { ru: 'К сегодня', en: 'Due today' },
   'progress.today': { ru: 'Сегодня', en: 'Today' },

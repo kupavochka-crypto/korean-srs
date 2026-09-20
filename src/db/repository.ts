@@ -29,7 +29,7 @@ import { allSeedSources } from '../domain/sources';
 import { bootstrapPacks } from '../domain/packs';
 import { achievementDefs } from '../domain/gamification';
 import { calculateNextReview, type SrsRatingValue } from '../domain/srs-engine';
-import { pickCategoryStyle } from '../domain/categories';
+import { categoryLookupKey, pickCategoryStyle, wordCategoryIds } from '../domain/categories';
 import { markTagsToCategoriesMigrated, tagsToCategoriesMigrated } from '../domain/settings';
 
 export const MASTERED_INTERVAL_DAYS = 21;
@@ -49,11 +49,11 @@ function startOfToday(): number {
 }
 
 export async function ensureDefaultCategories(): Promise<void> {
-  const count = await db.categories.count();
-  if (count > 0) return;
   const now = Date.now();
-  await db.categories.bulkAdd(
-    DEFAULT_CATEGORIES.map((c, i) => ({
+  for (const [i, c] of DEFAULT_CATEGORIES.entries()) {
+    const existing = await findCategoryByName(c.name, 'ko');
+    if (existing) continue;
+    await db.categories.add({
       id: newId(),
       name: c.name,
       colorHex: c.colorHex,
@@ -61,8 +61,64 @@ export async function ensureDefaultCategories(): Promise<void> {
       createdAt: now + i,
       isDefault: true,
       language: 'ko' as const,
-    }))
-  );
+    });
+  }
+}
+
+export async function dedupeCategories(): Promise<void> {
+  const categories = await db.categories.toArray();
+  const groups = new Map<string, Category[]>();
+
+  for (const c of categories) {
+    const key = categoryLookupKey(c.name, c.language ?? 'ko');
+    const list = groups.get(key) ?? [];
+    list.push(c);
+    groups.set(key, list);
+  }
+
+  const remap = new Map<string, string>();
+  const toDelete: string[] = [];
+
+  for (const group of groups.values()) {
+    if (group.length <= 1) continue;
+    group.sort((a, b) => {
+      if (Boolean(a.isDefault) !== Boolean(b.isDefault)) return a.isDefault ? -1 : 1;
+      return a.createdAt - b.createdAt;
+    });
+    const keep = group[0]!;
+    for (const dup of group.slice(1)) {
+      remap.set(dup.id, keep.id);
+      toDelete.push(dup.id);
+    }
+  }
+
+  if (toDelete.length === 0) return;
+
+  const words = await db.words.toArray();
+  const patches: Word[] = [];
+  for (const w of words) {
+    const ids = wordCategoryIds(w);
+    const next = [...new Set(ids.map((id) => remap.get(id) ?? id))];
+    if (next.length === ids.length && next.every((id, i) => id === ids[i])) continue;
+    patches.push({ ...w, categoryIds: next });
+  }
+  if (patches.length > 0) await db.words.bulkPut(patches);
+  await db.categories.bulkDelete(toDelete);
+}
+
+export async function pruneEmptyLegacyDefaultCategories(): Promise<void> {
+  const allowed = new Set(DEFAULT_CATEGORIES.map((c) => categoryLookupKey(c.name, 'ko')));
+  const categories = await db.categories.toArray();
+  const usedIds = new Set<string>();
+  for (const w of await db.words.toArray()) {
+    for (const id of wordCategoryIds(w)) usedIds.add(id);
+  }
+  const toDelete = categories
+    .filter((c) => c.isDefault)
+    .filter((c) => !allowed.has(categoryLookupKey(c.name, c.language ?? 'ko')))
+    .filter((c) => !usedIds.has(c.id))
+    .map((c) => c.id);
+  if (toDelete.length > 0) await db.categories.bulkDelete(toDelete);
 }
 
 export async function migrateCategoryLanguage(): Promise<void> {
@@ -137,6 +193,8 @@ export async function initialize(): Promise<void> {
   await migrateProgressionProfiles();
   await migrateCategoryLanguage();
   await migrateTagsToCategories();
+  await dedupeCategories();
+  await pruneEmptyLegacyDefaultCategories();
 }
 
 type LegacyWord = Word & {
@@ -150,19 +208,15 @@ export async function migrateTagsToCategories(): Promise<void> {
   const rawWords = (await db.words.toArray()) as LegacyWord[];
   let categories = await db.categories.toArray();
 
-  function categoryKey(name: string, lang: LearningLanguage): string {
-    return `${lang}:${name.trim().toLowerCase()}`;
-  }
-
   const byName = new Map<string, Category>();
   for (const c of categories) {
-    byName.set(categoryKey(c.name, c.language ?? 'ko'), c);
+    byName.set(categoryLookupKey(c.name, c.language ?? 'ko'), c);
   }
 
   async function resolveTagName(tag: string, lang: LearningLanguage): Promise<string | null> {
     const trimmed = tag.trim();
     if (!trimmed) return null;
-    const key = categoryKey(trimmed, lang);
+    const key = categoryLookupKey(trimmed, lang);
     let cat = byName.get(key);
     if (!cat) {
       const style = pickCategoryStyle(trimmed);
@@ -490,15 +544,34 @@ export async function insertCategory(category: Category): Promise<void> {
   await db.categories.add(category);
 }
 
+export async function updateCategory(category: Category): Promise<void> {
+  await db.categories.put(category);
+}
+
+export async function deleteCategory(id: string): Promise<number> {
+  const words = await db.words.toArray();
+  const patches: Word[] = [];
+  for (const word of words) {
+    const ids = word.categoryIds ?? [];
+    if (!ids.includes(id)) continue;
+    patches.push({
+      ...word,
+      categoryIds: ids.filter((cid) => cid !== id),
+    });
+  }
+  if (patches.length > 0) await db.words.bulkPut(patches);
+  await db.categories.delete(id);
+  return patches.length;
+}
+
 export async function findCategoryByName(
   name: string,
   lang: LearningLanguage = 'ko'
 ): Promise<Category | undefined> {
-  const trimmed = name.trim();
-  if (!trimmed) return undefined;
-  const lower = trimmed.toLowerCase();
+  if (!name.trim()) return undefined;
+  const key = categoryLookupKey(name, lang);
   const all = await db.categories.toArray();
-  return all.find((c) => c.name.toLowerCase() === lower && (c.language ?? 'ko') === lang);
+  return all.find((c) => categoryLookupKey(c.name, c.language ?? 'ko') === key);
 }
 
 export async function findOrCreateCategory(
@@ -736,12 +809,32 @@ function countRatingsFromReviews(reviews: ReviewRecord[]): CategoryRatingCounts 
   return counts;
 }
 
+/** First SRS review per word for a given day (Anki-style true retention). */
+function firstReviewPerWord(reviews: ReviewRecord[]): ReviewRecord[] {
+  const firstByWord = new Map<string, ReviewRecord>();
+  for (const r of reviews) {
+    const existing = firstByWord.get(r.wordId);
+    if (!existing || r.timestamp < existing.timestamp) {
+      firstByWord.set(r.wordId, r);
+    }
+  }
+  return [...firstByWord.values()];
+}
+
 export async function ratingCountsForDate(
   dateStr: string,
   lang?: LearningLanguage
 ): Promise<CategoryRatingCounts> {
   const reviews = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr);
   return countRatingsFromReviews(reviews);
+}
+
+export async function trueRetentionRatingCountsForDate(
+  dateStr: string,
+  lang?: LearningLanguage
+): Promise<CategoryRatingCounts> {
+  const reviews = (await reviewsForLang(lang)).filter((r) => r.dateString === dateStr);
+  return countRatingsFromReviews(firstReviewPerWord(reviews));
 }
 
 export async function categoryRatingCountsForWordIds(
@@ -816,9 +909,19 @@ export async function weeklyWordsGrowth(lang?: LearningLanguage): Promise<number
   return Math.round(((thisWeek - prevWeek) / prevWeek) * 100);
 }
 
+async function studyDateSet(lang?: LearningLanguage): Promise<Set<string>> {
+  const [reviews, events] = await Promise.all([
+    reviewsForLang(lang),
+    practiceEventsForLang(lang),
+  ]);
+  const dateSet = new Set<string>();
+  for (const r of reviews) dateSet.add(r.dateString);
+  for (const e of events) dateSet.add(e.dateString);
+  return dateSet;
+}
+
 export async function streakCount(lang?: LearningLanguage): Promise<number> {
-  const records = await reviewsForLang(lang);
-  const dateSet = new Set(records.map((r) => r.dateString));
+  const dateSet = await studyDateSet(lang);
   if (dateSet.size === 0) return 0;
 
   let streak = 0;

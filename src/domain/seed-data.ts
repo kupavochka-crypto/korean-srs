@@ -1,16 +1,5 @@
 import type { Category, NotebookWord } from '../types';
 
-export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'createdAt' | 'isDefault'>[] = [
-  { name: 'Основы', colorHex: '#E53935', emoji: '📌' },
-  { name: 'Еда', colorHex: '#FB8C00', emoji: '🍱' },
-  { name: 'Путешествия', colorHex: '#00897B', emoji: '✈️' },
-  { name: 'Работа', colorHex: '#1E88E5', emoji: '💼' },
-  { name: 'Учёба', colorHex: '#8E24AA', emoji: '📚' },
-  { name: 'Общение', colorHex: '#43A047', emoji: '💬' },
-  { name: 'Эмоции', colorHex: '#F06292', emoji: '😊' },
-  { name: 'Природа', colorHex: '#558B2F', emoji: '🌿' },
-];
-
 export const NOTEBOOK_WORDS: NotebookWord[] = [
   { korean: '초', translation: 'секунда', transcription: 'секундо', categoryName: 'Основы' },
   { korean: '차', translation: 'чай', transcription: 'чай', categoryName: 'Еда' },
@@ -32,6 +21,20 @@ export const NOTEBOOK_WORDS: NotebookWord[] = [
   { korean: '인천', translation: 'Инчхон', transcription: 'Инчхон', categoryName: 'Путешествия' },
   { korean: '프랑스', translation: 'Франция', transcription: 'Франция', categoryName: 'Путешествия' },
 ];
+
+const NOTEBOOK_CATEGORY_STYLES: Record<string, { colorHex: string; emoji: string }> = {
+  Основы: { colorHex: '#E53935', emoji: '📌' },
+  Еда: { colorHex: '#FB8C00', emoji: '🍱' },
+  Путешествия: { colorHex: '#00897B', emoji: '✈️' },
+};
+
+export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'createdAt' | 'isDefault'>[] = [
+  ...new Set(NOTEBOOK_WORDS.map((w) => w.categoryName)),
+].map((name) => ({
+  name,
+  colorHex: NOTEBOOK_CATEGORY_STYLES[name]?.colorHex ?? '#1E88E5',
+  emoji: NOTEBOOK_CATEGORY_STYLES[name]?.emoji ?? '📌',
+}));
 
 export function lookupNotebookWord(korean: string): NotebookWord | undefined {
   const trimmed = korean.trim();

@@ -14,7 +14,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png', 'icons/icon-maskable-512.png'],
+      includeAssets: [
+        'icons/favicon.svg',
+        'icons/woori-mark.svg',
+        'icons/apple-touch-icon.png',
+        'icons/icon-maskable-512.png',
+      ],
       manifest: {
         name: 'Woori · 우리',
         short_name: 'Woori',

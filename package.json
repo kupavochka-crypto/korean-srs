@@ -1,12 +1,12 @@
 {
   "name": "woori",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm run sync:icons && tsc --noEmit && vite build",
-    "icons:generate": "python3 scripts/generate-icons.py",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "preview": "vite preview",
     "postinstall": "node scripts/sync-shoelace-icons.mjs",
     "sync:icons": "node scripts/sync-shoelace-icons.mjs",
@@ -26,6 +26,7 @@
     "gh-pages": "^6.2.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
+    "@resvg/resvg-js": "^2.6.2",
     "vite-plugin-pwa": "^0.21.1"
   }
 }

@@ -656,7 +656,17 @@ textarea {
   margin-bottom: 24px;
 }
 
-.activity-stats-tabs {
+.file-import-formats {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.file-import-formats li {
+  margin-bottom: 4px;
+}
+
+.activity-stats-tabs,
+.activity-stats-ratings-mode {
   display: flex;
   gap: 6px;
 }
@@ -1802,6 +1812,64 @@ textarea {
   background: var(--charcoal);
   border-color: var(--charcoal);
   color: var(--light-bg);
+}
+
+.chip-gear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip-gear.active {
+  background: var(--red-soft);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.chip-manage {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.chip-manage-label {
+  pointer-events: none;
+  border: none;
+  background: transparent;
+  padding: 4px 8px;
+}
+
+.chip-manage-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.chip-manage-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--charcoal-soft);
+  color: var(--charcoal);
+}
+
+.chip-manage-btn--danger {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.chip-manage-btn:active {
+  transform: scale(0.92);
 }
 
 .word-list {

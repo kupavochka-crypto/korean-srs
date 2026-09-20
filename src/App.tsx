@@ -15,13 +15,14 @@ import DuplicateResolveDialog from './components/DuplicateResolveDialog';
 import OnboardingFlow from './components/OnboardingFlow';
 import TranslateSheet from './components/TranslateSheet';
 import WordDetailDialog from './components/WordDetailDialog';
-import CreateCategoryDialog from './components/CreateCategoryDialog';
+import CategoryFormDialog from './components/CategoryFormDialog';
 import ScanOcrDialog from './components/ScanOcrDialog';
 import GuideDialog from './components/GuideDialog';
 import PacksDialog from './components/PacksDialog';
 import MissionPickDialog from './components/MissionPickDialog';
 import MissionStartDialog from './components/MissionStartDialog';
 import SongImportDialog from './components/SongImportDialog';
+import FileImportDialog from './components/FileImportDialog';
 import { loadVoices } from './domain/tts';
 import { t } from './domain/i18n';
 import { tabSubtitle } from './domain/learning-ui';
@@ -72,8 +73,9 @@ export default function App() {
     store.init().then(() => setReady(true));
     return () => {
       store.closeScanOcr();
+      store.closeFileImport();
       store.closeAddWord();
-      store.closeCreateCategory();
+      store.closeCategoryForm();
       store.closeWordDetail();
       store.closeGuide();
       store.closeSongImport();
@@ -110,7 +112,8 @@ export default function App() {
 
       {store.getIsAddWordOpen() && <AddWordDialog />}
       {store.getIsScanOcrOpen() && <ScanOcrDialog />}
-      {store.getIsCreateCategoryOpen() && <CreateCategoryDialog />}
+      {store.getIsFileImportOpen() && <FileImportDialog />}
+      {store.getIsCategoryFormOpen() && <CategoryFormDialog />}
       {store.getIsGuideOpen() && <GuideDialog />}
       {store.getIsPacksOpen() && <PacksDialog />}
       {store.getIsMissionPickOpen() && <MissionPickDialog />}

@@ -129,6 +129,21 @@ export default function AddWordDialog() {
           </button>
         </div>
 
+        {!editing && (
+          <button
+            type="button"
+            className="secondary-btn mb16"
+            style={{ width: '100%' }}
+            onClick={() => {
+              store.closeAddWord();
+              store.openFileImport();
+            }}
+          >
+            <WIcon name="file-text" size={16} />
+            {t('add.importFile')}
+          </button>
+        )}
+
         <div className="form-group">
           <label className="form-label">
             {learningLanguage === 'zh' ? t('add.hanzi') : t('add.korean')}

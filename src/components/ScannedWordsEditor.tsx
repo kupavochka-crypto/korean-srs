@@ -1,4 +1,5 @@
 import CategoryMultiPicker from './CategoryMultiPicker';
+import { t } from '../domain/i18n';
 import type { ImportedWordDraft } from '../types';
 
 type Props = {
@@ -33,11 +34,13 @@ export default function ScannedWordsEditor({
   return (
     <>
       <p className="section-title mt12">
-        Распознанные слова ({readyCount} готовых
-        {knownInDictionaryCount != null && knownInDictionaryCount > 0
-          ? ` · ${knownInDictionaryCount} уже в словаре`
-          : ''}
-        )
+        {t('import.recognizedTitle', {
+          count: readyCount,
+          known:
+            knownInDictionaryCount != null && knownInDictionaryCount > 0
+              ? t('import.recognizedKnown', { count: knownInDictionaryCount })
+              : '',
+        })}
       </p>
       <div className="mb12">
         {drafts.map((d, i) => {

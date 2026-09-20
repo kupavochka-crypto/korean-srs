@@ -1,4 +1,8 @@
-import type { Word } from '../types';
+import type { LearningLanguage, Word } from '../types';
+
+export function categoryLookupKey(name: string, lang: LearningLanguage = 'ko'): string {
+  return `${lang}:${name.trim().normalize('NFC').toLowerCase()}`;
+}
 
 export function wordCategoryIds(word: Word): string[] {
   return word.categoryIds ?? [];
