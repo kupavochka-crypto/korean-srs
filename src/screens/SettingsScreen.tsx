@@ -495,13 +495,16 @@ export default function SettingsScreen() {
           <SettingsSection title={t('settings.themePreview')}>
             <div className="card">
               <div className="theme-preview">
-                <PortraitImage
-                  className="greeting-image"
-                  imageName={activeTheme.greetings[0].imageName}
-                  variant={1}
-                  alt={activeTheme.greetings[0].artistName}
-                />
-                <div>
+                <div className="greeting-portrait">
+                  <PortraitImage
+                    className="greeting-image"
+                    imageName={activeTheme.greetings[0].imageName}
+                    variant={1}
+                    alt={activeTheme.greetings[0].artistName}
+                  />
+                  <p className="greeting-artist">{activeTheme.greetings[0].artistName}</p>
+                </div>
+                <div className="greeting-body">
                   {(() => {
                     const preview = resolveGreeting(activeTheme.greetings[0].id, 1, activeTheme.id);
                     return (
@@ -510,7 +513,6 @@ export default function SettingsScreen() {
                         <p className="greeting-text-kor">
                           {greetingNative(preview, learningLanguage)}
                         </p>
-                        <p className="greeting-artist">{preview.artistName}</p>
                       </>
                     );
                   })()}

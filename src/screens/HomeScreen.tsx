@@ -83,13 +83,16 @@ export default function HomeScreen() {
           store.setGreeting(next.id, next.variant);
         }}
       >
-        <PortraitImage
-          className="greeting-image"
-          imageName={greeting.imageName}
-          variant={store.getGreetingPortraitVariant()}
-          alt={greeting.artistName}
-        />
-        <div>
+        <div className="greeting-portrait">
+          <PortraitImage
+            className="greeting-image"
+            imageName={greeting.imageName}
+            variant={store.getGreetingPortraitVariant()}
+            alt={greeting.artistName}
+          />
+          <p className="greeting-artist">{greeting.artistName}</p>
+        </div>
+        <div className="greeting-body">
           <p className="greeting-text-rus">{greeting.russian}</p>
           <div className="greeting-kor-row">
             <p className="greeting-text-kor">{greetingNative(greeting, learningLang)}</p>
@@ -105,7 +108,6 @@ export default function HomeScreen() {
               <WIcon name="volume-up" size={11} />
             </button>
           </div>
-          <p className="greeting-artist">{greeting.artistName}</p>
         </div>
       </div>
 
