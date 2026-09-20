@@ -13,7 +13,8 @@ import {
   type ColorTheme,
 } from '../domain/settings';
 import type { LearningLanguage } from '../types';
-import { THEMES, getTheme, portraitUrl } from '../domain/themes';
+import { THEMES, getTheme } from '../domain/themes';
+import PortraitImage from '../components/PortraitImage';
 import { VOICE_CHARACTERS } from '../domain/voice-chars';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
@@ -494,9 +495,10 @@ export default function SettingsScreen() {
           <SettingsSection title={t('settings.themePreview')}>
             <div className="card">
               <div className="theme-preview">
-                <img
+                <PortraitImage
                   className="greeting-image"
-                  src={portraitUrl(activeTheme.greetings[0].imageName)}
+                  imageName={activeTheme.greetings[0].imageName}
+                  variant={1}
                   alt={activeTheme.greetings[0].artistName}
                 />
                 <div>

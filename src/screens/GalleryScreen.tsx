@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { artistsOfActiveTheme } from '../domain/sources';
 import { currentLevelIndex, levelProgress, nextArtist } from '../domain/gamification';
-import { portraitUrl } from '../domain/themes';
+import PortraitImage from '../components/PortraitImage';
 import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import { tabSubtitle } from '../domain/learning-ui';
@@ -69,9 +69,9 @@ export default function GalleryScreen() {
             return (
               <div key={artist.id} className={`photo-card ${unlocked ? '' : 'photo-locked'}`}>
                 <div className="photo-card-img-wrap">
-                  <img
+                  <PortraitImage
                     className="photo-card-img"
-                    src={portraitUrl(artist.imageName)}
+                    imageName={artist.imageName}
                     alt={artist.stageName}
                   />
                   {!unlocked && (

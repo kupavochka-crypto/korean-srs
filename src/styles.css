@@ -453,6 +453,7 @@ textarea {
   height: 104px;
   border-radius: 16px;
   object-fit: cover;
+  object-position: center 32%;
   flex-shrink: 0;
 }
 
@@ -463,10 +464,19 @@ textarea {
   margin: 0 0 4px;
 }
 
+.greeting-kor-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+}
+
 .greeting-text-kor {
   font-size: 12px;
   color: var(--text-secondary);
-  margin: 0 0 4px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .greeting-artist {
@@ -476,6 +486,7 @@ textarea {
   opacity: 0.75;
   margin: 0;
 }
+
 
 .section-title {
   font-size: 15px;
@@ -2561,6 +2572,18 @@ textarea {
   background: var(--surface-soft);
 }
 
+.proverb-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--red-light);
+  color: var(--red);
+}
+
 .proverb-card-text {
   flex: 1;
   min-width: 0;
@@ -3091,6 +3114,13 @@ textarea {
 
 .icon-btn:active {
   transform: scale(0.88);
+}
+
+.greeting-kor-row .icon-btn.greeting-speak-btn {
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  flex-shrink: 0;
 }
 
 .theme-row {

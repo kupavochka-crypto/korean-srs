@@ -18,7 +18,12 @@ import type {
 } from '../types';
 import { toRomaja } from '../domain/romaja';
 import { speak } from '../domain/tts';
-import { randomGreeting, randomGifName, activeTheme } from '../domain/themes';
+import {
+  randomGreeting,
+  randomGifName,
+  randomPortraitVariant,
+  activeTheme,
+} from '../domain/themes';
 import {
   xpForReview,
   todayMission,
@@ -46,6 +51,8 @@ import {
   saveThemeId,
   storedGreetingId,
   saveGreetingId,
+  storedGreetingPortraitVariant,
+  saveGreetingPortraitVariant,
   storedShowRomaja,
   saveShowRomaja,
   storedCardVoice,
@@ -97,6 +104,11 @@ function resolveInitialGreetingId(): string {
   const greetings = activeTheme().greetings;
   if (saved && greetings.some((g) => g.id === saved)) return saved;
   return randomGreeting().id;
+}
+
+function resolveInitialGreetingPortraitVariant(): number {
+  const themeId = storedThemeId();
+  return storedGreetingPortraitVariant(themeId) ?? randomPortraitVariant();
 }
 
 function localToday(): string {
@@ -190,6 +202,7 @@ function createStore() {
   let prefilledKorean = '';
   let prefilledCategoryId: string | null = null;
   let currentGreetingId: string = resolveInitialGreetingId();
+  let currentGreetingPortraitVariant: number = resolveInitialGreetingPortraitVariant();
   let showRomaja: boolean = storedShowRomaja();
   let cardVoiceId: string = storedCardVoice();
   let listenVoiceId: string = storedListenVoice();
@@ -573,6 +586,7 @@ function createStore() {
     getPrefilledKorean: () => prefilledKorean,
     getPrefilledCategoryId: () => prefilledCategoryId,
     getGreetingId: () => currentGreetingId,
+    getGreetingPortraitVariant: () => currentGreetingPortraitVariant,
     getShowRomaja: () => showRomaja,
     getColorTheme: () => colorTheme,
     getCardVoice: () => voiceCharacter(cardVoiceId),
@@ -1256,9 +1270,12 @@ function createStore() {
       emit();
     },
 
-    setGreeting(id: string) {
+    setGreeting(id: string, portraitVariant?: number) {
       currentGreetingId = id;
-      saveGreetingId(storedThemeId(), id);
+      currentGreetingPortraitVariant = portraitVariant ?? randomPortraitVariant();
+      const themeId = storedThemeId();
+      saveGreetingId(themeId, id);
+      saveGreetingPortraitVariant(themeId, currentGreetingPortraitVariant);
       emit();
     },
 
@@ -1290,6 +1307,9 @@ function createStore() {
     selectTheme(id: string) {
       saveThemeId(id);
       currentGreetingId = randomGreeting().id;
+      currentGreetingPortraitVariant = randomPortraitVariant();
+      saveGreetingId(id, currentGreetingId);
+      saveGreetingPortraitVariant(id, currentGreetingPortraitVariant);
       emit();
     },
 

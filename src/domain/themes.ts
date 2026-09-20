@@ -1,6 +1,9 @@
 import { storedThemeId } from './settings';
 import type { BTSGreeting } from '../types';
 
+/** Portrait slots per member: `{base}.png`, `{base}_02.png` … `{base}_07.png` */
+export const PORTRAIT_VARIANT_COUNT = 7;
+
 export interface Theme {
   id: string;
   name: string;
@@ -10,6 +13,7 @@ export interface Theme {
   statusGifName: string;
   gifDir: string;
   portraitDir: string;
+  portraitVariantCount: number;
   /** Drop PNGs here: public/portraits/victory/ or public/skz-portraits/victory/ */
   victoryPortraitDir: string;
   victoryPortraitNames: string[];
@@ -232,6 +236,7 @@ export const THEMES: Theme[] = [
     statusGifName: 'bts_jk_please_wait',
     gifDir: 'bts-gifs',
     portraitDir: 'portraits',
+    portraitVariantCount: PORTRAIT_VARIANT_COUNT,
     victoryPortraitDir: 'portraits/victory',
     victoryPortraitNames: BTS_VICTORY_PORTRAIT_NAMES,
     victoryGifNames: BTS_VICTORY_GIF_NAMES,
@@ -245,6 +250,7 @@ export const THEMES: Theme[] = [
     statusGifName: 'skz_status',
     gifDir: 'skz-gifs',
     portraitDir: 'skz-portraits',
+    portraitVariantCount: PORTRAIT_VARIANT_COUNT,
     victoryPortraitDir: 'skz-portraits/victory',
     victoryPortraitNames: SKZ_VICTORY_PORTRAIT_NAMES,
     victoryGifNames: SKZ_VICTORY_GIF_NAMES,
@@ -274,6 +280,20 @@ export function randomGreeting(excluding?: BTSGreeting): BTSGreeting {
   return pool[Math.floor(Math.random() * pool.length)] ?? greetings[0];
 }
 
+/** Tap greeting card: next photo slot, then next member. */
+export function nextGreetingPortrait(
+  current: BTSGreeting,
+  currentVariant: number
+): { greeting: BTSGreeting; variant: number } {
+  const greetings = activeTheme().greetings;
+  if (currentVariant < PORTRAIT_VARIANT_COUNT) {
+    return { greeting: current, variant: currentVariant + 1 };
+  }
+  const idx = greetings.findIndex((g) => g.id === current.id);
+  const nextGreeting = greetings[(idx + 1) % greetings.length] ?? greetings[0];
+  return { greeting: nextGreeting, variant: 1 };
+}
+
 export function randomGifName(): string {
   const names = activeTheme().gifNames;
   return names[Math.floor(Math.random() * names.length)] ?? names[0];
@@ -287,6 +307,40 @@ export function gifUrl(name: string): string {
 export function portraitUrl(name: string, themeId?: string): string {
   const theme = themeId ? getTheme(themeId) : activeTheme();
   return `${import.meta.env.BASE_URL}${theme.portraitDir}/${name}.png`;
+}
+
+/** e.g. bts_jungkook → bts_jungkook, bts_jungkook_02 … bts_jungkook_07 */
+export function portraitVariantNames(
+  baseName: string,
+  count: number = PORTRAIT_VARIANT_COUNT
+): string[] {
+  const names = [baseName];
+  for (let i = 2; i <= count; i++) {
+    names.push(`${baseName}_${String(i).padStart(2, '0')}`);
+  }
+  return names;
+}
+
+export function randomPortraitVariant(count: number = PORTRAIT_VARIANT_COUNT): number {
+  return 1 + Math.floor(Math.random() * count);
+}
+
+export function portraitVariantForSeed(seed: string, count: number = PORTRAIT_VARIANT_COUNT): number {
+  return (hashString(seed) % count) + 1;
+}
+
+export function portraitCandidateUrls(
+  baseName: string,
+  options?: { themeId?: string; preferredVariant?: number; variantCount?: number }
+): string[] {
+  const count = options?.variantCount ?? PORTRAIT_VARIANT_COUNT;
+  const names = portraitVariantNames(baseName, count);
+  const preferred = options?.preferredVariant;
+  const ordered =
+    preferred !== undefined && preferred >= 1 && preferred <= names.length
+      ? [names[preferred - 1], ...names.filter((_, i) => i !== preferred - 1)]
+      : names;
+  return ordered.map((name) => portraitUrl(name, options?.themeId));
 }
 
 function hashString(value: string): number {
@@ -391,7 +445,9 @@ function staticBannerMediaCandidates(
     ordered.push(asset);
   }
   for (const g of theme.greetings) {
-    ordered.push({ kind: 'portrait', name: g.imageName });
+    for (const name of portraitVariantNames(g.imageName, theme.portraitVariantCount)) {
+      ordered.push({ kind: 'portrait', name });
+    }
   }
   return ordered.map((asset) => ({
     asset,

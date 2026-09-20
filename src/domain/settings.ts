@@ -10,6 +10,7 @@ const GEMINI_PROXY_KEY = 'gemini_proxy_url';
 const THEME_KEY = 'theme_id';
 const SHOW_ROMAJA_KEY = 'show_romaja';
 const GREETING_KEY_PREFIX = 'greeting_';
+const GREETING_PORTRAIT_KEY_PREFIX = 'greeting_portrait_';
 const CARD_VOICE_KEY = 'voice_card';
 const LISTEN_VOICE_KEY = 'voice_listen';
 const COLOR_THEME_KEY = 'color_theme';
@@ -181,6 +182,26 @@ export function storedGreetingId(themeId: string): string | null {
 export function saveGreetingId(themeId: string, id: string) {
   try {
     localStorage.setItem(GREETING_KEY_PREFIX + themeId, id.trim());
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function storedGreetingPortraitVariant(themeId: string): number | null {
+  try {
+    const raw = localStorage.getItem(GREETING_PORTRAIT_KEY_PREFIX + themeId);
+    if (!raw) return null;
+    const n = parseInt(raw, 10);
+    if (Number.isFinite(n) && n >= 1 && n <= 7) return n;
+  } catch {
+    // storage unavailable
+  }
+  return null;
+}
+
+export function saveGreetingPortraitVariant(themeId: string, variant: number) {
+  try {
+    localStorage.setItem(GREETING_PORTRAIT_KEY_PREFIX + themeId, String(variant));
   } catch {
     // storage unavailable
   }

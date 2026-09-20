@@ -3,7 +3,8 @@ import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
 import HomeActivityStats from '../components/HomeActivityStats';
 import type { ModeDayCounts } from '../db/repository';
-import { greetingById, portraitUrl, randomGreeting } from '../domain/themes';
+import { greetingById, randomGreeting, randomPortraitVariant } from '../domain/themes';
+import PortraitImage from '../components/PortraitImage';
 import { artistsOfActiveTheme } from '../domain/sources';
 import {
   currentLevelIndex,
@@ -72,20 +73,48 @@ export default function HomeScreen() {
         </div>
       )}
 
-      <div className="greeting-card card" onClick={() => store.setGreeting(randomGreeting(greeting).id)}>
-        <img className="greeting-image" src={portraitUrl(greeting.imageName)} alt={greeting.artistName} />
+      <div
+        className="greeting-card card"
+        onClick={() => {
+          const next = randomGreeting(greeting);
+          let variant = randomPortraitVariant();
+          if (next.id === greeting.id) {
+            variant = (store.getGreetingPortraitVariant() % 7) + 1;
+          }
+          store.setGreeting(next.id, variant);
+        }}
+      >
+        <PortraitImage
+          className="greeting-image"
+          imageName={greeting.imageName}
+          variant={store.getGreetingPortraitVariant()}
+          alt={greeting.artistName}
+        />
         <div>
           <p className="greeting-text-rus">{greeting.russian}</p>
-          <p className="greeting-text-kor">{greetingNative(greeting, learningLang)}</p>
+          <div className="greeting-kor-row">
+            <p className="greeting-text-kor">{greetingNative(greeting, learningLang)}</p>
+            <button
+              type="button"
+              className="icon-btn greeting-speak-btn"
+              aria-label={t('cards.speakAria')}
+              onClick={(e) => {
+                e.stopPropagation();
+                store.speakText(greetingNative(greeting, learningLang), learningLang);
+              }}
+            >
+              <WIcon name="volume-up" size={11} />
+            </button>
+          </div>
           <p className="greeting-artist">{greeting.artistName}</p>
         </div>
       </div>
 
       {displayArtist && (
         <div className="card mentor-card" onClick={() => store.selectTab('gallery')}>
-          <img
+          <PortraitImage
             className={`mentor-avatar${mentor ? '' : ' mentor-avatar--locked'}`}
-            src={portraitUrl(displayArtist.imageName)}
+            imageName={displayArtist.imageName}
             alt={displayArtist.stageName}
           />
           <div className="mentor-body">

@@ -109,10 +109,7 @@ export default function FileImportDialog() {
             <span className="scan-tool-icon">
               <WIcon name="file-text" size={22} />
             </span>
-            <span>
-              {t('fileImport.pickFile')}{' '}
-              <span className="song-mode-badge song-mode-badge--free">{t('fileImport.badgeFree')}</span>
-            </span>
+            <span>{t('fileImport.pickFile')}</span>
           </button>
           <input
             ref={fileInputRef}
