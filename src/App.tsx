@@ -110,21 +110,6 @@ export default function App() {
         {SCREENS[tab]()}
       </div>
 
-      {store.getIsAddWordOpen() && <AddWordDialog />}
-      {store.getIsScanOcrOpen() && <ScanOcrDialog />}
-      {store.getIsFileImportOpen() && <FileImportDialog />}
-      {store.getIsCategoryFormOpen() && <CategoryFormDialog />}
-      {store.getIsGuideOpen() && <GuideDialog />}
-      {store.getIsPacksOpen() && <PacksDialog />}
-      {store.getIsMissionPickOpen() && <MissionPickDialog />}
-      {store.getIsMissionStartOpen() && <MissionStartDialog />}
-      {store.getIsSongImportOpen() && <SongImportDialog />}
-      {store.getSelectedWordForDetail() && <WordDetailDialog />}
-      {store.getDuplicatePending() && <DuplicateResolveDialog />}
-      {store.getIsOnboardingOpen() && <OnboardingFlow />}
-      {store.getIsTranslateOpen() && <TranslateSheet />}
-      <AppFab />
-
       <nav ref={(el) => { navRef.current = el; }} className="tab-bar">
         <span
           className="tab-ind"
@@ -150,6 +135,21 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {store.getIsAddWordOpen() && <AddWordDialog />}
+      {store.getIsScanOcrOpen() && <ScanOcrDialog />}
+      {store.getIsFileImportOpen() && <FileImportDialog />}
+      {store.getIsCategoryFormOpen() && <CategoryFormDialog />}
+      {store.getIsGuideOpen() && <GuideDialog />}
+      {store.getIsPacksOpen() && <PacksDialog />}
+      {store.getIsMissionPickOpen() && <MissionPickDialog />}
+      {store.getIsMissionStartOpen() && <MissionStartDialog />}
+      {store.getIsSongImportOpen() && <SongImportDialog />}
+      {store.getSelectedWordForDetail() && <WordDetailDialog />}
+      {store.getDuplicatePending() && <DuplicateResolveDialog />}
+      {store.getIsOnboardingOpen() && <OnboardingFlow />}
+      {store.getIsTranslateOpen() && <TranslateSheet />}
+      <AppFab />
     </div>
   );
 }

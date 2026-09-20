@@ -102,6 +102,13 @@ const STRINGS: Dict = {
     ru: 'Сегодня в этой категории карточки ещё не отрабатывались',
     en: 'No card reviews in this category today yet',
   },
+  'home.stats.headerTitle': { ru: 'Показатели дня', en: "Today's stats" },
+  'home.stats.dailyProgressCaption': { ru: 'активность', en: 'activity' },
+  'home.stats.dailyProgressAria': {
+    ru: 'Активность {pct}%: {value} из {max}',
+    en: 'Activity {pct}%: {value} of {max}',
+  },
+  'home.stats.miniHeatmapTitle': { ru: 'Неделя', en: 'Week' },
   'home.stats.tabOverview': { ru: 'Сегодня', en: 'Today' },
   'home.stats.tabRatings': { ru: 'Прогресс', en: 'Progress' },
   'home.stats.tabCategory': { ru: 'Категория', en: 'Category' },
@@ -112,10 +119,10 @@ const STRINGS: Dict = {
     en: 'No card reviews today yet',
   },
   'home.stats.ratingsModeAll': { ru: 'Все ответы', en: 'All reviews' },
-  'home.stats.ratingsModeRetention': { ru: 'True Retention', en: 'True Retention' },
+  'home.stats.ratingsModeRetention': { ru: 'Первый ответ', en: 'First answer' },
   'home.stats.ratingsRetentionHint': {
-    ru: 'Только первый ответ на слово за день — как в Anki',
-    en: 'First answer per word per day — like Anki true retention',
+    ru: 'Учитывается только первый ответ на слово за день',
+    en: 'Only the first answer per word each day counts',
   },
   'home.stats.ratingsInsight': {
     ru: '{hard} сложных из {total}',
@@ -577,6 +584,10 @@ const STRINGS: Dict = {
   'progress.byCatDict': { ru: 'Слова по категориям', en: 'Words by category' },
   'progress.noCategory': { ru: 'Без категории', en: 'No category' },
   'progress.proverb': { ru: 'Многие капли образуют гору', en: 'Many drops form a mountain' },
+  'progress.proverbPhotoAlt': {
+    ru: '{name} — мотивация',
+    en: '{name} — motivation',
+  },
 
   'word.status.mastered': { ru: 'Выучено', en: 'Mastered' },
   'word.status.due': { ru: 'Повторить', en: 'Review' },
@@ -865,6 +876,47 @@ const STRINGS: Dict = {
   'progress.xpRank': { ru: 'Уровень {level}', en: 'Level {level}' },
   'progress.goal': { ru: 'Цель: {count}/день', en: 'Goal: {count}/day' },
   'progress.topCategories': { ru: 'Топ категорий', en: 'Top categories' },
+  'progress.chart.heroTitle': { ru: 'Общий прогресс', en: 'Overall progress' },
+  'progress.chart.masteredCaption': { ru: 'выучено', en: 'mastered' },
+  'progress.chart.masteredCount': {
+    ru: '{mastered} из {total} слов',
+    en: '{mastered} of {total} words',
+  },
+  'progress.chart.masteredAria': {
+    ru: 'Выучено {pct}%: {mastered} из {total} слов',
+    en: '{pct}% mastered: {mastered} of {total} words',
+  },
+  'progress.chart.inProgress': { ru: 'Ещё {count} в работе', en: '{count} still learning' },
+  'progress.chart.vocabTitle': { ru: 'Состояние словаря', en: 'Vocabulary state' },
+  'progress.chart.vocabNew': { ru: 'Новые', en: 'New' },
+  'progress.chart.vocabLearning': { ru: 'Учу', en: 'Learning' },
+  'progress.chart.vocabMature': { ru: 'В памяти', en: 'In memory' },
+  'progress.chart.vocabMastered': { ru: 'Освоено', en: 'Mastered' },
+  'progress.chart.vocabEmpty': {
+    ru: 'Добавьте слова в словарь',
+    en: 'Add words to your dictionary',
+  },
+  'progress.chart.vocabHint': {
+    ru: '«В памяти» — интервал 21+ день сейчас. «Освоено» — достигнут навсегда.',
+    en: 'In memory = 21+ day interval now. Mastered = reached milestone.',
+  },
+  'progress.chart.activityTitle': { ru: 'Активность', en: 'Activity' },
+  'progress.chart.heatmapTitle': { ru: 'Последние 14 дней', en: 'Last 14 days' },
+  'progress.chart.heatmapActive': {
+    ru: '{active} из {total} дней',
+    en: '{active} of {total} days',
+  },
+  'progress.chart.heatmapDay': {
+    ru: '{date}: {count} действий',
+    en: '{date}: {count} actions',
+  },
+  'progress.chart.streakStrip': { ru: 'Серия {count} дн.', en: '{count}-day streak' },
+  'progress.chart.legendReviews': { ru: 'Повторения', en: 'Reviews' },
+  'progress.chart.legendNew': { ru: 'Новые слова', en: 'New words' },
+  'progress.chart.dayBreakdown': {
+    ru: '{reviews} повторений · {newWords} новых',
+    en: '{reviews} reviews · {newWords} new',
+  },
 
   'quiz.modeReverse': { ru: 'Выбор ответа', en: 'Multiple choice' },
   'quiz.modeWrite': { ru: 'Написать по переводу', en: 'Write by translation' },

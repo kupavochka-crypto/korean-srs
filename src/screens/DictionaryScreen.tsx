@@ -105,7 +105,7 @@ export default function DictionaryScreen() {
       )}
 
       {words.length > 0 && !selectionActive && (
-        <div className="dict-review-row">
+        <div className="btn-row dict-review-row">
           <button
             className="secondary-btn"
             onClick={() =>

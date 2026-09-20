@@ -4,11 +4,19 @@ import { t } from '../domain/i18n';
 import type { CategoryRatingCounts } from '../db/repository';
 import { EMPTY_CATEGORY_RATING_COUNTS } from '../db/repository';
 import CategoryRatingBreakdown, { categoryRatingTotal } from './CategoryRatingBreakdown';
+import RatingDonut from './RatingDonut';
+import HomeStatsTabCta from './HomeStatsTabCta';
 import { saveTrueRetentionMode, storedTrueRetentionMode } from '../domain/settings';
+import type { LearningLanguage } from '../types';
 
 type RatingsMode = 'all' | 'retention';
 
-export default function HomeStatsRatingsPanel() {
+interface Props {
+  dueCount: number;
+  learningLang: LearningLanguage;
+}
+
+export default function HomeStatsRatingsPanel({ dueCount, learningLang }: Props) {
   useStore();
   const [counts, setCounts] = useState<CategoryRatingCounts>(EMPTY_CATEGORY_RATING_COUNTS);
   const [mode, setMode] = useState<RatingsMode>(() =>
@@ -37,6 +45,16 @@ export default function HomeStatsRatingsPanel() {
 
   const total = categoryRatingTotal(counts);
   const hardCount = counts.again + counts.hard;
+  const difficultCount = store.difficultWords().length;
+
+  let ctaLabel = t('home.startCards');
+  let ctaAction = () => void store.startDueReview();
+  if (dueCount > 0) {
+    ctaLabel = `${t('home.startReview')} (${dueCount})`;
+  } else if (difficultCount > 0) {
+    ctaLabel = t('cards.difficult', { count: difficultCount });
+    ctaAction = () => void store.startDifficultReview();
+  }
 
   return (
     <div className="activity-stats-body activity-stats-body--stacked">
@@ -68,6 +86,7 @@ export default function HomeStatsRatingsPanel() {
         </p>
         {total > 0 ? (
           <>
+            <RatingDonut counts={counts} />
             <CategoryRatingBreakdown counts={counts} variant="bars" />
             {hardCount > 0 && (
               <p className="activity-stats-insight">
@@ -76,6 +95,8 @@ export default function HomeStatsRatingsPanel() {
             )}
           </>
         ) : null}
+
+        <HomeStatsTabCta label={ctaLabel} learningLang={learningLang} onClick={ctaAction} />
       </div>
     </div>
   );

@@ -1487,6 +1487,14 @@ function createStore() {
       return repo.weeklyWordsGrowth(learningLanguage);
     },
 
+    async wordBucketCounts() {
+      return repo.wordBucketCounts(learningLanguage);
+    },
+
+    async activityIntensity(days: number) {
+      return repo.activityIntensityLastDays(days, learningLanguage);
+    },
+
     async deleteWord(word: Word) {
       if (selectedWordForDetail?.id === word.id) {
         selectedWordForDetail = null;

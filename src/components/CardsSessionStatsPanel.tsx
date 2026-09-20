@@ -100,13 +100,15 @@ export default function CardsSessionStatsPanel({ categoryId }: Props) {
             )}
           </div>
           {difficultCount > 0 ? (
-            <button
-              type="button"
-              className="primary-btn cards-session-difficult-btn"
-              onClick={() => void store.startCategoryDifficultReview(categoryId)}
-            >
-              {t('cards.session.difficultInCategory', { count: difficultCount })}
-            </button>
+            <div className="btn-row btn-row--auto">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={() => void store.startCategoryDifficultReview(categoryId)}
+              >
+                {t('cards.session.difficultInCategory', { count: difficultCount })}
+              </button>
+            </div>
           ) : (
             <p className="muted cards-session-stats-empty">{t('cards.session.noDifficultInCategory')}</p>
           )}

@@ -10,7 +10,16 @@ export interface Theme {
   statusGifName: string;
   gifDir: string;
   portraitDir: string;
+  /** Drop PNGs here: public/portraits/victory/ or public/skz-portraits/victory/ */
+  victoryPortraitDir: string;
+  victoryPortraitNames: string[];
+  victoryGifNames: string[];
 }
+
+export type VictoryAsset =
+  | { kind: 'victory-portrait'; name: string }
+  | { kind: 'gif'; name: string }
+  | { kind: 'portrait'; name: string };
 
 const BTS_GREETINGS: BTSGreeting[] = [
   {
@@ -174,6 +183,45 @@ const SKZ_GIF_NAMES = [
   'skz_in_01',
 ];
 
+/** Curated GIFs with win/celebration vibe — reuse files from public/bts-gifs/ */
+const BTS_VICTORY_GIF_NAMES = [
+  'bts_jimin_concert',
+  'bts_jin_idol',
+  'bts_jhope_smile',
+  'bts_jungkook_01',
+  'bts_jungkook_02',
+  'bts_jungkook_03',
+  'bts_jhope_01',
+  'bts_jhope_02',
+  'bts_v_01',
+  'bts_v_02',
+];
+
+/** Drop custom victory PNGs into public/portraits/victory/ */
+const BTS_VICTORY_PORTRAIT_NAMES = [
+  'bts_rm_victory',
+  'bts_jin_victory',
+  'bts_suga_victory',
+  'bts_jhope_victory',
+  'bts_jimin_victory',
+  'bts_v_victory',
+  'bts_jungkook_victory',
+];
+
+const SKZ_VICTORY_GIF_NAMES = [...SKZ_GIF_NAMES];
+
+/** Drop custom victory PNGs into public/skz-portraits/victory/ */
+const SKZ_VICTORY_PORTRAIT_NAMES = [
+  'skz_bangchan_victory',
+  'skz_leeknow_victory',
+  'skz_changbin_victory',
+  'skz_hyunjin_victory',
+  'skz_han_victory',
+  'skz_felix_victory',
+  'skz_seungmin_victory',
+  'skz_in_victory',
+];
+
 export const THEMES: Theme[] = [
   {
     id: 'bts',
@@ -184,6 +232,9 @@ export const THEMES: Theme[] = [
     statusGifName: 'bts_jk_please_wait',
     gifDir: 'bts-gifs',
     portraitDir: 'portraits',
+    victoryPortraitDir: 'portraits/victory',
+    victoryPortraitNames: BTS_VICTORY_PORTRAIT_NAMES,
+    victoryGifNames: BTS_VICTORY_GIF_NAMES,
   },
   {
     id: 'stray-kids',
@@ -194,6 +245,9 @@ export const THEMES: Theme[] = [
     statusGifName: 'skz_status',
     gifDir: 'skz-gifs',
     portraitDir: 'skz-portraits',
+    victoryPortraitDir: 'skz-portraits/victory',
+    victoryPortraitNames: SKZ_VICTORY_PORTRAIT_NAMES,
+    victoryGifNames: SKZ_VICTORY_GIF_NAMES,
   },
 ];
 
@@ -230,7 +284,126 @@ export function gifUrl(name: string): string {
   return `${import.meta.env.BASE_URL}${theme.gifDir}/${name}.gif`;
 }
 
-export function portraitUrl(name: string): string {
-  const theme = activeTheme();
+export function portraitUrl(name: string, themeId?: string): string {
+  const theme = themeId ? getTheme(themeId) : activeTheme();
   return `${import.meta.env.BASE_URL}${theme.portraitDir}/${name}.png`;
+}
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+export function staticVictoryAssetPool(themeOrId?: Theme | string): VictoryAsset[] {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  return theme.victoryPortraitNames.map((name) => ({
+    kind: 'victory-portrait',
+    name,
+  }));
+}
+
+export function victoryAssetPool(themeOrId?: Theme | string): VictoryAsset[] {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  const portraits = staticVictoryAssetPool(theme);
+  const gifs: VictoryAsset[] = theme.victoryGifNames.map((name) => ({
+    kind: 'gif',
+    name,
+  }));
+  return [...portraits, ...gifs];
+}
+
+export function victoryAssetUrl(asset: VictoryAsset, themeOrId?: Theme | string): string {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  const base = import.meta.env.BASE_URL;
+  if (asset.kind === 'victory-portrait') {
+    return `${base}${theme.victoryPortraitDir}/${asset.name}.png`;
+  }
+  if (asset.kind === 'gif') {
+    return `${base}${theme.gifDir}/${asset.name}.gif`;
+  }
+  return `${base}${theme.portraitDir}/${asset.name}.png`;
+}
+
+export function pickVictoryAsset(themeOrId?: Theme | string, seed?: string): VictoryAsset | null {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  const pool = victoryAssetPool(theme);
+  if (pool.length === 0) return null;
+  const day = seed ?? new Date().toISOString().slice(0, 10);
+  const idx = hashString(`${day}:${theme.id}`) % pool.length;
+  return pool[idx] ?? null;
+}
+
+export function pickStaticVictoryAsset(themeOrId?: Theme | string, seed?: string): VictoryAsset | null {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  const pool = staticVictoryAssetPool(theme);
+  if (pool.length === 0) return null;
+  const day = seed ?? new Date().toISOString().slice(0, 10);
+  const idx = hashString(`${day}:${theme.id}`) % pool.length;
+  return pool[idx] ?? null;
+}
+
+export function memberNameForVictoryAsset(asset: VictoryAsset, themeOrId?: Theme | string): string {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  for (const g of theme.greetings) {
+    if (asset.name.includes(g.imageName) || asset.name.includes(`_${g.id}`)) {
+      return g.artistName;
+    }
+  }
+  return theme.name;
+}
+
+function staticBannerMediaCandidates(
+  themeOrId?: Theme | string,
+  seed?: string
+): { url: string; memberName: string; asset: VictoryAsset }[] {
+  const theme =
+    typeof themeOrId === 'string'
+      ? getTheme(themeOrId)
+      : themeOrId ?? activeTheme();
+  const day = seed ?? new Date().toISOString().slice(0, 10);
+  const pool = staticVictoryAssetPool(theme);
+  const primary = pickStaticVictoryAsset(theme, day);
+  const ordered: VictoryAsset[] = [];
+  if (primary) ordered.push(primary);
+  for (const asset of pool) {
+    if (primary && asset.kind === primary.kind && asset.name === primary.name) continue;
+    ordered.push(asset);
+  }
+  for (const g of theme.greetings) {
+    ordered.push({ kind: 'portrait', name: g.imageName });
+  }
+  return ordered.map((asset) => ({
+    asset,
+    url: victoryAssetUrl(asset, theme),
+    memberName: memberNameForVictoryAsset(asset, theme),
+  }));
+}
+
+/** Static PNG only — victory portraits + member portraits (no GIF). */
+export function proverbBannerMediaCandidates(
+  themeOrId?: Theme | string,
+  seed?: string
+): { url: string; memberName: string; asset: VictoryAsset }[] {
+  return staticBannerMediaCandidates(themeOrId, seed);
 }

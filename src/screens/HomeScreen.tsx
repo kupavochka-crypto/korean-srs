@@ -64,9 +64,11 @@ export default function HomeScreen() {
       {store.getZhProfileHint() && (
         <div className="profile-hint card-flat mb16">
           <p>{t('home.zhProfileHint')}</p>
-          <button type="button" className="secondary-btn" onClick={() => store.dismissZhProfileHint()}>
-            {t('common.close')}
-          </button>
+          <div className="btn-row btn-row--auto">
+            <button type="button" className="secondary-btn" onClick={() => store.dismissZhProfileHint()}>
+              {t('common.close')}
+            </button>
+          </div>
         </div>
       )}
 
@@ -118,18 +120,9 @@ export default function HomeScreen() {
         dailyGoal={store.getDailyWordGoal()}
         today={modeToday}
         yesterday={modeYesterday}
+        streak={streak}
+        learningLang={learningLang}
       />
-
-      <button className="primary-btn home-primary-cta mb24" onClick={() => store.startDueReview()}>
-        <span>
-          <span>
-            {due.length > 0
-              ? `${t('home.startReview')} (${due.length})`
-              : t('home.startCards')}
-          </span>
-          <span className="btn-kor">{tL('btn.go', learningLang)}</span>
-        </span>
-      </button>
 
       {challengePack && (
         <div className="card challenge-card mb24">
@@ -144,12 +137,15 @@ export default function HomeScreen() {
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${Math.round(challengeProgress * 100)}%` }} />
           </div>
-          <div className="challenge-actions">
+          <div className="btn-row challenge-actions">
             <button className="secondary-btn" onClick={() => store.openMissionPick()}>
               {t('home.challengePick')}
             </button>
             {challengeProgress >= 1 ? (
-              <button className="primary-btn challenge-start-btn" onClick={() => store.openMissionStart(challengePack.id)}>
+              <button
+                className="primary-btn"
+                onClick={() => void store.beginMissionTraining(challengePack.id)}
+              >
                 {t('missionStart.start')}
               </button>
             ) : (

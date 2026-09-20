@@ -909,6 +909,77 @@ export async function weeklyWordsGrowth(lang?: LearningLanguage): Promise<number
   return Math.round(((thisWeek - prevWeek) / prevWeek) * 100);
 }
 
+export interface WordBucketCounts {
+  new: number;
+  learning: number;
+  matureNow: number;
+  masteredEver: number;
+}
+
+export const EMPTY_WORD_BUCKET_COUNTS: WordBucketCounts = {
+  new: 0,
+  learning: 0,
+  matureNow: 0,
+  masteredEver: 0,
+};
+
+/** Mutually exclusive buckets for vocab donut chart. */
+export async function wordBucketCounts(lang?: LearningLanguage): Promise<WordBucketCounts> {
+  const all = await db.words.toArray();
+  const words = lang ? all.filter((w) => (w.language ?? 'ko') === lang) : all;
+  const counts: WordBucketCounts = { new: 0, learning: 0, matureNow: 0, masteredEver: 0 };
+  for (const w of words) {
+    if (w.totalReviews === 0) {
+      counts.new += 1;
+    } else if (w.masteredAt) {
+      counts.masteredEver += 1;
+    } else if (w.intervalDays >= MASTERED_INTERVAL_DAYS) {
+      counts.matureNow += 1;
+    } else {
+      counts.learning += 1;
+    }
+  }
+  return counts;
+}
+
+export type ActivityIntensityLevel = 0 | 1 | 2 | 3;
+
+export interface DayActivityIntensity {
+  dateString: string;
+  level: ActivityIntensityLevel;
+  total: number;
+}
+
+function activityLevel(total: number): ActivityIntensityLevel {
+  if (total <= 0) return 0;
+  if (total <= 5) return 1;
+  if (total <= 15) return 2;
+  return 3;
+}
+
+export async function activityIntensityLastDays(
+  days: number,
+  lang?: LearningLanguage,
+  now: number = Date.now()
+): Promise<DayActivityIntensity[]> {
+  const [reviews, events] = await Promise.all([
+    reviewsForLang(lang),
+    practiceEventsForLang(lang),
+  ]);
+  const result: DayActivityIntensity[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const ds = dateString(d.getTime());
+    const reviewCount = reviews.filter((r) => r.dateString === ds).length;
+    const eventCount = events.filter((e) => e.dateString === ds).length;
+    const total = reviewCount + eventCount;
+    result.push({ dateString: ds, level: activityLevel(total), total });
+  }
+  return result;
+}
+
 async function studyDateSet(lang?: LearningLanguage): Promise<Set<string>> {
   const [reviews, events] = await Promise.all([
     reviewsForLang(lang),

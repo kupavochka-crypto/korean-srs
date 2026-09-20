@@ -57,7 +57,7 @@ export default function MissionStartDialog() {
           {missing > 0 && <li>{t('missionStart.wordsNew', { count: missing })}</li>}
         </ul>
 
-        <div className="mission-start-actions">
+        <div className="btn-row mission-start-actions">
           <button className="secondary-btn" onClick={() => store.dismissMissionStart()}>
             {t('missionStart.later')}
           </button>

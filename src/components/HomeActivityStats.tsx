@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { t } from '../domain/i18n';
 import type { ModeDayCounts } from '../db/repository';
+import HomeStatsHeader from './HomeStatsHeader';
 import HomeStatsOverviewPanel from './HomeStatsOverviewPanel';
 import HomeStatsRatingsPanel from './HomeStatsRatingsPanel';
 import HomeStatsCategoryPanel from './HomeStatsCategoryPanel';
+import type { LearningLanguage } from '../types';
 
 type HomeStatsTab = 'overview' | 'ratings' | 'category';
 
@@ -12,13 +14,24 @@ interface Props {
   dailyGoal: number;
   today: ModeDayCounts;
   yesterday: ModeDayCounts;
+  streak: number;
+  learningLang: LearningLanguage;
 }
 
-export default function HomeActivityStats({ dueCount, dailyGoal, today, yesterday }: Props) {
+export default function HomeActivityStats({
+  dueCount,
+  dailyGoal,
+  today,
+  yesterday,
+  streak,
+  learningLang,
+}: Props) {
   const [tab, setTab] = useState<HomeStatsTab>('overview');
 
   return (
-    <div className="activity-stats-card card">
+    <div className="activity-stats-card card home-stats-dashboard">
+      <HomeStatsHeader streak={streak} today={today} yesterday={yesterday} />
+
       <div className="activity-stats-tabs">
         <button
           type="button"
@@ -49,10 +62,13 @@ export default function HomeActivityStats({ dueCount, dailyGoal, today, yesterda
           dailyGoal={dailyGoal}
           today={today}
           yesterday={yesterday}
+          learningLang={learningLang}
         />
       )}
-      {tab === 'ratings' && <HomeStatsRatingsPanel />}
-      {tab === 'category' && <HomeStatsCategoryPanel />}
+      {tab === 'ratings' && (
+        <HomeStatsRatingsPanel dueCount={dueCount} learningLang={learningLang} />
+      )}
+      {tab === 'category' && <HomeStatsCategoryPanel learningLang={learningLang} />}
     </div>
   );
 }
