@@ -3,7 +3,7 @@ import { store, useStore } from '../store/AppStore';
 import ScreenHeader from '../components/ScreenHeader';
 import HomeActivityStats from '../components/HomeActivityStats';
 import type { ModeDayCounts } from '../db/repository';
-import { greetingById, randomGreeting, randomPortraitVariant } from '../domain/themes';
+import { greetingById, nextGreetingPortrait } from '../domain/themes';
 import PortraitImage from '../components/PortraitImage';
 import { artistsOfActiveTheme } from '../domain/sources';
 import {
@@ -22,7 +22,7 @@ export default function HomeScreen() {
   useStore();
   const wordsCount = store.totalWordsCount();
   const due = store.dueWords();
-  const greeting = greetingById(store.getGreetingId());
+  const greeting = greetingById(store.getGreetingId(), store.getGreetingPortraitVariant());
   const xp = store.getXp();
   const artists = artistsOfActiveTheme();
   const levelIdx = currentLevelIndex(xp, artists);
@@ -76,12 +76,11 @@ export default function HomeScreen() {
       <div
         className="greeting-card card"
         onClick={() => {
-          const next = randomGreeting(greeting);
-          let variant = randomPortraitVariant();
-          if (next.id === greeting.id) {
-            variant = (store.getGreetingPortraitVariant() % 7) + 1;
-          }
-          store.setGreeting(next.id, variant);
+          const next = nextGreetingPortrait(
+            store.getGreetingId(),
+            store.getGreetingPortraitVariant()
+          );
+          store.setGreeting(next.id, next.variant);
         }}
       >
         <PortraitImage

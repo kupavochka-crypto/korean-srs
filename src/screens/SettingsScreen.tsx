@@ -13,7 +13,7 @@ import {
   type ColorTheme,
 } from '../domain/settings';
 import type { LearningLanguage } from '../types';
-import { THEMES, getTheme } from '../domain/themes';
+import { THEMES, getTheme, resolveGreeting } from '../domain/themes';
 import PortraitImage from '../components/PortraitImage';
 import { VOICE_CHARACTERS } from '../domain/voice-chars';
 import ScreenHeader from '../components/ScreenHeader';
@@ -502,11 +502,18 @@ export default function SettingsScreen() {
                   alt={activeTheme.greetings[0].artistName}
                 />
                 <div>
-                  <p className="greeting-text-rus">{activeTheme.greetings[0].russian}</p>
-                  <p className="greeting-text-kor">
-                    {greetingNative(activeTheme.greetings[0], learningLanguage)}
-                  </p>
-                  <p className="greeting-artist">{activeTheme.greetings[0].artistName}</p>
+                  {(() => {
+                    const preview = resolveGreeting(activeTheme.greetings[0].id, 1, activeTheme.id);
+                    return (
+                      <>
+                        <p className="greeting-text-rus">{preview.russian}</p>
+                        <p className="greeting-text-kor">
+                          {greetingNative(preview, learningLanguage)}
+                        </p>
+                        <p className="greeting-artist">{preview.artistName}</p>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

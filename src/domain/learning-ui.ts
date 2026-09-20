@@ -1,4 +1,4 @@
-import type { BTSGreeting, LearningLanguage } from '../types';
+import type { LearningLanguage } from '../types';
 import type { SrsRatingName } from './srs-engine';
 
 type Bilingual = { ko: string; zh: string };
@@ -66,9 +66,12 @@ export function tabSubtitle(tabId: string, lang: LearningLanguage): string {
   return tL(`tab.subtitle.${tabId}`, lang);
 }
 
-export function greetingNative(greeting: BTSGreeting, lang: LearningLanguage): string {
-  if (lang === 'zh') return greeting.chinese ?? greeting.korean;
-  return greeting.korean;
+export function greetingNative(
+  quote: { korean: string; chinese?: string },
+  lang: LearningLanguage
+): string {
+  if (lang === 'zh') return quote.chinese ?? quote.korean;
+  return quote.korean;
 }
 
 export function srsRatingNative(name: SrsRatingName, lang: LearningLanguage): string {

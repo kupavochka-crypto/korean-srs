@@ -1,5 +1,14 @@
 import { storedThemeId } from './settings';
 import type { BTSGreeting } from '../types';
+import {
+  BTS_PROFILES,
+  SKZ_PROFILES,
+  greetingQuotesForTheme,
+  type MemberProfile,
+  type GreetingQuote,
+} from './greeting-quotes';
+
+export type { MemberProfile, GreetingQuote };
 
 /** Portrait slots per member: `{base}.png`, `{base}_02.png` … `{base}_07.png` */
 export const PORTRAIT_VARIANT_COUNT = 7;
@@ -8,7 +17,7 @@ export interface Theme {
   id: string;
   name: string;
   emoji: string;
-  greetings: BTSGreeting[];
+  greetings: MemberProfile[];
   gifNames: string[];
   statusGifName: string;
   gifDir: string;
@@ -25,64 +34,7 @@ export type VictoryAsset =
   | { kind: 'gif'; name: string }
   | { kind: 'portrait'; name: string };
 
-const BTS_GREETINGS: BTSGreeting[] = [
-  {
-    id: 'rm',
-    artistName: 'RM',
-    imageName: 'bts_rm',
-    russian: 'Каждый день — шанс стать собой',
-    korean: '매일은 더 나다운 내가 될 기회야',
-    chinese: '每天都是成为更好自己的机会',
-  },
-  {
-    id: 'jin',
-    artistName: 'Jin',
-    imageName: 'bts_jin',
-    russian: 'Ты уже достоин любви — просто живи',
-    korean: '너는 이미 사랑받을 자격이 있어',
-    chinese: '你已经值得被爱——好好生活就好',
-  },
-  {
-    id: 'suga',
-    artistName: 'SUGA',
-    imageName: 'bts_suga',
-    russian: 'Даже маленький шаг — это уже прогресс',
-    korean: '작은 한 걸음도 이미 성장이야',
-    chinese: '哪怕一小步，也是成长',
-  },
-  {
-    id: 'jhope',
-    artistName: 'j-hope',
-    imageName: 'bts_jhope',
-    russian: 'Начни с улыбки — путь станет светлее',
-    korean: '미소부터 시작하면 길이 밝아져',
-    chinese: '从微笑开始，路会更亮',
-  },
-  {
-    id: 'jimin',
-    artistName: 'Jimin',
-    imageName: 'bts_jimin',
-    russian: 'Будь мягче к себе и смелее вперёд',
-    korean: '자신에게는 다정하게, 앞으로는 용기 있게',
-    chinese: '对自己温柔一点，向前勇敢一点',
-  },
-  {
-    id: 'v',
-    artistName: 'V',
-    imageName: 'bts_v',
-    russian: 'Иди своим ритмом — он тоже верный',
-    korean: '네 리듬대로 가도 괜찮아',
-    chinese: '按你的节奏走，也没问题',
-  },
-  {
-    id: 'jungkook',
-    artistName: 'Jungkook',
-    imageName: 'bts_jungkook',
-    russian: 'Ещё одна попытка — и ты уже ближе',
-    korean: '한 번 더 하면 이미 더 가까워져',
-    chinese: '再试一次，你就更近了',
-  },
-];
+const BTS_GREETINGS = BTS_PROFILES;
 
 const BTS_GIF_NAMES = [
   'bts_jhope_01',
@@ -109,72 +61,7 @@ const BTS_GIF_NAMES = [
   'bts_v_life_goes_on',
 ];
 
-const SKZ_GREETINGS: BTSGreeting[] = [
-  {
-    id: 'bangchan',
-    artistName: 'Bang Chan',
-    imageName: 'skz_bangchan',
-    russian: 'Ты поднимаешься с каждым новым днём',
-    korean: '새로운 날마다 넌 한 걸음씩 올라가고 있어',
-    chinese: '每一天你都在向上一步',
-  },
-  {
-    id: 'leeknow',
-    artistName: 'Lee Know',
-    imageName: 'skz_leeknow',
-    russian: 'Не торопись — всё придёт в свой срок',
-    korean: '서두르지 마, 모든 게 제때 온다고',
-    chinese: '别急，一切都会准时到来',
-  },
-  {
-    id: 'changbin',
-    artistName: 'Changbin',
-    imageName: 'skz_changbin',
-    russian: 'Попробуй ещё раз — и не сдавайся',
-    korean: '다시 도전해 봐, 포기하지 마',
-    chinese: '再挑战一次，别放弃',
-  },
-  {
-    id: 'hyunjin',
-    artistName: 'Hyunjin',
-    imageName: 'skz_hyunjin',
-    russian: 'Даже в темноте ты сияешь',
-    korean: '어둠 속에서도 넌 빛나고 있어',
-    chinese: '即使在黑暗里你也在发光',
-  },
-  {
-    id: 'han',
-    artistName: 'HAN',
-    imageName: 'skz_han',
-    russian: 'Сегодня ты тоже молодец',
-    korean: '오늘도 넌 정말 잘하고 있어',
-    chinese: '今天你也做得很好',
-  },
-  {
-    id: 'felix',
-    artistName: 'Felix',
-    imageName: 'skz_felix',
-    russian: 'Не бойся быть собой',
-    korean: '너 자신을 있는 그대로, 두려워하지 마',
-    chinese: '做你自己，别害怕',
-  },
-  {
-    id: 'seungmin',
-    artistName: 'Seungmin',
-    imageName: 'skz_seungmin',
-    russian: 'Один шаг за другим — и ты справишься',
-    korean: '하나씩 천천히, 넌 할 수 있어',
-    chinese: '一步一步来，你可以的',
-  },
-  {
-    id: 'in',
-    artistName: 'I.N',
-    imageName: 'skz_in',
-    russian: 'Улыбнись — ты на верном пути',
-    korean: '미소 지어 봐, 넌 올바른 길에 있어',
-    chinese: '笑一笑，你在正确的路上',
-  },
-];
+const SKZ_GREETINGS = SKZ_PROFILES;
 
 const SKZ_GIF_NAMES = [
   'skz_bangchan_01',
@@ -265,33 +152,64 @@ export function activeTheme(): Theme {
   return getTheme(storedThemeId());
 }
 
-export function themeGreetings(): BTSGreeting[] {
+export function themeProfiles(): MemberProfile[] {
   return activeTheme().greetings;
 }
 
-export function greetingById(id: string | null): BTSGreeting {
-  const greetings = activeTheme().greetings;
-  return greetings.find((g) => g.id === id) ?? greetings[0];
+export function profileById(id: string | null): MemberProfile {
+  const profiles = activeTheme().greetings;
+  return profiles.find((p) => p.id === id) ?? profiles[0];
 }
 
-export function randomGreeting(excluding?: BTSGreeting): BTSGreeting {
-  const greetings = activeTheme().greetings;
-  const pool = excluding ? greetings.filter((g) => g.id !== excluding.id) : greetings;
-  return pool[Math.floor(Math.random() * pool.length)] ?? greetings[0];
+export function quoteIndexForSlot(memberId: string, variant: number, themeId?: string): number {
+  const theme = themeId ? getTheme(themeId) : activeTheme();
+  const memberIdx = theme.greetings.findIndex((p) => p.id === memberId);
+  const pool = greetingQuotesForTheme(theme.id);
+  if (pool.length === 0) return 0;
+  return (Math.max(0, memberIdx) * PORTRAIT_VARIANT_COUNT + (variant - 1)) % pool.length;
 }
 
-/** Tap greeting card: next photo slot, then next member. */
+export function resolveGreeting(id: string, variant: number, themeId?: string): BTSGreeting {
+  const theme = themeId ? getTheme(themeId) : activeTheme();
+  const profile = theme.greetings.find((p) => p.id === id) ?? theme.greetings[0];
+  const pool = greetingQuotesForTheme(theme.id);
+  const quote = pool[quoteIndexForSlot(profile.id, variant, theme.id)] ?? pool[0] ?? {
+    korean: '',
+    russian: '',
+  };
+  return {
+    id: profile.id,
+    artistName: profile.artistName,
+    imageName: profile.imageName,
+    korean: quote.korean,
+    russian: quote.russian,
+    chinese: quote.chinese,
+  };
+}
+
+export function greetingById(id: string | null, variant = 1): BTSGreeting {
+  const profile = profileById(id);
+  return resolveGreeting(profile.id, variant);
+}
+
+export function randomGreeting(excludingId?: string): MemberProfile {
+  const profiles = activeTheme().greetings;
+  const pool = excludingId ? profiles.filter((p) => p.id !== excludingId) : profiles;
+  return pool[Math.floor(Math.random() * pool.length)] ?? profiles[0];
+}
+
+/** Tap greeting card: next photo slot (new quote), then next member. */
 export function nextGreetingPortrait(
-  current: BTSGreeting,
+  currentId: string,
   currentVariant: number
-): { greeting: BTSGreeting; variant: number } {
-  const greetings = activeTheme().greetings;
+): { id: string; variant: number } {
+  const profiles = activeTheme().greetings;
   if (currentVariant < PORTRAIT_VARIANT_COUNT) {
-    return { greeting: current, variant: currentVariant + 1 };
+    return { id: currentId, variant: currentVariant + 1 };
   }
-  const idx = greetings.findIndex((g) => g.id === current.id);
-  const nextGreeting = greetings[(idx + 1) % greetings.length] ?? greetings[0];
-  return { greeting: nextGreeting, variant: 1 };
+  const idx = profiles.findIndex((p) => p.id === currentId);
+  const nextProfile = profiles[(idx + 1) % profiles.length] ?? profiles[0];
+  return { id: nextProfile.id, variant: 1 };
 }
 
 export function randomGifName(): string {

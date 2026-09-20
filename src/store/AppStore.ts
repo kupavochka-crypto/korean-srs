@@ -101,8 +101,8 @@ import { setLocale as applyLocale, getLocale as readLocale, type Locale } from '
 function resolveInitialGreetingId(): string {
   const themeId = storedThemeId();
   const saved = storedGreetingId(themeId);
-  const greetings = activeTheme().greetings;
-  if (saved && greetings.some((g) => g.id === saved)) return saved;
+  const profiles = activeTheme().greetings;
+  if (saved && profiles.some((p) => p.id === saved)) return saved;
   return randomGreeting().id;
 }
 

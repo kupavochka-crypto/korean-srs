@@ -157,6 +157,7 @@ export interface ReviewRecord {
   timestamp: number;
 }
 
+/** Resolved view-model: member profile + one quote from the pool. */
 export interface BTSGreeting {
   id: string;
   artistName: string;
