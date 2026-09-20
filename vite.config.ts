@@ -52,7 +52,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,json,svg,png,jpg,gif,webmanifest}'],
         globIgnores: ['**/content/catalog.json'],
         maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
-        navigateFallback: '/korean-srs/index.html'
+        navigateFallback: '/korean-srs/index.html',
+        skipWaiting: true,
+        clientsClaim: true,
       }
     })
   ]

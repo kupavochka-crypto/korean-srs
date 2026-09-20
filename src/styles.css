@@ -144,7 +144,6 @@ textarea {
   width: 100%;
   margin: 0 auto;
   height: 100dvh;
-  height: 100svh;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   display: flex;
@@ -192,20 +191,20 @@ textarea {
 /* ---- Tab bar ---- */
 .tab-bar {
   position: fixed;
+  inset-inline: 0;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-shrink: 0;
   width: 100%;
   max-width: var(--app-max-width);
+  margin-inline: auto;
+  flex-shrink: 0;
   border-top: 1px solid var(--border);
   box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.06);
   display: flex;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 40;
+  background: var(--surface);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   backdrop-filter: saturate(180%) blur(12px);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
 }
 
 .tab-ind {

@@ -105,12 +105,34 @@ export default function App() {
   const learningLang = store.getLearningLanguage();
 
   return (
-    <div className="app">
-      <div key={tab} className="screen screen-enter">
-        {SCREENS[tab]()}
+    <>
+      <div className="app">
+        <div key={tab} className="screen screen-enter">
+          {SCREENS[tab]()}
+        </div>
+
+        {store.getIsAddWordOpen() && <AddWordDialog />}
+        {store.getIsScanOcrOpen() && <ScanOcrDialog />}
+        {store.getIsFileImportOpen() && <FileImportDialog />}
+        {store.getIsCategoryFormOpen() && <CategoryFormDialog />}
+        {store.getIsGuideOpen() && <GuideDialog />}
+        {store.getIsPacksOpen() && <PacksDialog />}
+        {store.getIsMissionPickOpen() && <MissionPickDialog />}
+        {store.getIsMissionStartOpen() && <MissionStartDialog />}
+        {store.getIsSongImportOpen() && <SongImportDialog />}
+        {store.getSelectedWordForDetail() && <WordDetailDialog />}
+        {store.getDuplicatePending() && <DuplicateResolveDialog />}
+        {store.getIsOnboardingOpen() && <OnboardingFlow />}
+        {store.getIsTranslateOpen() && <TranslateSheet />}
+        <AppFab />
       </div>
 
-      <nav ref={(el) => { navRef.current = el; }} className="tab-bar">
+      <nav
+        ref={(el) => {
+          navRef.current = el;
+        }}
+        className="tab-bar"
+      >
         <span
           className="tab-ind"
           style={{ transform: `translateX(${ind.left}px)`, width: ind.width }}
@@ -135,21 +157,6 @@ export default function App() {
           </button>
         ))}
       </nav>
-
-      {store.getIsAddWordOpen() && <AddWordDialog />}
-      {store.getIsScanOcrOpen() && <ScanOcrDialog />}
-      {store.getIsFileImportOpen() && <FileImportDialog />}
-      {store.getIsCategoryFormOpen() && <CategoryFormDialog />}
-      {store.getIsGuideOpen() && <GuideDialog />}
-      {store.getIsPacksOpen() && <PacksDialog />}
-      {store.getIsMissionPickOpen() && <MissionPickDialog />}
-      {store.getIsMissionStartOpen() && <MissionStartDialog />}
-      {store.getIsSongImportOpen() && <SongImportDialog />}
-      {store.getSelectedWordForDetail() && <WordDetailDialog />}
-      {store.getDuplicatePending() && <DuplicateResolveDialog />}
-      {store.getIsOnboardingOpen() && <OnboardingFlow />}
-      {store.getIsTranslateOpen() && <TranslateSheet />}
-      <AppFab />
-    </div>
+    </>
   );
 }
