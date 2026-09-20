@@ -32,6 +32,13 @@ import { packFullyImported, packReviewed } from '../domain/daily-challenge';
 import type { SrsRatingValue } from '../domain/srs-engine';
 import { newId } from '../db/schema';
 import { mergeCategoryIds, wordCategoryIds, wordHasCategory } from '../domain/categories';
+import {
+  applyBackup,
+  createBackupBlob,
+  downloadBackup,
+  parseBackupFile,
+  type BackupSummary,
+} from '../domain/backup';
 import { syncContentCatalog } from '../domain/content-sync';
 import {
   storedRewardThreshold,
@@ -1800,6 +1807,24 @@ function createStore() {
       return wordCategoryIds(word)
         .map((id) => categories.find((c) => c.id === id))
         .filter((c): c is Category => !!c);
+    },
+
+    async exportBackup(): Promise<BackupSummary> {
+      const { blob, summary } = await createBackupBlob();
+      downloadBackup(blob);
+      return summary;
+    },
+
+    async importBackup(file: File): Promise<void> {
+      const parsed = await parseBackupFile(file);
+      if (!parsed.ok) {
+        throw new Error(parsed.reason);
+      }
+      if (!parsed.file) {
+        throw new Error('invalid_backup');
+      }
+      await applyBackup(parsed.file);
+      window.location.reload();
     },
   };
 }

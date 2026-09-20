@@ -952,3 +952,60 @@ export async function streakCount(lang?: LearningLanguage): Promise<number> {
 
   return streak;
 }
+
+export interface UserDataExport {
+  words: Word[];
+  categories: Category[];
+  reviews: ReviewRecord[];
+  practiceEvents: PracticeEvent[];
+  progression: Progression[];
+  achievements: Achievement[];
+  sources: Source[];
+}
+
+export async function exportUserData(): Promise<UserDataExport> {
+  const [words, categories, reviews, practiceEvents, progression, achievements, sources] =
+    await Promise.all([
+      db.words.toArray(),
+      db.categories.toArray(),
+      db.reviews.toArray(),
+      db.practiceEvents.toArray(),
+      db.progression.toArray(),
+      db.achievements.toArray(),
+      db.sources.toArray(),
+    ]);
+  return { words, categories, reviews, practiceEvents, progression, achievements, sources };
+}
+
+export async function importUserData(data: UserDataExport): Promise<void> {
+  await db.transaction(
+    'rw',
+    [
+      db.words,
+      db.categories,
+      db.reviews,
+      db.practiceEvents,
+      db.progression,
+      db.achievements,
+      db.sources,
+    ],
+    async () => {
+      await Promise.all([
+        db.words.clear(),
+        db.categories.clear(),
+        db.reviews.clear(),
+        db.practiceEvents.clear(),
+        db.progression.clear(),
+        db.achievements.clear(),
+        db.sources.clear(),
+      ]);
+      if (data.words.length > 0) await db.words.bulkAdd(data.words);
+      if (data.categories.length > 0) await db.categories.bulkAdd(data.categories);
+      if (data.reviews.length > 0) await db.reviews.bulkAdd(data.reviews);
+      if (data.practiceEvents.length > 0) await db.practiceEvents.bulkAdd(data.practiceEvents);
+      if (data.progression.length > 0) await db.progression.bulkPut(data.progression);
+      if (data.achievements.length > 0) await db.achievements.bulkPut(data.achievements);
+      if (data.sources.length > 0) await db.sources.bulkAdd(data.sources);
+    }
+  );
+}

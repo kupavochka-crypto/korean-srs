@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { storedApiKey, saveApiKey } from '../domain/gemini-ocr';
 import {
@@ -19,6 +19,7 @@ import ScreenHeader from '../components/ScreenHeader';
 import { t } from '../domain/i18n';
 import { greetingNative, tabSubtitle, tL, voiceNative } from '../domain/learning-ui';
 import WIcon from '../ui/WIcon';
+import { backupErrorMessage, parseBackupFile, type BackupSummary } from '../domain/backup';
 
 type SettingsView = 'main' | 'learning' | 'theme' | 'general' | 'account' | 'pro' | 'help';
 
@@ -111,6 +112,12 @@ export default function SettingsScreen() {
   const [themeId, setThemeId] = useState(storedThemeId());
   const [mymemoryEmail, setMymemoryEmail] = useState(storedMymemoryEmail());
   const [dailyGoal, setDailyGoal] = useState(store.getDailyWordGoal());
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(null);
+  const [backupError, setBackupError] = useState('');
+  const [importConfirm, setImportConfirm] = useState<{ file: File; summary: BackupSummary } | null>(
+    null
+  );
 
   const activeTheme = getTheme(themeId);
   const learningLanguage = store.getLearningLanguage();
@@ -313,6 +320,41 @@ export default function SettingsScreen() {
   }
 
   if (view === 'account') {
+    async function handleExportBackup() {
+      setBackupError('');
+      setBackupBusy('export');
+      try {
+        await store.exportBackup();
+      } catch {
+        setBackupError(t('backup.errorGeneric'));
+      } finally {
+        setBackupBusy(null);
+      }
+    }
+
+    async function handleImportPick(file: File | undefined) {
+      if (!file) return;
+      setBackupError('');
+      const parsed = await parseBackupFile(file);
+      if (!parsed.ok) {
+        setBackupError(t(backupErrorMessage(parsed.reason)));
+        return;
+      }
+      setImportConfirm({ file, summary: parsed.summary });
+    }
+
+    async function handleImportConfirm() {
+      if (!importConfirm) return;
+      setBackupBusy('import');
+      setBackupError('');
+      try {
+        await store.importBackup(importConfirm.file);
+      } catch {
+        setBackupError(t('backup.errorGeneric'));
+        setBackupBusy(null);
+      }
+    }
+
     return (
       <div className="settings-page">
         <SettingsDetail title={t('settings.group.account')} onBack={() => setView('main')}>
@@ -328,6 +370,75 @@ export default function SettingsScreen() {
             />
             <p className="field-hint">{t('settings.mymemoryEmailHint')}</p>
           </div>
+
+          <SettingsSection title={t('backup.sectionTitle')}>
+            <p className="field-hint mb12">{t('backup.sectionHint')}</p>
+            <div className="backup-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                disabled={backupBusy !== null}
+                onClick={() => void handleExportBackup()}
+              >
+                <WIcon name="download" size={16} />
+                {backupBusy === 'export' ? t('backup.exporting') : t('backup.export')}
+              </button>
+              <button
+                type="button"
+                className="secondary-btn"
+                disabled={backupBusy !== null}
+                onClick={() => importInputRef.current?.click()}
+              >
+                <WIcon name="upload" size={16} />
+                {backupBusy === 'import' ? t('backup.importing') : t('backup.import')}
+              </button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept=".json,application/json"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  void handleImportPick(file);
+                }}
+              />
+            </div>
+            {backupError ? <p className="scan-error mt12">{backupError}</p> : null}
+          </SettingsSection>
+
+          {importConfirm ? (
+            <div className="overlay" onClick={() => setImportConfirm(null)}>
+              <div className="sheet" onClick={(e) => e.stopPropagation()}>
+                <h3 className="sheet-title">{t('backup.confirmTitle')}</h3>
+                <p className="field-hint">
+                  {t('backup.confirmBody', {
+                    words: String(importConfirm.summary.words),
+                    categories: String(importConfirm.summary.categories),
+                    reviews: String(importConfirm.summary.reviews),
+                  })}
+                </p>
+                <div className="backup-actions mt12">
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    disabled={backupBusy === 'import'}
+                    onClick={() => setImportConfirm(null)}
+                  >
+                    {t('backup.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className="save-btn"
+                    disabled={backupBusy === 'import'}
+                    onClick={() => void handleImportConfirm()}
+                  >
+                    {backupBusy === 'import' ? t('backup.importing') : t('backup.confirmAction')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </SettingsDetail>
       </div>
     );

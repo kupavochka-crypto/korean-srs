@@ -385,6 +385,23 @@ textarea {
   gap: 12px;
 }
 
+.woori-logo {
+  display: block;
+  flex-shrink: 0;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.backup-actions .secondary-btn,
+.backup-actions .save-btn {
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+
 .header-title {
   font-size: 17px;
   font-weight: 800;

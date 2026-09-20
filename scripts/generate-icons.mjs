@@ -1,28 +1,35 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Resvg } from '@resvg/resvg-js';
+import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(__dirname, '../public/icons');
+const MASTER = path.join(OUT, 'woori-mark-master.png');
 
-function renderSvg(svgPath, width, outPath) {
-  const svg = fs.readFileSync(svgPath, 'utf8');
-  const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: width },
-  });
-  const png = resvg.render().asPng();
-  fs.writeFileSync(outPath, png);
-  console.log(`wrote ${path.basename(outPath)} (${width}px)`);
+async function loadMaster() {
+  if (!fs.existsSync(MASTER)) {
+    throw new Error(`Missing master icon: ${MASTER}`);
+  }
+  return sharp(MASTER).trim({ threshold: 24 }).png();
 }
 
-const jobs = [
-  { svg: 'woori-mark.svg', width: 512, out: 'icon-512.png' },
-  { svg: 'woori-mark.svg', width: 192, out: 'icon-192.png' },
-  { svg: 'woori-mark-maskable.svg', width: 512, out: 'icon-maskable-512.png' },
-  { svg: 'woori-mark-maskable.svg', width: 180, out: 'apple-touch-icon.png' },
-];
-
-for (const job of jobs) {
-  renderSvg(path.join(OUT, job.svg), job.width, path.join(OUT, job.out));
+async function writeSized(pipeline, width, outName) {
+  const outPath = path.join(OUT, outName);
+  await pipeline.clone().resize(width, width, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toFile(outPath);
+  console.log(`wrote ${outName} (${width}px)`);
 }
+
+async function main() {
+  const master = await loadMaster();
+  await writeSized(master, 512, 'icon-512.png');
+  await writeSized(master, 512, 'icon-maskable-512.png');
+  await writeSized(master, 192, 'icon-192.png');
+  await writeSized(master, 180, 'apple-touch-icon.png');
+  await writeSized(master, 32, 'favicon-32.png');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

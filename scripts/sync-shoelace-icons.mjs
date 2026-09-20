@@ -55,6 +55,8 @@ const ICONS = [
   'chevron-down',
   'chevron-up',
   'chevron-left',
+  'download',
+  'upload',
 ];
 
 if (!existsSync(source)) {
