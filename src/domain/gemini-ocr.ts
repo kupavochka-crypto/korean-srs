@@ -57,8 +57,34 @@ const invalidImageError = () =>
   new GeminiOcrError('Не удалось подготовить изображение для распознавания.');
 
 const API_KEY_STORAGE = 'gemini_api_key';
+const API_KEY_REMEMBER_STORAGE = 'gemini_api_key_remember';
+
+let sessionApiKey = '';
+
+export function storedApiKeyRemember(): boolean {
+  try {
+    const flag = localStorage.getItem(API_KEY_REMEMBER_STORAGE);
+    if (flag === '0') return false;
+    if (flag === '1') return true;
+    // Legacy installs: persisted key before remember toggle existed.
+    return Boolean(localStorage.getItem(API_KEY_STORAGE)?.trim());
+  } catch {
+    return false;
+  }
+}
+
+function setApiKeyRemember(remember: boolean) {
+  try {
+    localStorage.setItem(API_KEY_REMEMBER_STORAGE, remember ? '1' : '0');
+  } catch {
+    // storage unavailable
+  }
+}
 
 export function storedApiKey(): string {
+  const session = sessionApiKey.trim();
+  if (session) return session;
+  if (!storedApiKeyRemember()) return '';
   try {
     return (localStorage.getItem(API_KEY_STORAGE) ?? '').trim();
   } catch {
@@ -74,9 +100,29 @@ export function resolvedApiKey(override?: string): string {
   return '';
 }
 
-export function saveApiKey(key: string) {
+export function saveApiKey(key: string, remember = storedApiKeyRemember()) {
+  const trimmed = key.trim();
   try {
-    localStorage.setItem(API_KEY_STORAGE, key.trim());
+    if (remember) {
+      sessionApiKey = '';
+      if (trimmed) localStorage.setItem(API_KEY_STORAGE, trimmed);
+      else localStorage.removeItem(API_KEY_STORAGE);
+      setApiKeyRemember(true);
+      return;
+    }
+    sessionApiKey = trimmed;
+    localStorage.removeItem(API_KEY_STORAGE);
+    setApiKeyRemember(false);
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function clearApiKey() {
+  sessionApiKey = '';
+  try {
+    localStorage.removeItem(API_KEY_STORAGE);
+    setApiKeyRemember(false);
   } catch {
     // storage unavailable
   }

@@ -149,6 +149,33 @@ const STRINGS: Dict = {
   'home.sectionQuick': { ru: 'Быстрые действия', en: 'Quick actions' },
   'home.quick.add': { ru: 'Добавить', en: 'Add word' },
   'home.quick.scan': { ru: 'Сканировать', en: 'Scan' },
+
+  'scan.title': { ru: 'Сканирование (OCR)', en: 'Scan (OCR)' },
+  'scan.proSection': { ru: 'Pro · фото', en: 'Pro · photo' },
+  'scan.proHint': {
+    ru: 'Распознавание с камеры или из галереи через Gemini. Нужен ваш API ключ в настройках.',
+    en: 'Recognize text from camera or gallery via Gemini. Requires your API key in Settings.',
+  },
+  'scan.freeSection': { ru: 'Базовое · текст', en: 'Basic · text' },
+  'scan.freeHint': {
+    ru: 'Вставьте готовый список слов — разбор на устройстве, без интернета и без ключа.',
+    en: 'Paste a ready word list — parsed on device, no internet or API key needed.',
+  },
+  'scan.camera': { ru: 'Камера', en: 'Camera' },
+  'scan.gallery': { ru: 'Галерея', en: 'Gallery' },
+  'scan.text': { ru: 'Текст', en: 'Text' },
+  'scan.noApiKey': { ru: 'Ключ Gemini API не настроен.', en: 'Gemini API key is not set.' },
+  'scan.openSettings': { ru: 'Настроить в Настройках', en: 'Set up in Settings' },
+  'scan.processing': { ru: 'Распознавание…', en: 'Recognizing…' },
+  'scan.noImageText': {
+    ru: 'Не удалось распознать корейский текст на изображении.',
+    en: 'Could not recognize Korean text in the image.',
+  },
+  'scan.noApiKeyInline': {
+    ru: 'Укажите ключ Gemini API в настройках.',
+    en: 'Set your Gemini API key in Settings.',
+  },
+  'scan.save': { ru: 'Сохранить ({count})', en: 'Save ({count})' },
   'home.quick.difficult': { ru: 'Трудные ({count})', en: 'Difficult ({count})' },
   'home.quick.help': { ru: 'Помощь', en: 'Help' },
   'home.quick.packs': { ru: 'Все подборки', en: 'All collections' },
@@ -565,8 +592,8 @@ const STRINGS: Dict = {
   'settings.group.account': { ru: 'Аккаунт', en: 'Account' },
   'backup.sectionTitle': { ru: 'Резервная копия', en: 'Backup' },
   'backup.sectionHint': {
-    ru: 'Экспортируйте слова, статистику и настройки в файл JSON. Файл может содержать API-ключ — храните его в безопасном месте.',
-    en: 'Export words, stats, and settings to a JSON file. The file may contain your API key — keep it safe.',
+    ru: 'Экспортируйте слова, статистику и настройки в файл JSON.',
+    en: 'Export words, stats, and settings to a JSON file.',
   },
   'backup.export': { ru: 'Экспорт данных', en: 'Export data' },
   'backup.import': { ru: 'Импорт данных', en: 'Import data' },
@@ -588,18 +615,28 @@ const STRINGS: Dict = {
   'settings.group.integrations': { ru: 'Сканирование', en: 'Scanning' },
   'settings.group.help': { ru: 'Справка', en: 'Help' },
   'settings.proOcrNote': {
-    ru: 'Распознавание текста с фото будет переработано в следующих версиях.',
-    en: 'Photo text recognition will be reworked in future versions.',
+    ru: 'Функция в доработке. Если у вас есть Gemini API ключ, вы можете подключить распознавание текста с фото — укажите ключ ниже.',
+    en: 'This feature is still being improved. If you have a Gemini API key, you can enable photo text recognition — enter it below.',
   },
   'settings.lang': { ru: 'Язык', en: 'Language' },
   'settings.langHint': { ru: 'Язык интерфейса. Данные слов не меняются.', en: 'Interface language. Word data is unchanged.' },
   'settings.ocr': { ru: 'Распознавание текста', en: 'Text recognition' },
   'settings.apiKey': { ru: 'Gemini API ключ', en: 'Gemini API key' },
   'settings.apiKeyHint': {
-    ru: 'Нужен для сканирования текста с фото. Ключ сохраняется в браузере.',
-    en: 'Needed to scan text from photos. The key is stored in your browser.',
+    ru: 'Нужен для сканирования текста с фото.',
+    en: 'Needed to scan text from photos.',
   },
-  'settings.proxy': { ru: 'Обход ограничений региона', en: 'Region restrictions bypass' },
+  'settings.apiKeyRemember': { ru: 'Запомнить в браузере', en: 'Remember in browser' },
+  'settings.apiKeyRememberHint': {
+    ru: 'Если выключено, ключ хранится только до закрытия вкладки.',
+    en: 'When off, the key is kept only until you close the tab.',
+  },
+  'settings.apiKeySecurityHint': {
+    ru: 'Ограничьте ключ в Google Cloud: только Generative Language API и ваш сайт. Ключ не попадает в резервную копию.',
+    en: 'Restrict your key in Google Cloud: Generative Language API only and your site. The key is not included in backups.',
+  },
+  'settings.apiKeyClear': { ru: 'Удалить ключ', en: 'Delete key' },
+  'settings.proxy': { ru: 'Прокси для Gemini', en: 'Gemini proxy' },
   'settings.proxyLabel': { ru: 'Адрес прокси (Cloudflare Worker)', en: 'Proxy URL (Cloudflare Worker)' },
   'settings.proxyHint': {
     ru: 'По умолчанию уже стоит общий адрес — сканирование работает сразу. Очистите поле для прямого подключения или вставьте свой адрес.',
@@ -687,8 +724,8 @@ const STRINGS: Dict = {
   },
   'guide.fail.proxy.title': { ru: 'Проверьте адрес помощника (прокси)', en: 'Check the helper URL (proxy)' },
   'guide.fail.proxy.text': {
-    ru: 'В настройках в разделе «Обход ограничений региона» по умолчанию стоит адрес {proxy}. Не удаляйте его — он помогает сканированию работать из вашей страны. Если его нет — вставьте адрес обратно.',
-    en: 'In Settings → “Region restrictions bypass” a default URL {proxy} is set. Keep it — it helps scanning work from your country. If missing, paste it back.',
+    ru: 'В настройках в разделе «Прокси для Gemini» по умолчанию стоит адрес {proxy}. Не удаляйте его — он нужен для стабильной работы сканирования. Если его нет — вставьте адрес обратно.',
+    en: 'In Settings → “Gemini proxy” a default URL {proxy} is set. Keep it — scanning needs it for reliable operation. If missing, paste it back.',
   },
   'guide.fail.camera.title': { ru: 'Разрешите доступ к камере', en: 'Allow camera access' },
   'guide.fail.camera.text': {
@@ -936,8 +973,8 @@ const STRINGS: Dict = {
     en: 'Add words manually or from collections and songs — and organize them into categories. Easier to find what you need when it is time to review.',
   },
   'onboard.story.world.dictSoon': {
-    ru: 'Скоро можно будет загружать целые наборы слов из файла.',
-    en: 'Soon you will be able to upload whole word sets from a file.',
+    ru: 'Можно импортировать целые наборы слов из файла — TSV, CSV или JSON.',
+    en: 'You can import whole word sets from a file — TSV, CSV, or JSON.',
   },
   'onboard.story.world.themesTitle': {
     ru: 'Мотивация · твоя группа',

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { store, useStore } from '../store/AppStore';
-import { storedApiKey, saveApiKey } from '../domain/gemini-ocr';
+import { clearApiKey, saveApiKey, storedApiKey, storedApiKeyRemember } from '../domain/gemini-ocr';
 import {
   storedRewardThreshold,
   saveRewardThreshold,
@@ -107,6 +107,7 @@ export default function SettingsScreen() {
   useStore();
   const [view, setView] = useState<SettingsView>('main');
   const [apiKey, setApiKey] = useState(storedApiKey());
+  const [rememberApiKey, setRememberApiKey] = useState(storedApiKeyRemember());
   const [threshold, setThreshold] = useState(storedRewardThreshold());
   const [proxyUrl, setProxyUrl] = useState(storedGeminiProxy());
   const [themeId, setThemeId] = useState(storedThemeId());
@@ -135,7 +136,18 @@ export default function SettingsScreen() {
   }
 
   function saveKey() {
-    saveApiKey(apiKey);
+    saveApiKey(apiKey, rememberApiKey);
+  }
+
+  function handleRememberApiKey(checked: boolean) {
+    setRememberApiKey(checked);
+    saveApiKey(apiKey, checked);
+  }
+
+  function handleClearApiKey() {
+    clearApiKey();
+    setApiKey('');
+    setRememberApiKey(false);
   }
 
   function colorThemeLabel(): string {
@@ -358,53 +370,56 @@ export default function SettingsScreen() {
     return (
       <div className="settings-page">
         <SettingsDetail title={t('settings.group.account')} onBack={() => setView('main')}>
-          <div className="card">
-            <label className="form-label">{t('settings.mymemoryEmail')}</label>
-            <input
-              className="form-input"
-              type="email"
-              value={mymemoryEmail}
-              onChange={(e) => setMymemoryEmail(e.target.value)}
-              onBlur={() => saveMymemoryEmail(mymemoryEmail)}
-              placeholder="email@example.com"
-            />
-            <p className="field-hint">{t('settings.mymemoryEmailHint')}</p>
-          </div>
+          <SettingsSection title={t('settings.mymemoryEmail')}>
+            <div className="card">
+              <input
+                className="form-input"
+                type="email"
+                value={mymemoryEmail}
+                onChange={(e) => setMymemoryEmail(e.target.value)}
+                onBlur={() => saveMymemoryEmail(mymemoryEmail)}
+                placeholder="email@example.com"
+              />
+              <p className="field-hint">{t('settings.mymemoryEmailHint')}</p>
+            </div>
+          </SettingsSection>
 
           <SettingsSection title={t('backup.sectionTitle')}>
-            <p className="field-hint mb12">{t('backup.sectionHint')}</p>
-            <div className="backup-actions">
-              <button
-                type="button"
-                className="secondary-btn"
-                disabled={backupBusy !== null}
-                onClick={() => void handleExportBackup()}
-              >
-                <WIcon name="download" size={16} />
-                {backupBusy === 'export' ? t('backup.exporting') : t('backup.export')}
-              </button>
-              <button
-                type="button"
-                className="secondary-btn"
-                disabled={backupBusy !== null}
-                onClick={() => importInputRef.current?.click()}
-              >
-                <WIcon name="upload" size={16} />
-                {backupBusy === 'import' ? t('backup.importing') : t('backup.import')}
-              </button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept=".json,application/json"
-                hidden
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  void handleImportPick(file);
-                }}
-              />
+            <div className="card">
+              <p className="field-hint">{t('backup.sectionHint')}</p>
+              <div className="backup-actions">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  disabled={backupBusy !== null}
+                  onClick={() => void handleExportBackup()}
+                >
+                  <WIcon name="download" size={16} />
+                  {backupBusy === 'export' ? t('backup.exporting') : t('backup.export')}
+                </button>
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  disabled={backupBusy !== null}
+                  onClick={() => importInputRef.current?.click()}
+                >
+                  <WIcon name="upload" size={16} />
+                  {backupBusy === 'import' ? t('backup.importing') : t('backup.import')}
+                </button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    void handleImportPick(file);
+                  }}
+                />
+              </div>
+              {backupError ? <p className="scan-error mt12">{backupError}</p> : null}
             </div>
-            {backupError ? <p className="scan-error mt12">{backupError}</p> : null}
           </SettingsSection>
 
           {importConfirm ? (
@@ -522,6 +537,33 @@ export default function SettingsScreen() {
                   AI Studio
                 </a>
               </p>
+              <SettingsRow inline>
+                <span className="settings-row-label">
+                  <strong>{t('settings.apiKeyRemember')}</strong>
+                  <span className="setting-toggle-subtitle">{t('settings.apiKeyRememberHint')}</span>
+                </span>
+                <input
+                  className="setting-toggle"
+                  type="checkbox"
+                  checked={rememberApiKey}
+                  onChange={(e) => handleRememberApiKey(e.target.checked)}
+                />
+              </SettingsRow>
+              <p className="field-hint">
+                {t('settings.apiKeySecurityHint')}{' '}
+                <a
+                  href="https://console.cloud.google.com/apis/credentials"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Google Cloud Console
+                </a>
+              </p>
+              {apiKey ? (
+                <button type="button" className="secondary-btn mt12" onClick={handleClearApiKey}>
+                  {t('settings.apiKeyClear')}
+                </button>
+              ) : null}
             </div>
           </SettingsSection>
 
@@ -602,7 +644,7 @@ export default function SettingsScreen() {
         />
         <SettingsLinkRow
           label={t('settings.group.pro')}
-          value={apiKey ? '••••' : '—'}
+          value={storedApiKey() ? '••••' : '—'}
           onClick={() => setView('pro')}
         />
         <SettingsLinkRow label={t('settings.guideHow')} onClick={() => setView('help')} />

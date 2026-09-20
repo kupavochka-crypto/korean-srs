@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { store, useStore } from '../store/AppStore';
 import { recognizeVocabulary, storedApiKey, parseScannedVocabulary } from '../domain/gemini-ocr';
 import { gifUrl, activeTheme } from '../domain/themes';
+import { t } from '../domain/i18n';
 import ManualKoreanTextBlock from './ManualKoreanTextBlock';
 import ScannedWordsEditor from './ScannedWordsEditor';
 import WIcon from '../ui/WIcon';
@@ -21,6 +22,8 @@ export default function ScanOcrDialog() {
   const [drafts, setDrafts] = useState<ImportedWordDraft[]>([]);
   const [selected, setSelected] = useState<boolean[]>([]);
 
+  const hasApiKey = Boolean(storedApiKey());
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -32,7 +35,7 @@ export default function ScanOcrDialog() {
   async function processFile(file: File) {
     const key = storedApiKey();
     if (!key) {
-      setError('Укажите ключ Gemini API в настройках.');
+      setError(t('scan.noApiKeyInline'));
       return;
     }
     setProcessing(true);
@@ -52,10 +55,10 @@ export default function ScanOcrDialog() {
         );
         setSelected(scanned.map(() => true));
       } else {
-        setError('Не удалось распознать корейский текст на изображении.');
+        setError(t('scan.noImageText'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Неизвестная ошибка.');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setProcessing(false);
     }
@@ -101,41 +104,57 @@ export default function ScanOcrDialog() {
     <div className="overlay" onClick={() => store.closeScanOcr()}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-header">
-          <h3 className="sheet-title">Сканирование (OCR)</h3>
+          <h3 className="sheet-title">{t('scan.title')}</h3>
           <button className="sheet-close" onClick={() => store.closeScanOcr()}>
             <WIcon name="x-lg" />
           </button>
         </div>
 
-        {!storedApiKey() && (
-          <div className="scan-error">
-            Ключ Gemini API не настроен.{' '}
+        <section className="scan-section">
+          <h4 className="form-label">{t('scan.proSection')}</h4>
+          <p className="field-hint mb8">{t('scan.proHint')}</p>
+
+          {!hasApiKey && (
+            <div className="scan-error">
+              {t('scan.noApiKey')}{' '}
+              <button
+                type="button"
+                style={{ textDecoration: 'underline', color: 'inherit', background: 'none' }}
+                onClick={() => store.openSettings()}
+              >
+                {t('scan.openSettings')}
+              </button>
+            </div>
+          )}
+
+          <div className="scan-tools">
             <button
-              style={{ textDecoration: 'underline', color: 'inherit', background: 'none' }}
-              onClick={() => store.openSettings()}
+              className="scan-tool"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={processing || !hasApiKey}
             >
-              Настроить в Настройках
+              <span className="scan-tool-icon">
+                <WIcon name="camera" size={22} />
+              </span>
+              <span>
+                {t('scan.camera')}{' '}
+                <span className="song-mode-badge song-mode-badge--pro">{t('song.badgePro')}</span>
+              </span>
+            </button>
+            <button
+              className="scan-tool"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={processing || !hasApiKey}
+            >
+              <span className="scan-tool-icon">
+                <WIcon name="images" size={22} />
+              </span>
+              <span>
+                {t('scan.gallery')}{' '}
+                <span className="song-mode-badge song-mode-badge--pro">{t('song.badgePro')}</span>
+              </span>
             </button>
           </div>
-        )}
-
-        <div className="scan-tools">
-          <button
-            className="scan-tool"
-            onClick={() => cameraInputRef.current?.click()}
-            disabled={processing}
-          >
-            <span className="scan-tool-icon"><WIcon name="camera" size={22} /></span>
-            <span>Камера</span>
-          </button>
-          <button
-            className="scan-tool"
-            onClick={() => galleryInputRef.current?.click()}
-            disabled={processing}
-          >
-            <span className="scan-tool-icon"><WIcon name="images" size={22} /></span>
-            <span>Галерея</span>
-          </button>
           <input
             ref={cameraInputRef}
             type="file"
@@ -151,22 +170,34 @@ export default function ScanOcrDialog() {
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <button
-            className="scan-tool"
-            onClick={() => {
-              setShowManualEntry(true);
-              setDrafts([]);
-              setSelected([]);
-            }}
-          >
-            <span className="scan-tool-icon"><WIcon name="pencil-square" size={22} /></span>
-            <span>Текст</span>
-          </button>
-        </div>
+        </section>
 
-        {previewUrl && (
-          <img className="scan-preview" src={previewUrl} alt="Preview" />
-        )}
+        <section className="scan-section">
+          <h4 className="form-label">{t('scan.freeSection')}</h4>
+          <p className="field-hint mb8">{t('scan.freeHint')}</p>
+          <div className="scan-tools">
+            <button
+              className="scan-tool"
+              onClick={() => {
+                setShowManualEntry(true);
+                setDrafts([]);
+                setSelected([]);
+                setError('');
+              }}
+              disabled={processing}
+            >
+              <span className="scan-tool-icon">
+                <WIcon name="pencil-square" size={22} />
+              </span>
+              <span>
+                {t('scan.text')}{' '}
+                <span className="song-mode-badge song-mode-badge--free">{t('song.badgeFree')}</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        {previewUrl && <img className="scan-preview" src={previewUrl} alt="Preview" />}
 
         {processing && (
           <div className="scan-status">
@@ -181,7 +212,7 @@ export default function ScanOcrDialog() {
                 marginBottom: 10,
               }}
             />
-            Распознавание…
+            {t('scan.processing')}
           </div>
         )}
 
@@ -204,7 +235,7 @@ export default function ScanOcrDialog() {
             onUpdateField={updateField}
             onUpdateCategoryIds={updateCategoryIds}
             onSave={handleSave}
-            saveLabel={`Сохранить (${readyCount})`}
+            saveLabel={t('scan.save', { count: readyCount })}
           />
         )}
       </div>

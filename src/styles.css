@@ -394,6 +394,7 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 12px;
 }
 
 .backup-actions .secondary-btn,
@@ -2579,6 +2580,12 @@ textarea {
 }
 
 /* ---- OCR ---- */
+.scan-section + .scan-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
 .scan-tools {
   display: grid;
   grid-template-columns: 1fr 1fr;

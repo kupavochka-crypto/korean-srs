@@ -5,6 +5,9 @@ export const BACKUP_FORMAT_VERSION = 1;
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 export const BACKUP_WARN_BYTES = 5 * 1024 * 1024;
 
+/** Never included in export; stripped on import if present in older backups */
+export const BACKUP_EXCLUDED_SETTINGS_KEYS = new Set(['gemini_api_key']);
+
 export type BackupSummary = {
   words: number;
   categories: number;
@@ -58,7 +61,8 @@ export function exportAllSettings(): Record<string, string> {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key) out[key] = localStorage.getItem(key) ?? '';
+      if (!key || BACKUP_EXCLUDED_SETTINGS_KEYS.has(key)) continue;
+      out[key] = localStorage.getItem(key) ?? '';
     }
   } catch {
     // storage unavailable
@@ -69,7 +73,9 @@ export function exportAllSettings(): Record<string, string> {
 export function importAllSettings(settings: Record<string, string>): void {
   try {
     for (const [key, value] of Object.entries(settings)) {
-      if (typeof value === 'string') localStorage.setItem(key, value);
+      if (typeof value !== 'string') continue;
+      if (BACKUP_EXCLUDED_SETTINGS_KEYS.has(key)) continue;
+      localStorage.setItem(key, value);
     }
   } catch {
     // storage unavailable
